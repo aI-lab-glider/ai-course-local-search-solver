@@ -1,3 +1,4 @@
+from typing import List
 from genetic_algorithms.problems.base.moves import Move
 from genetic_algorithms.problems.base import Model, State
 from genetic_algorithms.helpers import History
@@ -8,7 +9,7 @@ class LocalSearchSolver(Solver):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.history = History(self.config.history_size)
+        self.history = History[int](self.config.history_size)
 
     def solve(self, problem: Model) -> State:
         moves = problem.valid_moves
@@ -21,7 +22,7 @@ class LocalSearchSolver(Solver):
             iter_count += 1
         return solution
 
-    def _local_search(self, model: Model, state: State, moves: Move) -> State:
+    def _local_search(self, model: Model, state: State, moves: List[Move]) -> State:
         best_state = state
         best_state_cost = model.cost_for(state)
         violations = sorted(model.find_violations_in(
@@ -29,7 +30,7 @@ class LocalSearchSolver(Solver):
         violation_to_fix = violations[0]
         for move in moves:
             binded_move = move.bind_to(state)
-            new_state = binded_move.make_on(violation_to_fix)
+            new_state = binded_move.make_on(violation_to_fix.decision_variable)
             new_state_cost = model.cost_for(new_state)
             if new_state_cost <= best_state_cost:
                 (best_state, best_state_cost) = (new_state, best_state_cost)

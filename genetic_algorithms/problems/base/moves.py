@@ -13,7 +13,7 @@ class Move(ABC):
         :returns: new state where passed :param variable: has modified value
         """
 
-    def bind_to(self, state: State) -> 'Move':
+    def bind_to(self, state: State) -> 'BindedMove':
         """
         Binds move to a given state
         :param state: state to which move will be binded
