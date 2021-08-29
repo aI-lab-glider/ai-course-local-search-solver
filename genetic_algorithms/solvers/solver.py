@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from genetic_algorithms.problems.base import Model, Assigment
+from genetic_algorithms.problems.base import Model, State
 from dataclasses import dataclass
 
 
@@ -18,7 +18,7 @@ class Solver(ABC):
         self.config = config
 
     @abstractmethod
-    def solve(self, problem: Model) -> Assigment:
+    def solve(self, problem: Model) -> State:
         """
         Applies some logic to solve a given problem
         """

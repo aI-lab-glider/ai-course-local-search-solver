@@ -13,9 +13,9 @@ class State(ABC):
         """
         Returns new :class State: with replaced decision variable
         """
-        new_decision_vars = [*self.decision_vars]
+        new_decision_vars = [*self.decision_variables]
         new_decision_vars[variable.idx] = variable
-        return State(self.original_model, new_decision_vars)
+        return self.__class__(model=self.original_model, variables=new_decision_vars)
 
     @abstractmethod
     def print(self):
