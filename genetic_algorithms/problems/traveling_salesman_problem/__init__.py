@@ -1,0 +1,1 @@
+from genetic_algorithms.problems.traveling_salesman_problem.problem_model import TravelingSalesmanModel

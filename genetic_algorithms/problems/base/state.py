@@ -1,24 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import List
-from genetic_algorithms.problems.base.decision_variable import DecisionVariable
-from genetic_algorithms.problems.base.model import Model
+from dataclasses import dataclass
+from typing import Any  # TODO: Fix cyclic import and add Model import
 
 
+@dataclass
 class State(ABC):
-    def __init__(self, model: Model, variables: List[DecisionVariable]):
-        self.original_model = model
-        self.decision_variables = variables
-
-    def with_replaced(self, variable: DecisionVariable) -> 'State':
-        """
-        Returns new :class State: with replaced decision variable
-        """
-        new_decision_vars = [*self.decision_variables]
-        new_decision_vars[variable.idx] = variable
-        return self.__class__(model=self.original_model, variables=new_decision_vars)
+    model: Any
 
     @abstractmethod
+    def __str__(self) -> str:
+        """
+        Returns a string representing a problem
+        """
+
     def print(self):
-        """
-        Prints a solution to the problem
-        """
+        print(self)

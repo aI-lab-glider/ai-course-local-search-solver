@@ -1,0 +1,1 @@
+from genetic_algorithms.solvers.local_search_solver import LocalSearchSolver
