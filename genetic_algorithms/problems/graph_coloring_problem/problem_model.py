@@ -1,4 +1,6 @@
 from typing import Generator, List, Set, Dict
+from pathlib import Path
+
 from genetic_algorithms.problems.graph_coloring_problem.state import GraphColoringState
 from genetic_algorithms.problems.graph_coloring_problem.moves import ChangeColor
 
@@ -65,4 +67,14 @@ class GraphColoringModel(Model):
         color_classes = self._color_classes(state)
         return sum([2*bad_edges[i]*color_classes[i]-color_classes[i]**2 for i in range(self.n_vertices)])
 
+    @staticmethod
+    def from_benchmark(benchmark_name: str):
+        with open(Path.cwd() / "problems" / "graph_coloring_problem" / "benchmarks" / benchmark_name) as benchmark_file:
+
+            def line_to_edge(line: str):
+                (start, end) = map(int, line.split(sep=' '))
+                return Edge(start, end)
+
+            edges = map(line_to_edge, [line for line in benchmark_file])
+            return GraphColoringModel(edges=list(edges))
 
