@@ -6,6 +6,7 @@ from genetic_algorithms.problems.base.model import Model
 
 from genetic_algorithms.problems.graph_coloring_problem.models.edge import Edge
 from genetic_algorithms.problems.graph_coloring_problem.models.vertex import Vertex
+from genetic_algorithms.problems.graph_coloring_problem.move_generator import GraphColoringMoveGenerator
 
 
 class GraphColoringModel(Model):
@@ -13,8 +14,9 @@ class GraphColoringModel(Model):
         self._edges: List[Edge] = edges
         self.graph: Dict[int, Set[int]] = self._create_graph()
         self.n_vertices = len(self.graph)
+        move_generator = GraphColoringMoveGenerator(self.n_vertices)
         initial_solution = self._find_initial_solution()
-        super().__init__(initial_solution)
+        super().__init__(initial_solution, move_generator)
 
     @property
     def edges(self):
