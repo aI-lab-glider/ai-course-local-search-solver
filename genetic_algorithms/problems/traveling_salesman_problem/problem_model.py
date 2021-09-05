@@ -13,6 +13,8 @@ from genetic_algorithms.problems.traveling_salesman_problem.moves import \
     SwapEdges
 from genetic_algorithms.problems.traveling_salesman_problem.state import \
     TravelingSalesmanState
+from genetic_algorithms.problems.traveling_salesman_problem.move_generator import \
+    TravelingSalesmanMoveGenerator
 
 
 class TravelingSalesmanModel(Model):
@@ -20,7 +22,8 @@ class TravelingSalesmanModel(Model):
         self._points: List[Point] = points
         self._depot_idx = depot_idx
         initial_solution = self._find_initial_solution()
-        super().__init__(initial_solution)
+        move_generator = TravelingSalesmanMoveGenerator(depot_idx)
+        super().__init__(initial_solution, move_generator)
 
     @property
     def points(self):
@@ -51,7 +54,7 @@ class TravelingSalesmanModel(Model):
 
     @staticmethod
     def from_benchmark(benchmark_name: str):
-        with open(Path.cwd()/"genetic_algorithms"/"problems"/"traveling_salesman_problem"/"benchmarks"/benchmark_name) as benchmark_file:
+        with open(Path.cwd()/"problems"/"traveling_salesman_problem"/"benchmarks"/benchmark_name) as benchmark_file:
             depot_idx = int(benchmark_file.readline())
 
             def line_to_point(line: str):

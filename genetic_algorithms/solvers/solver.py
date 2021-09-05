@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from genetic_algorithms.problems.base import Model, State
+from genetic_algorithms.models.algorithm import Algorithm
 from dataclasses import dataclass
 
 
@@ -17,7 +18,8 @@ DEFAULT_CONFIG = SolverConfig()
 
 class Solver(ABC):
 
-    def __init__(self, config: SolverConfig = None):
+    def __init__(self, algorithm: Algorithm, config: SolverConfig = None):
+        self.algorithm = algorithm
         self.config = config or DEFAULT_CONFIG
 
     @abstractmethod
