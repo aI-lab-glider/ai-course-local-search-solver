@@ -1,0 +1,230 @@
+Index: problems/base/model.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from abc import ABC, abstractmethod\r\nfrom genetic_algorithms.problems.base.decision_variable import DecisionVariable\r\nfrom genetic_algorithms.problems.base.moves import Move\r\nfrom typing import List\r\nfrom genetic_algorithms.problems.base.state import State\r\nfrom dataclasses import dataclass\r\n\r\n\r\n@dataclass\r\nclass Violation:\r\n    cost: int\r\n    decision_variable: DecisionVariable\r\n\r\n\r\nclass Model(ABC):\r\n    def __init__(self, initial_solution: State):\r\n        self.initial_solution = initial_solution\r\n\r\n    @property\r\n    @abstractmethod\r\n    def valid_moves(self) -> List[Move]:\r\n        \"\"\"\r\n        Returns actions that could be done on problem to generate neighboorhood\r\n        \"\"\"\r\n\r\n    @abstractmethod\r\n    def find_violations_in(self, state: State) -> List[Violation]:\r\n        \"\"\"\r\n        Returns violations present in state\r\n        \"\"\"\r\n\r\n    @abstractmethod\r\n    def cost_for(self, state: State) -> int:\r\n        \"\"\"\r\n        Calculates costs for passed state\r\n        \"\"\"\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/problems/base/model.py b/problems/base/model.py
+--- a/problems/base/model.py	
++++ b/problems/base/model.py	
+@@ -1,8 +1,8 @@
+ from abc import ABC, abstractmethod
+-from genetic_algorithms.problems.base.decision_variable import DecisionVariable
+-from genetic_algorithms.problems.base.moves import Move
++from decision_variable import DecisionVariable
++from moves import Move
+ from typing import List
+-from genetic_algorithms.problems.base.state import State
++from state import State
+ from dataclasses import dataclass
+ 
+ 
+Index: problems/base/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from genetic_algorithms.problems.base.moves import Move, BindedMove\r\nfrom genetic_algorithms.problems.base.state import State\r\nfrom genetic_algorithms.problems.base.decision_variable import DecisionVariable\r\nfrom genetic_algorithms.problems.base.model import Model\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/problems/base/__init__.py b/problems/base/__init__.py
+--- a/problems/base/__init__.py	
++++ b/problems/base/__init__.py	
+@@ -1,4 +1,4 @@
+-from genetic_algorithms.problems.base.moves import Move, BindedMove
+-from genetic_algorithms.problems.base.state import State
+-from genetic_algorithms.problems.base.decision_variable import DecisionVariable
+-from genetic_algorithms.problems.base.model import Model
++from moves import Move, BindedMove
++from state import State
++from decision_variable import DecisionVariable
++from model import Model
+Index: problems/base/state.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from abc import ABC, abstractmethod\r\nfrom typing import List\r\nfrom genetic_algorithms.problems.base.decision_variable import DecisionVariable\r\nfrom genetic_algorithms.problems.base.model import Model\r\n\r\n\r\nclass State(ABC):\r\n    def __init__(self, model: Model, variables: List[DecisionVariable]):\r\n        self.original_model = model\r\n        self.decision_variables = variables\r\n\r\n    def with_replaced(self, variable: DecisionVariable) -> 'State':\r\n        \"\"\"\r\n        Returns new :class State: with replaced decision variable\r\n        \"\"\"\r\n        new_decision_vars = [*self.decision_variables]\r\n        new_decision_vars[variable.idx] = variable\r\n        return self.__class__(model=self.original_model, variables=new_decision_vars)\r\n\r\n    @abstractmethod\r\n    def print(self):\r\n        \"\"\"\r\n        Prints a solution to the problem\r\n        \"\"\"\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/problems/base/state.py b/problems/base/state.py
+--- a/problems/base/state.py	
++++ b/problems/base/state.py	
+@@ -1,7 +1,7 @@
+ from abc import ABC, abstractmethod
+ from typing import List
+-from genetic_algorithms.problems.base.decision_variable import DecisionVariable
+-from genetic_algorithms.problems.base.model import Model
++from decision_variable import DecisionVariable
++from model import Model
+ 
+ 
+ class State(ABC):
+Index: problems/base/moves.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from abc import ABC, abstractmethod\r\nfrom genetic_algorithms.problems.base.decision_variable import DecisionVariable\r\nfrom genetic_algorithms.problems.base.state import State\r\n\r\n\r\nclass Move(ABC):\r\n    @abstractmethod\r\n    def make_on(self, state: State, variable: DecisionVariable) -> State:\r\n        \"\"\"\r\n        Creates a new assigment as a result of this action on assigment\r\n        :param state: current state of a problem\r\n        :param variable: decision variable on which we do want to make a move\r\n        :returns: new state where passed :param variable: has modified value\r\n        \"\"\"\r\n\r\n    def bind_to(self, state: State) -> 'BindedMove':\r\n        \"\"\"\r\n        Binds move to a given state\r\n        :param state: state to which move will be binded\r\n        \"\"\"\r\n        return BindedMove(move=self, initial_state=state)\r\n\r\n\r\nclass BindedMove:\r\n    def __init__(self, move: Move, initial_state: State):\r\n        self.unbinded_move = move\r\n        self.initial_state = initial_state\r\n\r\n    def make_on(self, variable: DecisionVariable) -> State:\r\n        return self.unbinded_move.make_on(self.initial_state, variable)\r\n\r\n    def unmake(self) -> State:\r\n        \"\"\"\r\n        Unmakes maked move\r\n        \"\"\"\r\n        # TODO Should it be so? What if we've applied a sequence of actions?\r\n        return self.initial_state\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/problems/base/moves.py b/problems/base/moves.py
+--- a/problems/base/moves.py	
++++ b/problems/base/moves.py	
+@@ -1,6 +1,6 @@
+ from abc import ABC, abstractmethod
+-from genetic_algorithms.problems.base.decision_variable import DecisionVariable
+-from genetic_algorithms.problems.base.state import State
++from decision_variable import DecisionVariable
++from state import State
+ 
+ 
+ class Move(ABC):
+Index: solvers/local_search_solver.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from typing import List\r\nfrom genetic_algorithms.problems.base.moves import Move\r\nfrom genetic_algorithms.problems.base import Model, State\r\nfrom genetic_algorithms.helpers import History\r\nfrom genetic_algorithms.solvers.solver import Solver\r\n\r\n\r\nclass LocalSearchSolver(Solver):\r\n\r\n    def __init__(self, **kwargs):\r\n        super().__init__(**kwargs)\r\n        self.history = History[int](self.config.history_size)\r\n\r\n    def solve(self, problem: Model) -> State:\r\n        moves = problem.valid_moves\r\n        solution = problem.initial_solution\r\n        solution_cost = problem.cost_for(solution)\r\n        iter_count = 0\r\n        self.history.append(solution_cost)\r\n        while not self.is_local_minimum(solution_cost) and iter_count < self.config.max_iter:\r\n            solution = self._local_search(problem, solution, moves)\r\n            iter_count += 1\r\n        return solution\r\n\r\n    def _local_search(self, model: Model, state: State, moves: List[Move]) -> State:\r\n        best_state = state\r\n        best_state_cost = model.cost_for(state)\r\n        violations = sorted(model.find_violations_in(\r\n            state), reverse=True, key=lambda v: v.cost)\r\n        violation_to_fix = violations[0]\r\n        for move in moves:\r\n            binded_move = move.bind_to(state)\r\n            new_state = binded_move.make_on(violation_to_fix.decision_variable)\r\n            new_state_cost = model.cost_for(new_state)\r\n            if new_state_cost <= best_state_cost:\r\n                (best_state, best_state_cost) = (new_state, best_state_cost)\r\n        return best_state\r\n\r\n    def is_local_minimum(self, cost_to_check: int):\r\n        return all(cost == cost_to_check for cost in self.history) and self.history.is_full()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/solvers/local_search_solver.py b/solvers/local_search_solver.py
+--- a/solvers/local_search_solver.py	
++++ b/solvers/local_search_solver.py	
+@@ -1,8 +1,8 @@
+ from typing import List
+-from genetic_algorithms.problems.base.moves import Move
+-from genetic_algorithms.problems.base import Model, State
+-from genetic_algorithms.helpers import History
+-from genetic_algorithms.solvers.solver import Solver
++from problems.base.moves import Move
++from problems.base import Model, State
++from helpers.history import History
++from solvers.solver import Solver
+ 
+ 
+ class LocalSearchSolver(Solver):
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/misc.xml	
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.8 (genetic_algorithms)" project-jdk-type="Python SDK" />
++</project>
+\ No newline at end of file
+Index: .idea/genetic_algorithms.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/genetic_algorithms.iml b/.idea/genetic_algorithms.iml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/genetic_algorithms.iml	
+@@ -0,0 +1,14 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="PYTHON_MODULE" version="4">
++  <component name="NewModuleRootManager">
++    <content url="file://$MODULE_DIR$">
++      <excludeFolder url="file://$MODULE_DIR$/venv" />
++    </content>
++    <orderEntry type="jdk" jdkName="Python 3.8 (genetic_algorithms)" jdkType="Python SDK" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++  <component name="PyDocumentationSettings">
++    <option name="format" value="PLAIN" />
++    <option name="myDocStringFormat" value="Plain" />
++  </component>
++</module>
+\ No newline at end of file
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/modules.xml	
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/genetic_algorithms.iml" filepath="$PROJECT_DIR$/.idea/genetic_algorithms.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+Index: problems/magic-square/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/problems/magic-square/__init__.py b/problems/magic-square/__init__.py
+new file mode 100644
+--- /dev/null	
++++ b/problems/magic-square/__init__.py	
+@@ -0,0 +1,5 @@
++from problems.base.model import Model
++from problems.base.state import State
++
++# initial_solution = State()
++# magic_square_model = Model(initial_solution=)
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/vcs.xml	
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+--- /dev/null	
++++ b/.idea/.gitignore	
+@@ -0,0 +1,8 @@
++# Default ignored files
++/shelf/
++/workspace.xml
++# Datasource local storage ignored files
++/dataSources/
++/dataSources.local.xml
++# Editor-based HTTP Client requests
++/httpRequests/
+Index: .idea/inspectionProfiles/profiles_settings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/inspectionProfiles/profiles_settings.xml b/.idea/inspectionProfiles/profiles_settings.xml
+new file mode 100644
+--- /dev/null	
++++ b/.idea/inspectionProfiles/profiles_settings.xml	
+@@ -0,0 +1,6 @@
++<component name="InspectionProjectProfileManager">
++  <settings>
++    <option name="USE_PROJECT_PROFILE" value="false" />
++    <version value="1.0" />
++  </settings>
++</component>
+\ No newline at end of file
