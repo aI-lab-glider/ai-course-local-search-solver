@@ -1,1 +1,1 @@
-from genetic_algorithms.helpers.history import History
+from helpers.history import History
