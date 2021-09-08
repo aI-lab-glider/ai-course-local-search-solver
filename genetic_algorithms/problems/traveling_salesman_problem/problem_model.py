@@ -3,6 +3,7 @@ from genetic_algorithms.problems.traveling_salesman_problem.models.edge import E
 from itertools import combinations
 from pathlib import Path
 from typing import Generator, List
+import genetic_algorithms
 
 from genetic_algorithms.problems.base.model import Model
 from genetic_algorithms.problems.traveling_salesman_problem.models.point import \
@@ -50,7 +51,7 @@ class TravelingSalesmanModel(Model):
 
     @staticmethod
     def from_benchmark(benchmark_name: str):
-        with open(Path.cwd()/"problems"/"traveling_salesman_problem"/"benchmarks"/benchmark_name) as benchmark_file:
+        with open(Path(genetic_algorithms.__file__).parent/"problems"/"traveling_salesman_problem"/"benchmarks"/benchmark_name) as benchmark_file:
             depot_idx = int(benchmark_file.readline())
 
             def line_to_point(line: str):
