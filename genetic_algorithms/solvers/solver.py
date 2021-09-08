@@ -18,12 +18,11 @@ DEFAULT_CONFIG = SolverConfig()
 
 class Solver(ABC):
 
-    def __init__(self, algorithm: Algorithm, config: SolverConfig = None):
-        self.algorithm = algorithm
+    def __init__(self, config: SolverConfig = None):
         self.config = config or DEFAULT_CONFIG
 
     @abstractmethod
-    def solve(self, model: Model) -> State:
+    def solve(self, model: Model, algorithm: Algorithm) -> State:
         """
         Applies some logic to solve a given problem
         """
