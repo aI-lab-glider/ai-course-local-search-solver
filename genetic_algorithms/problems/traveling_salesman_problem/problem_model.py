@@ -35,14 +35,6 @@ class TravelingSalesmanModel(Model):
             range(0, len(self._points))) + [self._depot_idx]
         return TravelingSalesmanState(model=self, route=naive_circle)
 
-    def moves_for(self, state: TravelingSalesmanState) -> Generator[SwapEdges, None, None]:
-        def is_depot_start(a: Edge):
-            return a.start != self._depot_idx
-
-        def is_depot_end(b: Edge):
-            return b.end != self._depot_idx
-        return (SwapEdges(state, a, b) for a, b in combinations(state.edges, 2) if not is_depot_start(a) and not is_depot_end(b))
-
     def cost_for(self, state: TravelingSalesmanState) -> int:
         route = [self._points[i]
                  for i in state.route if i != self._depot_idx]

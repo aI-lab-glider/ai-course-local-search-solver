@@ -5,6 +5,9 @@ from genetic_algorithms.problems.base.model import Model
 
 
 class Algorithm(ABC):
+    def __init__(self):
+        self.is_terminated = False
+
     @abstractmethod
     def next_state(self, model: Model, state: State) -> State:
         """
