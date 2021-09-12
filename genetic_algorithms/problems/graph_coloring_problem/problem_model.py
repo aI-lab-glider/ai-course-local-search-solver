@@ -62,9 +62,6 @@ class GraphColoringModel(Model):
             color_classes[vertex.color] += 1
         return color_classes
 
-    def moves_for(self, state: GraphColoringState) -> Generator[ChangeColor, None, None]:
-        return (ChangeColor(state, idx, color) for idx in range(self.n_vertices) for color in range(self.n_vertices))
-
     def cost_for(self, state: GraphColoringState) -> int:
         bad_edges = self._bad_edges(state)
         color_classes = self._color_classes(state)

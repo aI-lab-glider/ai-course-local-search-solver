@@ -10,12 +10,7 @@ class Model(ABC):
     def __init__(self, initial_solution: State, move_generator: MoveGenerator):
         self.initial_solution = initial_solution
         self.move_generator = move_generator
-
-    @abstractmethod
-    def moves_for(self, state: State) -> Generator[Move[Any], None, None]:
-        """
-        Returns actions that could be done on problem to generate neighborhood
-        """
+        self.best_state = initial_solution
 
     @abstractmethod
     def cost_for(self, state: State) -> int:
