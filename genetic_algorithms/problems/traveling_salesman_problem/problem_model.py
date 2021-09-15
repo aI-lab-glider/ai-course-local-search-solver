@@ -3,6 +3,7 @@ from genetic_algorithms.problems.traveling_salesman_problem.models.edge import E
 from itertools import combinations
 from pathlib import Path
 from typing import Generator, List
+import genetic_algorithms
 
 from genetic_algorithms.problems.base.model import Model
 from genetic_algorithms.problems.traveling_salesman_problem.models.point import \
@@ -13,6 +14,8 @@ from genetic_algorithms.problems.traveling_salesman_problem.moves import \
     SwapEdges
 from genetic_algorithms.problems.traveling_salesman_problem.state import \
     TravelingSalesmanState
+from genetic_algorithms.problems.traveling_salesman_problem.move_generator import \
+    TravelingSalesmanMoveGenerator
 
 
 class TravelingSalesmanModel(Model):
@@ -20,7 +23,8 @@ class TravelingSalesmanModel(Model):
         self._points: List[Point] = points
         self._depot_idx = depot_idx
         initial_solution = self._find_initial_solution()
-        super().__init__(initial_solution)
+        move_generator = TravelingSalesmanMoveGenerator(depot_idx)
+        super().__init__(initial_solution, move_generator)
 
     @property
     def points(self):
@@ -31,14 +35,6 @@ class TravelingSalesmanModel(Model):
             range(0, len(self._points))) + [self._depot_idx]
         return TravelingSalesmanState(model=self, route=naive_circle)
 
-    def moves_for(self, state: TravelingSalesmanState) -> Generator[SwapEdges, None, None]:
-        def is_depot_start(a: Edge):
-            return a.start != self._depot_idx
-
-        def is_depot_end(b: Edge):
-            return b.end != self._depot_idx
-        return (SwapEdges(state, a, b) for a, b in combinations(state.edges, 2) if not is_depot_start(a) and not is_depot_end(b))
-
     def cost_for(self, state: TravelingSalesmanState) -> int:
         route = [self._points[i]
                  for i in state.route if i != self._depot_idx]
@@ -47,7 +43,7 @@ class TravelingSalesmanModel(Model):
 
     @staticmethod
     def from_benchmark(benchmark_name: str):
-        with open(Path.cwd()/"genetic_algorithms"/"problems"/"traveling_salesman_problem"/"benchmarks"/benchmark_name) as benchmark_file:
+        with open(Path(genetic_algorithms.__file__).parent/"problems"/"traveling_salesman_problem"/"benchmarks"/benchmark_name) as benchmark_file:
             depot_idx = int(benchmark_file.readline())
 
             def line_to_point(line: str):
