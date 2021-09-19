@@ -1,8 +1,6 @@
-from functools import reduce
 from genetic_algorithms.problems.traveling_salesman_problem.models.edge import Edge
-from itertools import combinations
 from pathlib import Path
-from typing import Generator, List
+from typing import List
 import genetic_algorithms
 
 from genetic_algorithms.problems.base.model import Model
@@ -10,8 +8,6 @@ from genetic_algorithms.problems.traveling_salesman_problem.models.point import 
     Point
 from genetic_algorithms.problems.traveling_salesman_problem.models.salesman import \
     Salesman
-from genetic_algorithms.problems.traveling_salesman_problem.moves import \
-    SwapEdges
 from genetic_algorithms.problems.traveling_salesman_problem.state import \
     TravelingSalesmanState
 from genetic_algorithms.problems.traveling_salesman_problem.move_generator import \
@@ -24,6 +20,8 @@ class TravelingSalesmanModel(Model):
         self._depot_idx = depot_idx
         initial_solution = self._find_initial_solution()
         move_generator = TravelingSalesmanMoveGenerator(depot_idx)
+        # Should be so??
+        # I am not sure if move generator should be assigned to the model.
         super().__init__(initial_solution, move_generator)
 
     @property
@@ -39,7 +37,10 @@ class TravelingSalesmanModel(Model):
         route = [self._points[i]
                  for i in state.route if i != self._depot_idx]
         depot = self._points[self._depot_idx]
-        return int(Salesman.from_point(depot).walk_route(route).walk_to(depot).travelled_distance)
+        return int(Salesman.from_point(depot)
+                           .walk_route(route)
+                           .walk_to(depot)
+                           .travelled_distance)
 
     @staticmethod
     def from_benchmark(benchmark_name: str):
