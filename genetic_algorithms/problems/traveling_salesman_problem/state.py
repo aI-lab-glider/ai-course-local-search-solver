@@ -12,7 +12,6 @@ class TravelingSalesmanState(State):
     route: List[int]
 
     def __str__(self):
-        print(self.route)
         return str.join(" -> ", map(lambda idx: f'({self.model.points[idx].x}, {self.model.points[idx].y})', self.route))
 
     @property

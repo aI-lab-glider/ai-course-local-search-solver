@@ -1,6 +1,4 @@
 from typing import Generic, List, TypeVar
-
-
 THistoryItem = TypeVar("THistoryItem")
 
 

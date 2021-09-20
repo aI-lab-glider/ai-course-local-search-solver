@@ -1,29 +1,30 @@
 from abc import ABC, abstractmethod
+from genetic_algorithms.models.next_state_provider import NextStateProvider
 from genetic_algorithms.problems.base import Model, State
 from genetic_algorithms.models.algorithm import Algorithm
 from dataclasses import dataclass
 from time import time
+from genetic_algorithms.helpers.history import History
 
 
 @dataclass
 class SolverConfig:
-    """ "
+    """
     Parameters that are required to correct solver work
     """
-
     max_iter: int = 1000
     history_size: int = 5
+    time_limit: int = 60
 
 
 DEFAULT_CONFIG = SolverConfig()
 
 
 class Solver(ABC):
-    def __init__(self, time_limit: int, config: SolverConfig = None):
+    def __init__(self, config: SolverConfig = None):
         self.config = config or DEFAULT_CONFIG
-        self.time_limit = time_limit
-        self.total_time = None
-        self.start_time = None
+        self.time_limit = config.time_limit
+        self.cost_history = History[int](config.history_size)
 
     def start_timer(self):
         self.start_time = time()
@@ -38,7 +39,7 @@ class Solver(ABC):
         return self.wall_time() > self.time_limit
 
     @abstractmethod
-    def solve(self, model: Model, algorithm: Algorithm) -> State:
+    def solve(self, model: Model, algorithm: NextStateProvider) -> State:
         """
         Applies some logic to solve a given problem
         """
