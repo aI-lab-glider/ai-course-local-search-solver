@@ -11,7 +11,7 @@ from functools import reduce
 # Run with flag -m. Example:
 # python -m genetic_algorithms.main
 if __name__ == '__main__':
-    model = TravelingSalesmanModel.from_benchmark('tsp_for_visualization')
+    model = TravelingSalesmanModel.from_benchmark('tsp_for_visualization_1')
     algorithm = HillClimbing()
     config = SolverConfig(time_limit=60)
     solver = LocalSearchSolver(config)
