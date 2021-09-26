@@ -17,7 +17,7 @@ class AvatarModel(Model):
         super().__init__(initial_solution, move_generator)
 
     def _find_initial_solution(self) -> AvatarState:
-        return AvatarState(model=self, image=Image.new("RGB", self._image_size, "black"))
+        return AvatarState(model=self, image=Image.new("RGB", self._image_size, "white"))
 
     def _pix_comp(self, ref_pix: Tuple[int, int, int], pix_to_comp: Tuple[int, int, int]) -> int:
         d_r = ref_pix[0] - pix_to_comp[0]
