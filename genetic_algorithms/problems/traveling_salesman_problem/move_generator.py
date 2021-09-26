@@ -21,12 +21,15 @@ class TravelingSalesmanMoveGenerator(MoveGenerator):
         constraints = [self._depot_start, self._depot_end]
         return all([constraint(move) for constraint in constraints])
 
-    def random_move(self, state: TravelingSalesmanState) -> SwapEdges:
-        generate_move = lambda: SwapEdges(state, random.choice(list(state.edges)), random.choice(list(state.edges)))
-        random_move = generate_move()
-        while not self._satisfies_constraints(random_move):
-            random_move = generate_move()
-        return random_move
+    def _generate_move(self, state: TravelingSalesmanState):
+        new_move = lambda: SwapEdges(state, random.choice(list(state.edges)), random.choice(list(state.edges)))
+        while True:
+            random_move = new_move()
+            if self._satisfies_constraints(random_move):
+                yield random_move
+
+    def random_moves(self, state: TravelingSalesmanState) -> Generator[SwapEdges, None, None]:
+        return self._generate_move(state)
 
     def available_moves(self, state: TravelingSalesmanState) -> Generator[SwapEdges, None, None]:
         return (SwapEdges(state, a, b) for a, b in combinations(state.edges, 2)
