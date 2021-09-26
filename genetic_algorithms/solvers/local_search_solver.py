@@ -11,7 +11,7 @@ class LocalSearchSolver(Solver):
     def solve(self, model: Model, algorithm: NextStateProvider) -> State:
         self.start_timer()
         solution = model.initial_solution
-        while not self._is_optimal_solution_found() and not self.timeout():
+        while not self._is_optimal_solution_found():
             solution = algorithm.next_state(model, solution)
             self._update_best_state(model, solution)
         self.stop_timer()

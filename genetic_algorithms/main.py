@@ -15,7 +15,7 @@ if __name__ == '__main__':
     algorithm = HillClimbing()
     config = SolverConfig(time_limit=60)
     solver = LocalSearchSolver(config)
-    wrappers = [CostPrinterWrapper, Visualization]
+    wrappers = [CostPrinterWrapper, lambda algorithm: Visualization(config,algorithm = algorithm)]
     solution = solver.solve(model, reduce(
         lambda alg, wrapper: wrapper(algorithm=alg), wrappers, algorithm))
     print(solution)
