@@ -1,9 +1,8 @@
 from abc import abstractmethod
 from typing import Type, Union
-from genetic_algorithms.algorithms import Algorithm
 from genetic_algorithms.models.next_state_provider import NextStateProvider
 from genetic_algorithms.problems.base.state import State
-from genetic_algorithms.problems.base.model import Model
+from genetic_algorithms.problems import Model
 
 
 class AlgorithmWrapper(NextStateProvider):

@@ -5,11 +5,6 @@ from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems.base.model import Model
 
 
-@dataclass
-class FirstChoiceHillClimbingConfig:
-    min_count_without_improvements: int = 5
-
-
 class FirstChoiceHillClimbing(Algorithm):
     """
     Implementaion of stochastic local search. 

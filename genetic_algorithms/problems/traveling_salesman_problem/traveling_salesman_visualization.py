@@ -6,15 +6,19 @@ import sys
 import time
 
 import genetic_algorithms
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import VisualizationWrapper
+from genetic_algorithms.algorithm_wrappers import VisualizationWrapper
 from genetic_algorithms.models.next_state_provider import NextStateProvider
-from genetic_algorithms.problems.traveling_salesman_problem.problem_model import TravelingSalesmanModel
+from genetic_algorithms.problems.traveling_salesman_problem.problem_model import TravelingSalesmanProblem
 from genetic_algorithms.problems.traveling_salesman_problem.state import TravelingSalesmanState
 from genetic_algorithms.solvers.solver import SolverConfig
-from genetic_algorithms.solvers.local_search_solver import LocalSearchSolver
 
 
-class TravalingSalesmanVisualisation(VisualizationWrapper):
+class TravelingSalesmanVisualization(VisualizationWrapper):
+
+    @staticmethod
+    def get_corresponding_problem():
+        return TravelingSalesmanVisualization
+
     def __init__(self, config: SolverConfig, algorithm: NextStateProvider, **kwargs):
         pygame.init()
         pygame.font.init()
@@ -24,7 +28,7 @@ class TravalingSalesmanVisualisation(VisualizationWrapper):
         self.cost_best_state = inf
         super().__init__(algorithm, **kwargs)
 
-    def _perform_side_effects(self, model: TravelingSalesmanModel, state: TravelingSalesmanState):
+    def _perform_side_effects(self, model: TravelingSalesmanProblem, state: TravelingSalesmanState):
         self.screen = pygame.display.set_mode((900, 900))
         self.current_route = [(self._scale(model.points[idx], model))
                               for idx in state.route]
@@ -36,7 +40,7 @@ class TravalingSalesmanVisualisation(VisualizationWrapper):
         self._handle_pygame_events()
         self._draw(model, state)
 
-    def _draw_buildings(self, model: TravelingSalesmanModel, state: TravelingSalesmanState):
+    def _draw_buildings(self, model: TravelingSalesmanProblem, state: TravelingSalesmanState):
         building = pygame.image.load(Path(
             genetic_algorithms.__file__).parent / "problems" / "traveling_salesman_problem" / "pictures" / "building.png")
         building = pygame.transform.scale(building, (80, 80))
@@ -44,7 +48,7 @@ class TravalingSalesmanVisualisation(VisualizationWrapper):
             x, y = self._scale(model.points[idx], model)
             self.screen.blit(building, (x - 40, y - 40))
 
-    def _find_extreme(self, model: TravelingSalesmanModel):
+    def _find_extreme(self, model: TravelingSalesmanProblem):
         min_x = min(point.x for point in model.points)
         max_x = max(point.x for point in model.points)
         min_y = min(point.y for point in model.points)
@@ -52,7 +56,7 @@ class TravalingSalesmanVisualisation(VisualizationWrapper):
 
         return min_x, max_x, min_y, max_y
 
-    def _scale(self, point, model: TravelingSalesmanModel):
+    def _scale(self, point, model: TravelingSalesmanProblem):
         min_x, max_x, min_y, max_y = self._find_extreme(model)
         x, y = point.x, point.y
         x -= min_x
@@ -77,7 +81,7 @@ class TravalingSalesmanVisualisation(VisualizationWrapper):
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 sys.exit(0)
 
-    def _draw(self, model: TravelingSalesmanModel, state: TravelingSalesmanState):
+    def _draw(self, model: TravelingSalesmanProblem, state: TravelingSalesmanState):
         self.screen.fill((255, 255, 255))
         self._draw_buildings(model, state)
         self._draw_information()

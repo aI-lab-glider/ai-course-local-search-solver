@@ -12,7 +12,6 @@ class SolverConfig:
     Parameters that are required to correct solver work
     """
     max_iter: int = 1000
-    history_size: int = 5
     time_limit: int = 60
 
 

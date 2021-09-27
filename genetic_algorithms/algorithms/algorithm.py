@@ -19,7 +19,7 @@ class Algorithm(NextStateProvider):
     """
     Generates next states for the problem based on some logic.
     """
-    algorithms = {}
+    _algorithms = {}
 
     def __init__(self, config: AlgorithmConfig = None):
         config = config or DEFAULT_CONFIG
@@ -28,7 +28,7 @@ class Algorithm(NextStateProvider):
         self._best_cost, self._best_state = float('inf'), None
 
     def __init_subclass__(cls) -> None:
-        Algorithm.algorithms[camel_to_snake(cls.__name__)] = cls
+        Algorithm._algorithms[camel_to_snake(cls.__name__)] = cls
 
     @abstractmethod
     def _find_next_state(self, model: Model, state: State) -> Union[State, None]:

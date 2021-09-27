@@ -11,6 +11,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        genetic_algortihms=genetic_algorithms.main:cli
+        genetic_algortihms=genetic_algorithms.cli.entry_point:entry_point
     '''
 )
