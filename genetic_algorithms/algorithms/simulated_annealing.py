@@ -1,4 +1,5 @@
-from genetic_algorithms.models.algorithm import Algorithm
+from typing import Union
+from genetic_algorithms.algorithms import Algorithm, AlgorithmConfig
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems.base.model import Model
 from random import choices
@@ -7,7 +8,7 @@ import math
 
 
 @dataclass
-class SimulatedAnnealingConfig:
+class SimulatedAnnealingConfig(AlgorithmConfig):
     initial_temperature: int = 1000
     cooling_step: float = 0.001
 
@@ -23,8 +24,9 @@ class SimulatedAnnealing(Algorithm):
     """
 
     def __init__(self, config: SimulatedAnnealingConfig = None):
-        self.temperature = config.initial_temperature
         self.config = config or DEFAULT_CONFIG
+        self.temperature = self.config.initial_temperature
+        super().__init__(config=config)
 
     def _calculate_selection_probability(self, old_state_cost: float, new_state_cost: float) -> float:
         return math.exp(-(new_state_cost - old_state_cost) / self.temperature)
@@ -32,7 +34,7 @@ class SimulatedAnnealing(Algorithm):
     def _update_temperature(self):
         self.temperature = self.config.cooling_step * self.temperature
 
-    def next_state(self, model: Model, state: State) -> State:
+    def next_state(self, model: Model, state: State) -> Union[State, None]:
         move = next(model.move_generator.random_moves(state))
         new_state = move.make()
         old_state_cost, new_state_cost = model.cost_for(
@@ -45,4 +47,4 @@ class SimulatedAnnealing(Algorithm):
             result = choices([new_state, state], [
                              new_state_selection_probability, 1 - new_state_selection_probability], k=1)[0]
         self._update_temperature()
-        return result
+        return result if not self._is_optimal_state(new_state_cost) else None

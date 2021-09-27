@@ -6,7 +6,7 @@ import sys
 import time
 
 import genetic_algorithms
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmWrapper
+from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import VisualizationWrapper
 from genetic_algorithms.models.next_state_provider import NextStateProvider
 from genetic_algorithms.problems.traveling_salesman_problem.problem_model import TravelingSalesmanModel
 from genetic_algorithms.problems.traveling_salesman_problem.state import TravelingSalesmanState
@@ -14,7 +14,7 @@ from genetic_algorithms.solvers.solver import SolverConfig
 from genetic_algorithms.solvers.local_search_solver import LocalSearchSolver
 
 
-class Visualization(AlgorithmWrapper):
+class TravalingSalesmanVisualisation(VisualizationWrapper):
     def __init__(self, config: SolverConfig, algorithm: NextStateProvider, **kwargs):
         pygame.init()
         pygame.font.init()
@@ -22,20 +22,17 @@ class Visualization(AlgorithmWrapper):
         self.start_time = time.time()
         self.time_limit = config.time_limit
         self.cost_best_state = inf
-
         super().__init__(algorithm, **kwargs)
 
     def _perform_side_effects(self, model: TravelingSalesmanModel, state: TravelingSalesmanState):
         self.screen = pygame.display.set_mode((900, 900))
-        self.current_route = [(self._scale(model.points[idx], model)) for idx in state.route]
-
+        self.current_route = [(self._scale(model.points[idx], model))
+                              for idx in state.route]
         self.states += 1
         self.current_time = time.time()
-
         self.cost_current_state = model.cost_for(state)
 
         self._check_states()
-
         self._handle_pygame_events()
         self._draw(model, state)
 
@@ -84,7 +81,8 @@ class Visualization(AlgorithmWrapper):
         self.screen.fill((255, 255, 255))
         self._draw_buildings(model, state)
         self._draw_information()
-        pygame.draw.lines(self.screen, (0, 150, 0), True, self.current_route, 3)
+        pygame.draw.lines(self.screen, (0, 150, 0),
+                          True, self.current_route, 3)
         pygame.display.flip()
 
         if self._check_time():
@@ -96,9 +94,12 @@ class Visualization(AlgorithmWrapper):
         font = pygame.font.SysFont('arial', 20)
         text_1 = font.render('Time: ' + str(round(self.current_time - self.start_time, 2)) + '/' + str(self.time_limit),
                              False, (0, 0, 0))
-        text_2 = font.render('Checked states: ' + str(self.states), False, (0, 0, 0))
-        text_3 = font.render('Current state: ' + str(self.cost_current_state), False, (0, 0, 0))
-        text_4 = font.render('Best state: ' + str(self.cost_best_state), False, (0, 0, 0))
+        text_2 = font.render('Checked states: ' +
+                             str(self.states), False, (0, 0, 0))
+        text_3 = font.render('Current state: ' +
+                             str(self.cost_current_state), False, (0, 0, 0))
+        text_4 = font.render(
+            'Best state: ' + str(self.cost_best_state), False, (0, 0, 0))
         self.screen.blit(text_1, (self.screen.get_width() - 215, 25))
         self.screen.blit(text_2, (self.screen.get_width() - 215, 50))
         self.screen.blit(text_3, (self.screen.get_width() - 215, 75))
