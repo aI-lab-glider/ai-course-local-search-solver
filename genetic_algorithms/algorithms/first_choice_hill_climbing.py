@@ -19,7 +19,7 @@ class FirstChoiceHillClimbing(Algorithm):
         for move in model.move_generator.random_moves(state):
             new_state = move.make()
             new_cost = model.cost_for(new_state)
-            if new_cost >= cost_to_outperform:
+            if self._is_cost_better(new_cost, cost_to_outperform):
                 if new_cost != self._best_cost:
                     self._iter_count_since_best_solution += 1
                 else:
