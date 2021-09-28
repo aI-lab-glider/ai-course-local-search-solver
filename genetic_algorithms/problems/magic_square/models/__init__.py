@@ -1,0 +1,2 @@
+def state():
+    return None
