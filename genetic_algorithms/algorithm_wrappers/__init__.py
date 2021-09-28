@@ -1,1 +1,2 @@
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmWrapper, VisualizationWrapper
+from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmWrapper
+from genetic_algorithms.algorithm_wrappers.visualizations import VisualizationWrapper, TravelingSalesmanVisualization

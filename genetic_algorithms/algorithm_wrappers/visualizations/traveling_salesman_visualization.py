@@ -1,15 +1,17 @@
-from pathlib import Path
-from math import inf
-
-import pygame
 import sys
 import time
+from math import inf
+from pathlib import Path
 
 import genetic_algorithms
-from genetic_algorithms.algorithm_wrappers import VisualizationWrapper
+import pygame
+from genetic_algorithms.algorithm_wrappers.visualizations.visualization_wrapper import \
+    VisualizationWrapper
 from genetic_algorithms.models.next_state_provider import NextStateProvider
-from genetic_algorithms.problems.traveling_salesman_problem.problem_model import TravelingSalesmanProblem
-from genetic_algorithms.problems.traveling_salesman_problem.state import TravelingSalesmanState
+from genetic_algorithms.problems.traveling_salesman_problem.problem_model import \
+    TravelingSalesmanProblem
+from genetic_algorithms.problems.traveling_salesman_problem.state import \
+    TravelingSalesmanState
 from genetic_algorithms.solvers.solver import SolverConfig
 
 
@@ -17,7 +19,7 @@ class TravelingSalesmanVisualization(VisualizationWrapper):
 
     @staticmethod
     def get_corresponding_problem():
-        return TravelingSalesmanVisualization
+        return TravelingSalesmanProblem
 
     def __init__(self, config: SolverConfig, algorithm: NextStateProvider, **kwargs):
         pygame.init()
@@ -42,7 +44,7 @@ class TravelingSalesmanVisualization(VisualizationWrapper):
 
     def _draw_buildings(self, model: TravelingSalesmanProblem, state: TravelingSalesmanState):
         building = pygame.image.load(Path(
-            genetic_algorithms.__file__).parent / "problems" / "traveling_salesman_problem" / "pictures" / "building.png")
+            genetic_algorithms.__file__).parent / "algorithm_wrappers" / "visualizations" / "pictures" / "building.png")
         building = pygame.transform.scale(building, (80, 80))
         for idx in state.route:
             x, y = self._scale(model.points[idx], model)

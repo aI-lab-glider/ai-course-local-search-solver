@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from genetic_algorithms.models.next_state_provider import NextStateProvider
 from genetic_algorithms.problems.base import Model, State
-from genetic_algorithms.algorithms import Algorithm
 from dataclasses import dataclass
 from time import time
 

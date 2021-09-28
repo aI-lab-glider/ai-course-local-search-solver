@@ -1,10 +1,11 @@
+from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 import json
 from dataclasses import fields
 from typing import Dict, Type, Union
 import typing
 
 import click
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import (
+from genetic_algorithms.algorithm_wrappers import (
     AlgorithmWrapper, VisualizationWrapper)
 from genetic_algorithms.algorithms import Algorithm
 from genetic_algorithms.problems.base.model import Model
@@ -105,6 +106,10 @@ def create_problem_model(options):
 
 def create_algorithm(problem_model: Model, options) -> Union[Algorithm, AlgorithmWrapper]:
     algorithm_type = Algorithm._algorithms[options['algorithm']]
+
+    console.print(
+        f"Configuring {camel_to_snake(algorithm_type.__name__).replace('_', ' ')}", style="bold blue")
+
     config_type = signature(algorithm_type).parameters['config'].annotation
     config = options.setdefault(algorithm_type.__name__, {})
     config = populate_options_for_dataclass(config, config_type)
@@ -122,9 +127,10 @@ def wrap_algorithm_with_wrappers(options, problem_model: Model, algorithm: Algor
 
 
 def create_visualization_wrapper(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmWrapper]:
-    visualization_wrapper = VisualizationWrapper.visualizations[type(
-        problem_model)]
+    visualization_wrapper = VisualizationWrapper.visualizations.setdefault(type(
+        problem_model), None)
     if visualization_wrapper:
         solver_config = SolverConfig(**options['solver_config'])
-        algorithm = visualization_wrapper(algorithm, solver_config)
+        algorithm = visualization_wrapper(
+            algorithm=algorithm, config=solver_config)
     return algorithm
