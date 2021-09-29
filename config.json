@@ -2,5 +2,5 @@
     "problem_model": "traveling_salesman_problem",
     "benchmark_file": "tsp_5_1",
     "algorithm": "hill_climbing",
-    "visualization": false
+    "visualization": true
 }
