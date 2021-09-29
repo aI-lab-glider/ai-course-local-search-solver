@@ -1,8 +1,8 @@
 from abc import abstractmethod
-from genetic_algorithms.models.algorithm import Algorithm
+from typing import Type, Union
 from genetic_algorithms.models.next_state_provider import NextStateProvider
 from genetic_algorithms.problems.base.state import State
-from genetic_algorithms.problems.base.model import Model
+from genetic_algorithms.problems import Model
 
 
 class AlgorithmWrapper(NextStateProvider):
@@ -14,12 +14,13 @@ class AlgorithmWrapper(NextStateProvider):
         self.algorithm = algorithm
 
     @abstractmethod
-    def _perform_side_effects(self, model: Model, state: State):
+    def _perform_side_effects(self, model: 'Model', state: 'State'):
         """
         Performs logic related to the plugin.
         """
 
-    def next_state(self, model: Model, state: State) -> State:
+    def next_state(self, model: 'Model', state: 'State') -> Union['State', None]:
         next_state = self.algorithm.next_state(model, state)
-        self._perform_side_effects(model=model, state=next_state)
+        if next_state:
+            self._perform_side_effects(model=model, state=next_state)
         return next_state

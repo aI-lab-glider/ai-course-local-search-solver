@@ -11,16 +11,11 @@ class LocalSearchSolver(Solver):
     def solve(self, model: Model, algorithm: NextStateProvider) -> State:
         self.start_timer()
         solution = model.initial_solution
-        while not self._is_optimal_solution_found() and not self.timeout():
-            solution = algorithm.next_state(model, solution)
-            self._update_best_state(model, solution)
+        while not self.timeout():
+            next_state = algorithm.next_state(model, solution)
+            if next_state:
+                solution = next_state
+            else:
+                break
         self.stop_timer()
         return solution
-
-    def _is_optimal_solution_found(self) -> bool:
-        return self.cost_history.is_full() and len(set(self.cost_history)) == 1
-
-    def _update_best_state(self, model: Model, solution: State) -> None:
-        if model.cost_for(model.best_state) >= model.cost_for(solution):
-            model.best_state = solution
-            self.cost_history.append(model.cost_for(model.best_state))
