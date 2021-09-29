@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from genetic_algorithms.algorithms.exceptions import NoSolutionFoundError
 from typing import Union
 from genetic_algorithms.algorithms import Algorithm
 from genetic_algorithms.problems.base.state import State
@@ -19,10 +20,7 @@ class FirstChoiceHillClimbing(Algorithm):
         for move in model.move_generator.random_moves(state):
             new_state = move.make()
             new_cost = model.cost_for(new_state)
-            if self._is_cost_better(new_cost, cost_to_outperform):
-                if new_cost != self._best_cost:
-                    self._iter_count_since_best_solution += 1
-                else:
-                    self._iter_count_since_best_solution = 0
+            if self._is_cost_strictly_better(new_cost, cost_to_outperform):
                 self._best_cost, self._best_state = new_cost, new_state
-                return new_state if not self._is_optimal_state(new_cost) else None
+                return new_state if not self._is_in_optimal_state() else None
+        raise NoSolutionFoundError()

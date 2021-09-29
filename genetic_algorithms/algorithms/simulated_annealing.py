@@ -39,7 +39,7 @@ class SimulatedAnnealing(Algorithm):
         new_state = move.make()
         old_state_cost, new_state_cost = model.cost_for(
             state), model.cost_for(new_state)
-        if self._is_cost_better(new_state_cost, old_state_cost):
+        if self._is_cost_strictly_better(new_state_cost, old_state_cost):
             result = new_state
         else:
             new_state_selection_probability = self._calculate_selection_probability(
@@ -47,4 +47,4 @@ class SimulatedAnnealing(Algorithm):
             result = choices([new_state, state], [
                              new_state_selection_probability, 1 - new_state_selection_probability], k=1)[0]
         self._update_temperature()
-        return result if not self._is_optimal_state(new_state_cost) else None
+        return result if not self._is_in_optimal_state() else None

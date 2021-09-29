@@ -51,19 +51,19 @@ class Algorithm(NextStateProvider):
             self._update_algorithm_state(model, next_state)
         return next_state
 
-    def _is_cost_better(self, is_better_cost, is_better_than_cost):
+    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost):
         return {
-            OptimizationStrategy.Min: op.le,
-            OptimizationStrategy.Max: op.ge,
+            OptimizationStrategy.Min: op.lt,
+            OptimizationStrategy.Max: op.gt,
         }[self.config.optimization_stategy](is_better_cost, is_better_than_cost)
 
     def _update_algorithm_state(self, model: Model, problem_state: State):
         next_state_cost = model.cost_for(problem_state)
-        if self._is_cost_better(next_state_cost, self._best_cost):
+        if self._is_cost_strictly_better(next_state_cost, self._best_cost):
             self._best_cost, self._best_state = next_state_cost, self._best_state
             self._steps_from_last_state_update = 0
         else:
             self._steps_from_last_state_update += 1
 
-    def _is_optimal_state(self, state_cost: int):
-        return self._is_cost_better(state_cost, self._best_cost) and self._steps_from_last_state_update >= self.config.max_steps_without_improvement
+    def _is_in_optimal_state(self):
+        return self._steps_from_last_state_update >= self.config.max_steps_without_improvement

@@ -1,3 +1,5 @@
+from genetic_algorithms.algorithms.algorithm import AlgorithmConfig
+from genetic_algorithms.algorithm_wrappers.algorithm_monitor import AlgorithmMonitor
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 import json
 from dataclasses import fields
@@ -111,7 +113,7 @@ def create_algorithm(problem_model: Model, options) -> Union[Algorithm, Algorith
         f"Configuring {camel_to_snake(algorithm_type.__name__).replace('_', ' ')}", style="bold blue")
 
     config_type = signature(algorithm_type).parameters['config'].annotation
-    config = options.setdefault(algorithm_type.__name__, {})
+    config = options.setdefault('algorithm_config', {})
     config = populate_options_for_dataclass(config, config_type)
     algorithm = algorithm_type(config)
     algorithm_with_wrappers = wrap_algorithm_with_wrappers(
@@ -123,7 +125,8 @@ def wrap_algorithm_with_wrappers(options, problem_model: Model, algorithm: Algor
     if options['visualization']:
         algorithm = create_visualization_wrapper(
             options, problem_model, algorithm)
-    return algorithm
+
+    return create_solution_monitor_wrapper(options, algorithm)
 
 
 def create_visualization_wrapper(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmWrapper]:
@@ -134,3 +137,8 @@ def create_visualization_wrapper(options, problem_model: Model, algorithm: Algor
         algorithm = visualization_wrapper(
             algorithm=algorithm, config=solver_config)
     return algorithm
+
+
+def create_solution_monitor_wrapper(options, algorithm: Algorithm):
+    algorithm_config = AlgorithmConfig(**options['algorithm_config'])
+    return AlgorithmMonitor(config=algorithm_config, algorithm=algorithm)
