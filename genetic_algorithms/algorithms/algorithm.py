@@ -11,7 +11,7 @@ import operator as op
 
 
 class OptimizationStrategy(Enum):
-    Min = 'min',
+    Min = 'min'
     Max = 'max'
 
 
@@ -53,8 +53,8 @@ class Algorithm(NextStateProvider):
 
     def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost):
         return {
-            OptimizationStrategy.Min: op.lt,
-            OptimizationStrategy.Max: op.gt,
+            OptimizationStrategy.Min.value: op.lt,
+            OptimizationStrategy.Max.value: op.gt,
         }[self.config.optimization_stategy](is_better_cost, is_better_than_cost)
 
     def _update_algorithm_state(self, model: Model, problem_state: State):

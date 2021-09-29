@@ -16,6 +16,7 @@ from genetic_algorithms.solvers.solver import SolverConfig
 from rich.console import Console
 from rich import pretty
 from inspect import signature
+from enum import Enum
 
 console = Console()
 pretty.install()
@@ -95,7 +96,7 @@ def create_solver(options):
 def populate_options_for_dataclass(options, dataclass: Type):
     for field in fields(dataclass):
         field_metadata = {field.name: {
-            'default': field.default
+            'default': field.default if not issubclass(field.type, Enum) else field.default.value
         }}
         prompt_if_not_exists(options, field.name, field_metadata)
     return dataclass(**options)
