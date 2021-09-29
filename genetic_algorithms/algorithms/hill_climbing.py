@@ -1,4 +1,5 @@
-from genetic_algorithms.models.algorithm import Algorithm
+from typing import Union
+from genetic_algorithms.algorithms import Algorithm
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems.base.model import Model
 
@@ -11,12 +12,12 @@ class HillClimbing(Algorithm):
     and greedy selects the best neingboor available from the current state.
     """
 
-    def next_state(self, model: Model, state: State) -> State:
+    def _find_next_state(self, model: Model, state: State) -> Union[State, None]:
         best_state = state
         best_state_cost = model.cost_for(state)
         for move in model.move_generator.available_moves(state):
             new_state = move.make()
             new_state_cost = model.cost_for(new_state)
-            if new_state_cost <= best_state_cost:
+            if self._is_cost_strictly_better(new_state_cost, best_state_cost):
                 (best_state, best_state_cost) = (new_state, new_state_cost)
-        return best_state
+        return best_state if not self._is_in_optimal_state() else None

@@ -1,4 +1,3 @@
-from genetic_algorithms.problems.traveling_salesman_problem.models.edge import Edge
 from pathlib import Path
 from typing import List
 import genetic_algorithms
@@ -14,14 +13,12 @@ from genetic_algorithms.problems.traveling_salesman_problem.move_generator impor
     TravelingSalesmanMoveGenerator
 
 
-class TravelingSalesmanModel(Model):
+class TravelingSalesmanProblem(Model):
     def __init__(self, points: List[Point], depot_idx: int):
         self._points: List[Point] = points
         self._depot_idx = depot_idx
         initial_solution = self._find_initial_solution()
         move_generator = TravelingSalesmanMoveGenerator(depot_idx)
-        # Should be so??
-        # I am not sure if move generator should be assigned to the model.
         super().__init__(initial_solution, move_generator)
 
     @property
@@ -51,7 +48,7 @@ class TravelingSalesmanModel(Model):
                 (x, y) = map(int, line.split(sep=' '))
                 return Point(x, y)
             points = map(line_to_point, [line for line in benchmark_file])
-            return TravelingSalesmanModel(
+            return TravelingSalesmanProblem(
                 points=list(points),
                 depot_idx=depot_idx
             )

@@ -12,7 +12,7 @@ from genetic_algorithms.problems.graph_coloring_problem.models.vertex import Ver
 from genetic_algorithms.problems.graph_coloring_problem.move_generator import GraphColoringMoveGenerator
 
 
-class GraphColoringModel(Model):
+class GraphColoringProblem(Model):
     def __init__(self, edges: List[Edge]):
         self._edges: List[Edge] = edges
         self.graph: Dict[int, Set[int]] = self._create_graph()
@@ -76,4 +76,4 @@ class GraphColoringModel(Model):
                 return Edge(start, end)
 
             edges = [line_to_edge(line) for line in benchmark_file]
-            return GraphColoringModel(edges=edges)
+            return GraphColoringProblem(edges=edges)
