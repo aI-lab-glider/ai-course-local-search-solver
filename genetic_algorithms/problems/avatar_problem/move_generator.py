@@ -18,15 +18,15 @@ class AvatarMoveGenerator(MoveGenerator):
 
     def _generate_move(self, state: AvatarState):
         while True:
-            vertices = [self._generate_vertex(), self._generate_vertex(), self._generate_vertex()]
+            vertices = [self._generate_vertex() for _ in range(3)]
             color = self._generate_color()
             yield AddTriangle(state, vertices=vertices, color=color)
 
     def _generate_color(self) -> Color:
-        return Color(R=random.randint(0, 0xff),
-                     G=random.randint(0, 0xff),
-                     B=random.randint(0, 0xff),
-                     A=random.randint(0, 0xff))
+        return Color(R=random.randint(0, 255),
+                     G=random.randint(0, 255),
+                     B=random.randint(0, 255),
+                     A=random.randint(0, 255))
 
     def random_moves(self, state: AvatarState) -> Generator[AddTriangle, None, None]:
         return self._generate_move(state)
