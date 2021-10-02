@@ -1,17 +1,18 @@
-import math
 from pathlib import Path
+import genetic_algorithms
 from genetic_algorithms.problems.base.model import Model
 from typing import Generator, List
-import random
 from genetic_algorithms.problems.magic_square.moves import SwapNumbers
 from genetic_algorithms.problems.magic_square.state import MagicSquareState
+from genetic_algorithms.problems.magic_square.move_generator import MagicSquareMoveGenerator
 import numpy as np
 
 
 class MagicSquareModel(Model):
-    def __init__(self, numbers: np.matrix, magic_number: int):
+    def __init__(self, numbers: np.matrix, magic_number: int, move_generator: MagicSquareMoveGenerator):
         self._numbers: np.matrix = numbers
         self._magic_number = magic_number
+        self.move_generator = move_generator
         initial_solution = self._find_initial_solution()
         super().__init__(initial_solution)
 
@@ -23,9 +24,6 @@ class MagicSquareModel(Model):
         np.random.shuffle(self._numbers)
         return MagicSquareState(model=self)
 
-    def moves_for(self, state: MagicSquareState) -> Generator[SwapNumbers, None, None]:
-        return(SwapNumbers(state, [a, b], [c, d]) for a in range(len(state.numbers)) for b in range(len(state.numbers)) for c in range(len(state.numbers)) for d in range(len(state.numbers)) if d > b or (d == b and c > a))
-
     def cost_for(self, state: MagicSquareState) -> int:
         row_cost_sum = abs(self._numbers.sum(axis=1) - self._magic_number).sum()
         columnt_cost_sum = abs(self._numbers.sum(axis=0) - self._magic_number).sum()
@@ -36,7 +34,7 @@ class MagicSquareModel(Model):
 
     @staticmethod
     def from_benchmark(benchmark_name: str):
-        with open(Path.cwd()/"genetic_algorithms"/"problems"/"magic_square"/"benchmarks"/benchmark_name) as benchmark_file:
+        with open(Path(genetic_algorithms.__file__).parent/"genetic_algorithms"/"problems"/"magic_square"/"benchmarks"/benchmark_name) as benchmark_file:
             magic_number = int(benchmark_file.readline())
             numbers = benchmark_file.readlines()
             list_of_np_matrixes = [np.matrix(numbers[x]) for x in range(len(numbers))]
