@@ -20,7 +20,7 @@ DEFAULT_CONFIG = SolverConfig()
 class Solver(ABC):
     def __init__(self, config: SolverConfig = None):
         self.config = config or DEFAULT_CONFIG
-        self.time_limit = config.time_limit
+        self.time_limit = self.config.time_limit
 
     def start_timer(self):
         self.start_time = time()

@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
-from genetic_algorithms.problems.base.state import State
-from typing import Generic, TypeVar
-from typing import Any, Generator
-from genetic_algorithms.problems.base.moves import Move
 from random import sample
-TState = TypeVar("TState")
+from typing import Generator, TypeVar
+
+from genetic_algorithms.problems.base.moves import Move
+from genetic_algorithms.problems.base.state import State
 
 
 class MoveGenerator(ABC):
-    def random_moves(self, state: State) -> Generator[Move[Any], None, None]:
+    def random_moves(self, state: State) -> Generator[Move[State], None, None]:
         """
         Generates all available moves from state, but moves are performed in a random order.
 
@@ -21,7 +20,7 @@ class MoveGenerator(ABC):
         return (move for move in sample(moves, len(moves)))
 
     @ abstractmethod
-    def available_moves(self, state: State) -> Generator[Move[Any], None, None]:
+    def available_moves(self, state: State) -> Generator[Move[State], None, None]:
         """
         Generates available moves from state
         """

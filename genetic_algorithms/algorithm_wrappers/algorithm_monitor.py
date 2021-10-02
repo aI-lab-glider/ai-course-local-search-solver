@@ -1,4 +1,5 @@
-from genetic_algorithms.algorithms.algorithm import AlgorithmConfig
+import operator as op
+from genetic_algorithms.algorithms.algorithm import AlgorithmConfig, OptimizationStrategy
 from re import S
 from genetic_algorithms.solvers.solver import SolverConfig
 from genetic_algorithms.problems.base.state import State
@@ -40,7 +41,6 @@ class AlgorithmMonitor(AlgorithmWrapper):
         return f'Steps from last impr: [[cyan]{"#" * completed}[/cyan]{"-" * (left)}]'
 
     def _perform_side_effects(self, model: Model, state: State):
-        console.clear()
         new_cost = model.cost_for(state)
         if new_cost < self._best_algo_cost:
             self._best_algo_cost = new_cost
@@ -51,3 +51,9 @@ class AlgorithmMonitor(AlgorithmWrapper):
         console.print(progess_bar)
         self._iters_from_last_impr += 1
         sleep(0.1)
+
+    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost) -> bool:
+        return {
+            OptimizationStrategy.Min.value: op.lt,
+            OptimizationStrategy.Max.value: op.gt,
+        }[self._algorithm_config.optimization_stategy](is_better_cost, is_better_than_cost)

@@ -1,11 +1,12 @@
-from typing import Generator, List, Set, Dict
+from dataclasses import dataclass
+from genetic_algorithms.problems.base.model import Model
+from typing import Generator, Iterable, List, Set, Dict, Type
 from pathlib import Path
 
 import genetic_algorithms
 from genetic_algorithms.problems.graph_coloring_problem.state import GraphColoringState
 from genetic_algorithms.problems.graph_coloring_problem.moves import ChangeColor
 
-from genetic_algorithms.problems.base.model import Model
 
 from genetic_algorithms.problems.graph_coloring_problem.models.edge import Edge
 from genetic_algorithms.problems.graph_coloring_problem.models.vertex import Vertex
@@ -13,11 +14,20 @@ from genetic_algorithms.problems.graph_coloring_problem.move_generator import Gr
 
 
 class GraphColoringProblem(Model):
-    def __init__(self, edges: List[Edge]):
+
+    @staticmethod
+    def get_available_move_generation_strategies() -> Iterable[str]:
+        return GraphColoringMoveGenerator.move_generators.keys()
+
+    def __init__(self, edges: List[Edge], move_generator_name: str):
+        # ----
+
         self._edges: List[Edge] = edges
         self.graph: Dict[int, Set[int]] = self._create_graph()
         self.n_vertices = len(self.graph)
-        move_generator = GraphColoringMoveGenerator(self.n_vertices)
+        # ---
+        move_generator = GraphColoringMoveGenerator.move_generators[move_generator_name](
+            self.n_vertices)
         initial_solution = self._find_initial_solution()
         super().__init__(initial_solution, move_generator)
 
@@ -67,13 +77,13 @@ class GraphColoringProblem(Model):
         color_classes = self._color_classes(state)
         return sum([2*bad_edges[i]*color_classes[i]-color_classes[i]**2 for i in range(self.n_vertices)])
 
-    @staticmethod
-    def from_benchmark(benchmark_name: str):
-        with open(Path(genetic_algorithms.__file__).parent / "problems" / "graph_coloring_problem" / "benchmarks" / benchmark_name) as benchmark_file:
+    @classmethod
+    def from_benchmark(cls, benchmark_name: str, move_generator_name: str):
+        with open(cls.get_path_to_benchmarks()/benchmark_name) as benchmark_file:
 
             def line_to_edge(line: str):
                 (start, end) = map(int, line.split(sep=' '))
                 return Edge(start, end)
 
             edges = [line_to_edge(line) for line in benchmark_file]
-            return GraphColoringProblem(edges=edges)
+            return GraphColoringProblem(edges=edges, move_generator_name=move_generator_name)

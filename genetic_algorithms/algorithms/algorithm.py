@@ -1,13 +1,14 @@
 from abc import abstractmethod
 from re import M
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
-from typing import Union
+from typing import Type, Union
 from genetic_algorithms.problems.base.model import Model
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.models.next_state_provider import NextStateProvider
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import operator as op
+from abc import ABC
 
 
 class OptimizationStrategy(Enum):
@@ -28,7 +29,7 @@ class Algorithm(NextStateProvider):
     """
     Generates next states for the problem based on some logic.
     """
-    _algorithms = {}
+    algorithms = {}
 
     def __init__(self, config: AlgorithmConfig = None):
         config = config or DEFAULT_CONFIG
@@ -37,7 +38,7 @@ class Algorithm(NextStateProvider):
         self._best_cost, self._best_state = float('inf'), None
 
     def __init_subclass__(cls) -> None:
-        Algorithm._algorithms[camel_to_snake(cls.__name__)] = cls
+        Algorithm.algorithms[camel_to_snake(cls.__name__)] = cls
 
     @abstractmethod
     def _find_next_state(self, model: Model, state: State) -> Union[State, None]:
@@ -51,7 +52,7 @@ class Algorithm(NextStateProvider):
             self._update_algorithm_state(model, next_state)
         return next_state
 
-    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost):
+    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost) -> bool:
         return {
             OptimizationStrategy.Min.value: op.lt,
             OptimizationStrategy.Max.value: op.gt,

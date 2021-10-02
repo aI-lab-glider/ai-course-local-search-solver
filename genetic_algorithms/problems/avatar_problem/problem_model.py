@@ -32,5 +32,5 @@ class AvatarModel(Model):
     @staticmethod
     def from_benchmark(benchmark_name: str):
         img = Image.open(Path(
-                genetic_algorithms.__file__).parent / "problems" / "avatar_problem" / "benchmarks" / benchmark_name)
+            genetic_algorithms.__file__).parent / "problems" / "avatar_problem" / "benchmarks" / benchmark_name)
         return AvatarModel(img)
