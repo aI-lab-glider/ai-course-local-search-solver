@@ -58,7 +58,7 @@ def solve(config_file, **cli_options):
     problem_model = create_problem_model(options)
     algorithm = create_algorithm(problem_model, options)
     solution = solver.solve(problem_model, algorithm)
-    click.echo(solution)
+    console.print(str(solution))
 
 
 def read_options(config_file_path: str, cli_options):
