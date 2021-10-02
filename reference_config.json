@@ -6,7 +6,7 @@
     },
     "algorithm": {
         "name": "hill_climbing",
-        "max_steps_without_improvement": 10,
+        "max_steps_without_improvement": 100,
         "optimization_stategy": "min"
     },
     "solver_config": {

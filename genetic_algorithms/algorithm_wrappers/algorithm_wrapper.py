@@ -23,4 +23,11 @@ class AlgorithmWrapper(NextStateProvider):
         next_state = self.algorithm.next_state(model, state)
         if next_state:
             self._perform_side_effects(model=model, state=next_state)
+        else:
+            self._on_solution_found(state=state)
         return next_state
+
+    def _on_solution_found(self, state: State):
+        """
+        Hook that is called when solution is found.
+        """

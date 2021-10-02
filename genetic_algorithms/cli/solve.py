@@ -21,6 +21,7 @@ from rich.console import Console
 
 # TODO
 # [x] Add reference config.
+# [x] Add prefect solution monitor
 # [] Make perfect TSP:
 # [] Add new move generators
 # [] Add algorithms logic
@@ -86,10 +87,16 @@ def create_solver(options):
 def create_dataclass(options, dataclass: Type):
     dataclass_config = {}
     for field in fields(dataclass):
-        field_metadata = {
-            'default': field.default if not issubclass(field.type, Enum) else field.default.value
-        }
-        field_value = prompt_if_not_exists(options, field.name, field_metadata)
+        if issubclass(field.type, Enum):
+            value = prompt_if_not_exists(options, field.name, {
+                'default': field.default.value
+            })
+            field_value = field.type(value)
+        else:
+            field_value = prompt_if_not_exists(options, field.name, {
+                'default': field.default
+            })
+
         dataclass_config[field.name] = field_value
     return dataclass(**dataclass_config)
 
