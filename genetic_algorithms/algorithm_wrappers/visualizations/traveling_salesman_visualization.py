@@ -6,7 +6,7 @@ from pathlib import Path
 import genetic_algorithms
 import pygame
 from genetic_algorithms.algorithm_wrappers.visualizations.visualization_wrapper import \
-    VisualizationWrapper
+    VisualizationSubscriber
 from genetic_algorithms.models.next_state_provider import NextStateProvider
 from genetic_algorithms.problems.traveling_salesman_problem.problem_model import \
     TravelingSalesmanProblem
@@ -17,8 +17,8 @@ import time
 
 
 BEST_STATE = 'best_state'
-CURR_STATE = 'curr_state'
-PREV_STATE = 'prev_state'
+CURR_NEINGHBOR = 'curr_neinghbor'
+FROM_STATE = 'from_state'
 
 STATS = 'stats_info'
 
@@ -26,7 +26,7 @@ ROAD_COLOR = (0, 150, 0)
 BG_COLOR = (255,255,255)
 FONT_COLOR = (0, 0, 0)
 
-class TravelingSalesmanVisualization(VisualizationWrapper):
+class TravelingSalesmanVisualization(VisualizationSubscriber):
 
     @staticmethod
     def get_corresponding_problem():
@@ -44,15 +44,15 @@ class TravelingSalesmanVisualization(VisualizationWrapper):
         self.main_screen = pygame.display.set_mode((800, 800))
         self.canvas = pygame.Surface((800, 800))
         self.screen_coords = {
-            PREV_STATE: (0, 0),
-            CURR_STATE: (400, 0),
+            FROM_STATE: (0, 0),
+            CURR_NEINGHBOR: (400, 0),
             BEST_STATE: (0, 400),
             STATS: (400,400)
         }
         self.state_screens = {
             BEST_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[BEST_STATE], 400, 400)),
-            CURR_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[CURR_STATE], 400, 400)), 
-            PREV_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[PREV_STATE], 400, 400)),
+            CURR_NEINGHBOR: self.canvas.subsurface(pygame.Rect(*self.screen_coords[CURR_NEINGHBOR], 400, 400)), 
+            FROM_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[FROM_STATE], 400, 400)),
             STATS: self.canvas.subsurface(pygame.Rect(*self.screen_coords[STATS], 400, 400)),
         }
 
@@ -66,23 +66,24 @@ class TravelingSalesmanVisualization(VisualizationWrapper):
         self.best_state_cost = inf
         self.states = {
             BEST_STATE: None,
-            CURR_STATE: None, 
-            PREV_STATE: None
+            CURR_NEINGHBOR: None, 
+            FROM_STATE: None
         }
 
 
     
-    def _perform_side_effects(self, model: TravelingSalesmanProblem, state: TravelingSalesmanState):
-        self._update_states(model, state)
+    def _perform_side_effects(self, model: TravelingSalesmanProblem, state: TravelingSalesmanState, from_state: TravelingSalesmanState):
+        self._update_states(model, state, from_state)
         self._update_statistics()
         self._handle_pygame_events()
         self._draw(model)
+        time.sleep(.01)
 
-    def _update_states(self, model: TravelingSalesmanProblem, new_state: TravelingSalesmanState):
+    def _update_states(self, model: TravelingSalesmanProblem, new_state: TravelingSalesmanState, from_state: TravelingSalesmanState):
         self.states = {
             **self.states,
-            PREV_STATE: self.states[CURR_STATE],
-            CURR_STATE: new_state
+            FROM_STATE: from_state,
+            CURR_NEINGHBOR: new_state
         }
         # TODO: should depdent on optimization strategy
         if self.states[BEST_STATE] is None or model.cost_for(new_state) <= model.cost_for(self.states[BEST_STATE]):
@@ -178,7 +179,7 @@ class TravelingSalesmanVisualization(VisualizationWrapper):
         stats = {
             'time': f'{round(self.current_time - self.start_time, 2)}/{self.time_limit}',
             'checked_states': self.explored_states_count,
-            'current_state': get_cost_or_unknown(CURR_STATE),
+            'current_state': get_cost_or_unknown(CURR_NEINGHBOR),
             'best_state': get_cost_or_unknown(BEST_STATE),
         }
 

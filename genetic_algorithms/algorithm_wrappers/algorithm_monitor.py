@@ -4,7 +4,7 @@ import time
 from rich import box
 
 from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import \
-    AlgorithmWrapper
+    AlgorithmSubscriber
 from genetic_algorithms.algorithms.algorithm import (AlgorithmConfig,
                                                      OptimizationStrategy)
 from genetic_algorithms.problems.base.model import Model
@@ -15,7 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 
-class AlgorithmMonitor(AlgorithmWrapper):
+class AlgorithmMonitor(AlgorithmSubscriber):
     delay_time = 0.01
 
     def __init__(self, config: AlgorithmConfig, **kwargs):
@@ -31,6 +31,7 @@ class AlgorithmMonitor(AlgorithmWrapper):
             'explored_states_count': 0
         }
 
+        self._best_state = None
         self._start_time = time.monotonic()
         self._iters_from_last_impr = 0
 
@@ -68,9 +69,9 @@ class AlgorithmMonitor(AlgorithmWrapper):
 
     def _update_stats(self, model, state):
         new_state_cost = model.cost_for(state)
-        if self._is_cost_strictly_better(new_state_cost, self._stats["best_cost"]):
-            self._stats["best_cost"] = new_state_cost
-            self._iters_from_last_impr = 0
+        if (self._is_cost_strictly_better(new_state_cost, self._stats["best_cost"])):
+                self._stats["best_cost"] = new_state_cost
+                self._iters_from_last_impr = 0
         self._stats["last_cost"] = new_state_cost
         self._stats["explored_states_count"] += 1
 

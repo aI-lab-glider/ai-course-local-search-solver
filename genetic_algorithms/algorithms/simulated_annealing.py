@@ -39,7 +39,7 @@ class SimulatedAnnealing(Algorithm):
         new_state = move.make()
         old_state_cost, new_state_cost = model.cost_for(
             state), model.cost_for(new_state)
-        if self._is_cost_strictly_better(new_state_cost, old_state_cost):
+        if self._is_cost_better(new_state_cost, old_state_cost):
             result = new_state
         else:
             new_state_selection_probability = self._calculate_selection_probability(

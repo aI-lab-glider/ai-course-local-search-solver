@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from re import M
-from genetic_algorithms.algorithm_wrappers.visualizations.visualization_wrapper import VisualizationWrapper
+from genetic_algorithms.algorithm_wrappers.visualizations.visualization_wrapper import VisualizationSubscriber
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 from typing import Type, Union
 from genetic_algorithms.problems.base.model import Model
@@ -32,7 +32,7 @@ class Algorithm(NextStateProvider):
     """
     algorithms = {}
 
-    def __init__(self, config: AlgorithmConfig = None, visualization: VisualizationWrapper=None):
+    def __init__(self, config: AlgorithmConfig = None, visualization: VisualizationSubscriber=None):
         config = config or DEFAULT_CONFIG
         self.config = config
         self._steps_from_last_state_update = 0
@@ -54,25 +54,28 @@ class Algorithm(NextStateProvider):
             self._update_algorithm_state(model, next_state)
         return next_state
 
-    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost) -> bool:
+    def _is_cost_better(self, is_better_cost, is_better_than_cost) -> bool:
         return {
             OptimizationStrategy.Min: op.lt,
             OptimizationStrategy.Max: op.gt,
-        }[self.config.optimization_stategy](is_better_cost, is_better_than_cost)
+        }[self.config.optimization_stategy](is_better_cost, is_better_than_cost) or is_better_cost == is_better_than_cost 
 
-    def _update_algorithm_state(self, model: Model, problem_state: State):
-        next_state_cost = model.cost_for(problem_state)
-        if self._is_cost_strictly_better(next_state_cost, self._best_cost):
-            self._best_cost, self._best_state = next_state_cost, self._best_state
+    def _update_algorithm_state(self, model: Model, new_state: State):
+        next_state_cost = model.cost_for(new_state)
+        if self._best_state is None:
+            self._best_state = new_state
+        elif self._is_cost_better(next_state_cost, self._best_cost) and self._best_state != new_state:
+            self._best_cost, self._best_state = next_state_cost, new_state
             self._steps_from_last_state_update = 0
         else:
             self._steps_from_last_state_update += 1
+
 
     def _is_in_optimal_state(self):
         return self._steps_from_last_state_update >= self.config.max_steps_without_improvement
 
 
     # TODO: make it better
-    def visualize(self, model, state):
+    def visualize(self, model, new_state, from_state):
         if self.visualization:
-            self.visualization._perform_side_effects(model, state)
+            self.visualization._perform_side_effects(model, new_state, from_state=from_state)

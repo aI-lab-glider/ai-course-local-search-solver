@@ -1,18 +1,18 @@
 
 from abc import abstractmethod
 from typing import Type
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmWrapper
+from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmSubscriber
 from genetic_algorithms.problems import Model
 
 
-class VisualizationWrapper(AlgorithmWrapper):
+class VisualizationSubscriber(AlgorithmSubscriber):
     """
     Provides visualization to algorithm solutions.
     """
     visualizations = {}
 
     def __init_subclass__(cls):
-        VisualizationWrapper.visualizations[cls.get_corresponding_problem(
+        VisualizationSubscriber.visualizations[cls.get_corresponding_problem(
         )] = cls
 
     @staticmethod

@@ -20,7 +20,7 @@ class FirstChoiceHillClimbing(Algorithm):
         for move in model.move_generator.random_moves(state):
             new_state = move.make()
             new_cost = model.cost_for(new_state)
-            if self._is_cost_strictly_better(new_cost, cost_to_outperform):
+            if self._is_cost_better(new_cost, cost_to_outperform):
                 self._best_cost, self._best_state = new_cost, new_state
                 return new_state if not self._is_in_optimal_state() else None
         raise NoSolutionFoundError()

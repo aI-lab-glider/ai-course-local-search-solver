@@ -19,7 +19,8 @@ class HillClimbing(Algorithm):
             # TODO: change avaialble moves into next states. Change move_generator into neinghborhood generator.
             new_state = move.make()
             new_state_cost = model.cost_for(new_state)
-            self.visualize(model, new_state)
-            if self._is_cost_strictly_better(new_state_cost, best_state_cost):
+            self.visualize(model, new_state, from_state=state)
+            if self._is_cost_better(new_state_cost, best_state_cost):
                 (best_state, best_state_cost) = (new_state, new_state_cost)
+        print(self._is_in_optimal_state())
         return best_state if not self._is_in_optimal_state() else None

@@ -6,8 +6,8 @@ from inspect import signature
 from typing import Type, Union
 
 import click
-from genetic_algorithms.algorithm_wrappers import (AlgorithmWrapper,
-                                                   VisualizationWrapper)
+from genetic_algorithms.algorithm_wrappers import (AlgorithmSubscriber,
+                                                   VisualizationSubscriber)
 from genetic_algorithms.algorithm_wrappers.algorithm_monitor import \
     AlgorithmMonitor
 from genetic_algorithms.algorithms import Algorithm
@@ -125,7 +125,7 @@ def get_benchmark_names_for_model(model_type: Type[Model]):
     return os.listdir(model_type.get_path_to_benchmarks())
 
 
-def create_algorithm(problem_model: Model, options) -> Union[Algorithm, AlgorithmWrapper]:
+def create_algorithm(problem_model: Model, options) -> Algorithm:
     config = options['algorithm']
     console.print("Configuring algorithm", style="bold blue")
 
@@ -138,12 +138,13 @@ def create_algorithm(problem_model: Model, options) -> Union[Algorithm, Algorith
     config = create_dataclass(config, config_type)
 
     algorithm = algorithm_type(config)
-    algorithm_with_wrappers = wrap_algorithm_with_wrappers(
+    
+    add_alrogithm_subscribers(
         options, problem_model, algorithm)
-    return algorithm_with_wrappers
+    return algorithm
 
 
-def wrap_algorithm_with_wrappers(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmWrapper]:
+def add_alrogithm_subscribers(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmSubscriber]:
     if options.setdefault('visualization', False):
         algorithm = create_visualization_wrapper(
             options, problem_model, algorithm)
@@ -153,8 +154,8 @@ def wrap_algorithm_with_wrappers(options, problem_model: Model, algorithm: Algor
     return algorithm
 
 
-def create_visualization_wrapper(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmWrapper]:
-    visualization_wrapper = VisualizationWrapper.visualizations.setdefault(type(
+def create_visualization_wrapper(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmSubscriber]:
+    visualization_wrapper = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
     if visualization_wrapper:
         solver_config = SolverConfig(**options['solver_config'])

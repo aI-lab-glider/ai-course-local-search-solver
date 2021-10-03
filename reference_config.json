@@ -6,12 +6,12 @@
     },
     "algorithm": {
         "name": "hill_climbing",
-        "max_steps_without_improvement": 10000,
+        "max_steps_without_improvement": 6,
         "optimization_stategy": "min"
     },
     "solver_config": {
         "max_iter": 10000,
-        "time_limit": 60
+        "time_limit": 60000
     },
     "visualization": true,
     "algorithm_monitor": true

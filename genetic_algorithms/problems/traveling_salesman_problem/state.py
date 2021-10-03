@@ -21,3 +21,7 @@ class TravelingSalesmanState(State):
             self.route[1:] + [self.route[0]]
         )
         return map(lambda edge: Edge(edge[0], edge[1]), not_connected_edges)
+    
+    def __eq__(self, other):
+        is_any_idx_differs = any(self.route[i] != other.route[i] for i in range(len(self.route)))
+        return not is_any_idx_differs

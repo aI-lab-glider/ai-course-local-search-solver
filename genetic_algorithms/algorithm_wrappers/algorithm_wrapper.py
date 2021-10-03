@@ -1,25 +1,25 @@
 from abc import abstractmethod
 from typing import Type, Union
-from genetic_algorithms.models.next_state_provider import NextStateProvider
+from genetic_algorithms.algorithms.algorithm import Algorithm
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems import Model
 
 
-class AlgorithmWrapper(NextStateProvider):
+class AlgorithmSubscriber:
     """
     Allows to add some side effects to algorithm.
     """
 
-    def __init__(self, algorithm: NextStateProvider):
+    def __init__(self, algorithm: Algorithm):
         self.algorithm = algorithm
 
     @abstractmethod
-    def _perform_side_effects(self, model: Model, state: State):
+    def _perform_side_effects(self, model: Model, state: State, **kwargs):
         """
         Performs logic related to the plugin.
         """
 
-    def next_state(self, model: Model, state: State) -> Union[State, None]:
+    def update(self, model: Model, state: State) -> Union[State, None]:
         next_state = self.algorithm.next_state(model, state)
         if next_state:
             self._perform_side_effects(model=model, state=next_state)

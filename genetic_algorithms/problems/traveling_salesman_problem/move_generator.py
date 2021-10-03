@@ -1,6 +1,6 @@
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 import random
-from itertools import combinations
+from itertools import permutations
 
 from genetic_algorithms.models.move_generator import MoveGenerator
 from genetic_algorithms.problems.traveling_salesman_problem.state import TravelingSalesmanState
@@ -24,14 +24,14 @@ class TravelingSalesmanMoveGenerator(MoveGenerator):
 
 class TwoOpt(TravelingSalesmanMoveGenerator):
 
-    def _depot_start(self, move: SwapEdges):
+    def _is_depot_start(self, move: SwapEdges):
         return move.a.start != self._depot_idx
 
-    def _depot_end(self, move: SwapEdges):
+    def _is_depot_end(self, move: SwapEdges):
         return move.b.end != self._depot_idx
 
     def _satisfies_constraints(self, move: SwapEdges):
-        constraints = [self._depot_start, self._depot_end]
+        constraints = [self._is_depot_start, self._is_depot_end]
         return all([constraint(move) for constraint in constraints])
 
     def _generate_move(self, state: TravelingSalesmanState):
@@ -46,7 +46,8 @@ class TwoOpt(TravelingSalesmanMoveGenerator):
         return self._generate_move(state)
 
     def available_moves(self, state: TravelingSalesmanState) -> Generator[SwapEdges, None, None]:
-        return (SwapEdges(state, a, b) for a, b in combinations(state.edges, 2)
+        # TODO Add tests
+        return (SwapEdges(state, a, b) for a, b in permutations(state.edges, 2)
                 if self._satisfies_constraints(SwapEdges(state, a, b)))
 
 
