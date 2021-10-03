@@ -20,4 +20,6 @@ class HillClimbing(Algorithm):
             new_state_cost = model.cost_for(new_state)
             if self._is_cost_strictly_better(new_state_cost, best_state_cost):
                 (best_state, best_state_cost) = (new_state, new_state_cost)
+        if self._is_in_optimal_state():
+            self.visualization._on_solution_found(model,best_state)
         return best_state if not self._is_in_optimal_state() else None
