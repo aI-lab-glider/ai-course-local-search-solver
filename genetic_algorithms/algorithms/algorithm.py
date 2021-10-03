@@ -1,25 +1,20 @@
+import operator as op
 from abc import abstractmethod
-from re import M
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmNextNeingbourSubscriber, AlgorithmNextStateSubscriber
-from genetic_algorithms.algorithm_wrappers.visualizations.visualization_wrapper import VisualizationSubscriber
+from dataclasses import dataclass
+from enum import Enum
+from typing import Generator, List, Union
+
+from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import (
+    AlgorithmNextNeingbourSubscriber, AlgorithmNextStateSubscriber)
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
-from typing import Dict, Generator, List, Type, Union
+from genetic_algorithms.models.next_state_provider import Algorithm
 from genetic_algorithms.problems.base.model import Model
 from genetic_algorithms.problems.base.state import State
-from genetic_algorithms.models.next_state_provider import Algorithm
-from dataclasses import dataclass, field
-from enum import Enum
-import operator as op
-from abc import ABC
-from collections import defaultdict
+
 
 class OptimizationStrategy(Enum):
     Min = 'min'
     Max = 'max'
-
-class AlgorithmHook(Enum):
-    OnNeighbour = 'on_neighbour'
-    OnNextState = 'on_next_state'
 
 @dataclass
 class AlgorithmConfig:
@@ -61,15 +56,18 @@ class SubscribableAlgorithm(Algorithm):
             self._on_next_state(model, next_state)
         return next_state
 
-    def _is_cost_better(self, is_better_cost, is_better_than_cost) -> bool:
+    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost) -> bool:
         return {
             OptimizationStrategy.Min: op.lt,
             OptimizationStrategy.Max: op.gt,
-        }[self.config.optimization_stategy](is_better_cost, is_better_than_cost) or is_better_cost == is_better_than_cost 
+        }[self.config.optimization_stategy](is_better_cost, is_better_than_cost)
+    
+    def _is_cost_better_or_same(self, is_better_cost, is_better_than_cost) -> bool:
+        return self._is_cost_strictly_better(is_better_cost, is_better_than_cost) or is_better_cost == is_better_than_cost 
 
     def _update_algorithm_state(self, model: Model, new_state: State):
         next_state_cost = model.cost_for(new_state)
-        if self._is_cost_better(next_state_cost, self.best_cost) and self.best_state != new_state:
+        if self._is_cost_better_or_same(next_state_cost, self.best_cost) and self.best_state != new_state:
             self.best_cost, self.best_state = next_state_cost, new_state
             self._steps_from_last_state_update = 0
         else:
@@ -97,8 +95,9 @@ class SubscribableAlgorithm(Algorithm):
         self._next_neighbour_subsribers.append(subsriber)
 
     
-    def _get_neighbours(self, model: Model, state: State) -> Generator[State, None, None]:
-        for move in model.move_generator.available_moves(state):
+    def _get_neighbours(self, model: Model, state: State, is_stohastic=False) -> Generator[State, None, None]:
+        move_gen = model.move_generator.available_moves if not is_stohastic else model.move_generator.random_moves
+        for move in move_gen(state):
             neighbour = move.make() 
             self._on_next_neighbour(model, state, neighbour)
             yield neighbour

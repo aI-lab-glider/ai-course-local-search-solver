@@ -17,6 +17,6 @@ class HillClimbing(SubscribableAlgorithm):
         best_state_cost = model.cost_for(state)
         for neighbour in self._get_neighbours(model, state):
             new_state_cost = model.cost_for(neighbour)
-            if self._is_cost_better(new_state_cost, best_state_cost):
+            if self._is_cost_better_or_same(new_state_cost, best_state_cost):
                 (best_state, best_state_cost) = (neighbour, new_state_cost)
         return best_state if not self._is_in_optimal_state() else None

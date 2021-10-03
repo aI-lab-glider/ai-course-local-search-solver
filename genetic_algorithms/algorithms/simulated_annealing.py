@@ -35,16 +35,15 @@ class SimulatedAnnealing(SubscribableAlgorithm):
         self.temperature = self.config.cooling_step * self.temperature
 
     def next_state(self, model: Model, state: State) -> Union[State, None]:
-        move = next(model.move_generator.random_moves(state))
-        new_state = move.make()
+        neinghbour = next(self._get_neighbours(model, state))
         old_state_cost, new_state_cost = model.cost_for(
-            state), model.cost_for(new_state)
-        if self._is_cost_better(new_state_cost, old_state_cost):
-            result = new_state
+            state), model.cost_for(neinghbour)
+        if self._is_cost_better_or_same(new_state_cost, old_state_cost):
+            result = neinghbour
         else:
             new_state_selection_probability = self._calculate_selection_probability(
                 old_state_cost, new_state_cost)
-            result = choices([new_state, state], [
+            result = choices([neinghbour, state], [
                              new_state_selection_probability, 1 - new_state_selection_probability], k=1)[0]
         self._update_temperature()
         return result if not self._is_in_optimal_state() else None

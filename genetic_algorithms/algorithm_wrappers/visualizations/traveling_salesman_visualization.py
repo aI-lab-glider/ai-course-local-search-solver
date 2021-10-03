@@ -18,7 +18,7 @@ import time
 
 
 BEST_STATE = 'best_state'
-CURR_NEINGHBOR = 'curr_neinghbor'
+CURR_NEINGHBOR = 'curr_neinghbour'
 FROM_STATE = 'from_state'
 
 STATS = 'stats_info'
@@ -63,7 +63,6 @@ class TravelingSalesmanVisualization(VisualizationSubscriber):
         self.explored_states_count = 0
         self.start_time = time.time()
         self.time_limit = config.time_limit
-        # TODO best state should depdent on optimization strategy
         self.best_state_cost = inf
         self.states = {
             BEST_STATE: None,
@@ -91,7 +90,7 @@ class TravelingSalesmanVisualization(VisualizationSubscriber):
         self.current_time = time.time()
 
     def _handle_pygame_events(self):
-        exit_on = [pygame.QUIT, pygame.KEYDOWN, pygame.K_ESCAPE]
+        exit_on = [pygame.QUIT, pygame.K_ESCAPE]
         for event in pygame.event.get():
             if event.type in exit_on:
                 sys.exit(0)

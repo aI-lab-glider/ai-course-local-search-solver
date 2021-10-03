@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from genetic_algorithms.problems.base.state import State
-
 TState = TypeVar("TState")
 
 
@@ -11,7 +9,7 @@ class Move(ABC, Generic[TState]):
         self.state = from_state
 
     @abstractmethod
-    def make(self) -> State:
+    def make(self) -> TState:
         """
         Creates a new state as a result of this action on state
         :param state: current state of a problem

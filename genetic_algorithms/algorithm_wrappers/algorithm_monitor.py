@@ -38,6 +38,26 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
         self._best_state = None
         self._start_time = time.monotonic()
         self._iters_from_last_impr = 0
+     
+    
+    def _perform_side_effects(self, model: Model, state: State):
+        self._update_stats(state)
+        self._live.update(self._create_layout(model), refresh=True)
+        time.sleep(self.delay_time)
+
+    def _update_stats(self, state):
+        self._states[PREV_STATE] = self._states[CURR_STATE]
+        self._states[CURR_STATE] = state
+
+        if self._states[BEST_STATE] != self.algorithm.best_state:
+                self._states[BEST_STATE] = self.algorithm.best_state
+                self._iters_from_last_impr = 0
+                        
+        self._stats["best_state_updates_count"] += 1
+        self._stats["active_time"] = round(
+            time.monotonic() - self._start_time, 2)
+        self._iters_from_last_impr += 1
+
 
     def _create_layout(self, model: Model) -> Layout:
         layout = Layout()
@@ -68,6 +88,14 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
             box=box.ASCII,
             height=20)
         return panel
+    
+    def _create_progress_bar(self):
+        completed = self._iters_from_last_impr - 1
+        left = self._algorithm_config.max_steps_without_improvement - completed
+        completed_bar = f'[cyan]{"#" * completed}[/cyan]'
+        arrow = '[cyan3]>[/cyan3]'
+        left_bar = "-" * (left)
+        return f'Steps from last best state change: [{completed_bar}{arrow}{left_bar}]'
 
     def _create_state_column(self) -> Layout:
         layout = Layout()
@@ -77,40 +105,6 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
                       if state is not None]
         )
         return layout
-
-    def _perform_side_effects(self, model: Model, state: State):
-
-        self._update_stats(state)
-        
-        self._live.update(self._create_layout(model), refresh=True)
-        time.sleep(self.delay_time)
-
-    def _update_stats(self, state):
-        self._states[PREV_STATE] = self._states[CURR_STATE]
-        self._states[CURR_STATE] = state
-
-        if self._states[BEST_STATE] != self.algorithm.best_state:
-                self._states[BEST_STATE] = self.algorithm.best_state
-                self._iters_from_last_impr = 0
-                        
-        self._stats["best_state_updates_count"] += 1
-        self._stats["active_time"] = round(
-            time.monotonic() - self._start_time, 2)
-        self._iters_from_last_impr += 1
-
-    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost) -> bool:
-        return {
-            OptimizationStrategy.Min: op.lt,
-            OptimizationStrategy.Max: op.gt,
-        }[self._algorithm_config.optimization_stategy](is_better_cost, is_better_than_cost)
-
-    def _create_progress_bar(self):
-        completed = self._iters_from_last_impr - 1
-        left = self._algorithm_config.max_steps_without_improvement - completed
-        completed_bar = f'[cyan]{"#" * completed}[/cyan]'
-        arrow = '[cyan3]>[/cyan3]'
-        left_bar = "-" * (left)
-        return f'Steps from last best state change: [{completed_bar}{arrow}{left_bar}]'
 
     def _on_solution_found(self, **kwargs):
         self._live.stop()
