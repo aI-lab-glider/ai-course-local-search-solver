@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from genetic_algorithms.algorithms.exceptions import NoSolutionFoundError
 from typing import Union
-from genetic_algorithms.algorithms import Algorithm
+from genetic_algorithms.algorithms import SubscribableAlgorithm
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems.base.model import Model
 
 
-class FirstChoiceHillClimbing(Algorithm):
+class FirstChoiceHillClimbing(SubscribableAlgorithm):
     """
     Implementaion of stochastic local search. 
 

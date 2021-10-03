@@ -25,10 +25,12 @@ class TravelingSalesmanMoveGenerator(MoveGenerator):
 class TwoOpt(TravelingSalesmanMoveGenerator):
 
     def _is_depot_start(self, move: SwapEdges):
-        return move.a.start != self._depot_idx
+        new_state = move.make()
+        return new_state.route[0] == self._depot_idx
 
     def _is_depot_end(self, move: SwapEdges):
-        return move.b.end != self._depot_idx
+        new_state = move.make()
+        return new_state.route[-1] == self._depot_idx
 
     def _satisfies_constraints(self, move: SwapEdges):
         constraints = [self._is_depot_start, self._is_depot_end]

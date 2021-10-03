@@ -6,12 +6,12 @@ from inspect import signature
 from typing import Type, Union
 
 import click
-from genetic_algorithms.algorithm_wrappers import (AlgorithmSubscriber,
+from genetic_algorithms.algorithm_wrappers import (AlgorithmNextStateSubscriber,
                                                    VisualizationSubscriber)
 from genetic_algorithms.algorithm_wrappers.algorithm_monitor import \
     AlgorithmMonitor
-from genetic_algorithms.algorithms import Algorithm
-from genetic_algorithms.algorithms.algorithm import AlgorithmConfig
+from genetic_algorithms.algorithms import SubscribableAlgorithm
+from genetic_algorithms.algorithms.algorithm import AlgorithmConfig, AlgorithmHook
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 from genetic_algorithms.problems.base.model import Model
 from genetic_algorithms.solvers import LocalSearchSolver
@@ -125,14 +125,14 @@ def get_benchmark_names_for_model(model_type: Type[Model]):
     return os.listdir(model_type.get_path_to_benchmarks())
 
 
-def create_algorithm(problem_model: Model, options) -> Algorithm:
+def create_algorithm(problem_model: Model, options) -> SubscribableAlgorithm:
     config = options['algorithm']
     console.print("Configuring algorithm", style="bold blue")
 
     algo_name = prompt_if_not_exists(config, 'name', {
-        'type': click.Choice(list(Algorithm.algorithms.keys()), case_sensitive=True)
+        'type': click.Choice(list(SubscribableAlgorithm.algorithms.keys()), case_sensitive=True)
     })
-    algorithm_type = Algorithm.algorithms[algo_name]
+    algorithm_type = SubscribableAlgorithm.algorithms[algo_name]
 
     config_type = signature(algorithm_type).parameters['config'].annotation
     config = create_dataclass(config, config_type)
@@ -144,29 +144,26 @@ def create_algorithm(problem_model: Model, options) -> Algorithm:
     return algorithm
 
 
-def add_alrogithm_subscribers(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmSubscriber]:
+def add_alrogithm_subscribers(options, problem_model: Model, algorithm: SubscribableAlgorithm):
     if options.setdefault('visualization', False):
-        algorithm = create_visualization_wrapper(
+        add_visualization_subscriber(
             options, problem_model, algorithm)
     if options.setdefault('algorithm_monitor', False):
-        algorithm = create_solution_monitor_wrapper(options,
-                                                    algorithm)
-    return algorithm
+        add_solution_monitor_subsriber(options, algorithm)
 
 
-def create_visualization_wrapper(options, problem_model: Model, algorithm: Algorithm) -> Union[Algorithm, AlgorithmSubscriber]:
-    visualization_wrapper = VisualizationSubscriber.visualizations.setdefault(type(
+def add_visualization_subscriber(options, problem_model: Model, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmNextStateSubscriber]:
+    visualization = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
-    if visualization_wrapper:
+    if visualization:
         solver_config = SolverConfig(**options['solver_config'])
-        vw = visualization_wrapper(
+        visualization = visualization(
             algorithm=algorithm, config=solver_config)
-        # TODO: make it better
-        algorithm.visualization = vw
-    return algorithm
+        algorithm.subscribe_to_neinghbour_enter(visualization)
 
 
-def create_solution_monitor_wrapper(options, algorithm: Algorithm):
+def add_solution_monitor_subsriber(options, algorithm: SubscribableAlgorithm):
     config = options['algorithm']
     algorithm_config = create_dataclass(config, AlgorithmConfig)
-    return AlgorithmMonitor(config=algorithm_config, algorithm=algorithm)
+    algorithm_monitor = AlgorithmMonitor(config=algorithm_config, algorithm=algorithm)
+    algorithm.subsribe_to_state_update(algorithm_monitor) 

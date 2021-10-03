@@ -32,17 +32,15 @@ class TravelingSalesmanProblem(Model):
         return self._points
 
     def _find_initial_solution(self) -> TravelingSalesmanState:
-        naive_circle = list(
-            range(0, len(self._points))) + [self.depot_idx]
+        naive_circle = [self.depot_idx] + [idx for idx in range(len(self._points)) if idx != self.depot_idx] + [self.depot_idx]
         return TravelingSalesmanState(model=self, route=naive_circle)
 
+    # TODO: Add tests
     def cost_for(self, state: TravelingSalesmanState) -> int:
         route = [self._points[i]
-                 for i in state.route if i != self.depot_idx]
-        depot = self._points[self.depot_idx]
-        return int(Salesman.from_point(depot)
+                 for i in state.route]
+        return int(Salesman.from_point(route[0])
                            .walk_route(route)
-                           .walk_to(depot)
                            .travelled_distance)
 
     @classmethod
@@ -53,9 +51,10 @@ class TravelingSalesmanProblem(Model):
             def line_to_point(line: str):
                 (x, y) = map(int, line.split(sep=' '))
                 return Point(x, y)
-            points = map(line_to_point, [line for line in benchmark_file])
+            points = list(map(line_to_point, [line for line in benchmark_file]))
             return TravelingSalesmanProblem(
                 points=list(points),
                 depot_idx=depot_idx,
                 move_generator_name=move_generator_name
             )
+

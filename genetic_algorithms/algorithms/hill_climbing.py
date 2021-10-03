@@ -1,10 +1,10 @@
 from typing import Union
-from genetic_algorithms.algorithms import Algorithm
+from genetic_algorithms.algorithms import SubscribableAlgorithm
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems.base.model import Model
 
 
-class HillClimbing(Algorithm):
+class HillClimbing(SubscribableAlgorithm):
     """
     Implementation of basic hill climbing (also known under the name "greedy local search")
 
@@ -15,12 +15,8 @@ class HillClimbing(Algorithm):
     def _find_next_state(self, model: Model, state: State) -> Union[State, None]:
         best_state = state
         best_state_cost = model.cost_for(state)
-        for move in model.move_generator.available_moves(state):
-            # TODO: change avaialble moves into next states. Change move_generator into neinghborhood generator.
-            new_state = move.make()
-            new_state_cost = model.cost_for(new_state)
-            self.visualize(model, new_state, from_state=state)
+        for neighbour in self._get_neighbours(model, state):
+            new_state_cost = model.cost_for(neighbour)
             if self._is_cost_better(new_state_cost, best_state_cost):
-                (best_state, best_state_cost) = (new_state, new_state_cost)
-        print(self._is_in_optimal_state())
+                (best_state, best_state_cost) = (neighbour, new_state_cost)
         return best_state if not self._is_in_optimal_state() else None

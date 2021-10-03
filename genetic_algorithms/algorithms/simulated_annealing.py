@@ -1,5 +1,5 @@
 from typing import Union
-from genetic_algorithms.algorithms import Algorithm, AlgorithmConfig
+from genetic_algorithms.algorithms import SubscribableAlgorithm, AlgorithmConfig
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems.base.model import Model
 from random import choices
@@ -16,7 +16,7 @@ class SimulatedAnnealingConfig(AlgorithmConfig):
 DEFAULT_CONFIG = SimulatedAnnealingConfig()
 
 
-class SimulatedAnnealing(Algorithm):
+class SimulatedAnnealing(SubscribableAlgorithm):
     """
     Implementation of the simulated annealing algorithm.
 

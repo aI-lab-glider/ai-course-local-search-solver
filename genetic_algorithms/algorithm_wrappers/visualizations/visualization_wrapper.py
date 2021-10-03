@@ -1,11 +1,12 @@
 
 from abc import abstractmethod
 from typing import Type
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmSubscriber
+from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmNextNeingbourSubscriber, AlgorithmNextStateSubscriber
 from genetic_algorithms.problems import Model
+from genetic_algorithms.problems.base.state import State
 
 
-class VisualizationSubscriber(AlgorithmSubscriber):
+class VisualizationSubscriber(AlgorithmNextNeingbourSubscriber):
     """
     Provides visualization to algorithm solutions.
     """

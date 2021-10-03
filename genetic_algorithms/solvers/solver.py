@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from genetic_algorithms.models.next_state_provider import NextStateProvider
+from genetic_algorithms.models.next_state_provider import Algorithm
 from genetic_algorithms.problems.base import Model, State
 from dataclasses import dataclass
 from time import time
@@ -35,7 +35,7 @@ class Solver(ABC):
         return self.wall_time() > self.time_limit
 
     @abstractmethod
-    def solve(self, model: Model, algorithm: NextStateProvider) -> State:
+    def solve(self, model: Model, algorithm: Algorithm) -> State:
         """
         Applies some logic to solve a given problem
         """

@@ -4,10 +4,11 @@ from math import inf
 from pathlib import Path
 
 import genetic_algorithms
+from genetic_algorithms.algorithms.algorithm import SubscribableAlgorithm
 import pygame
 from genetic_algorithms.algorithm_wrappers.visualizations.visualization_wrapper import \
     VisualizationSubscriber
-from genetic_algorithms.models.next_state_provider import NextStateProvider
+from genetic_algorithms.models.next_state_provider import Algorithm
 from genetic_algorithms.problems.traveling_salesman_problem.problem_model import \
     TravelingSalesmanProblem
 from genetic_algorithms.problems.traveling_salesman_problem.state import \
@@ -33,7 +34,7 @@ class TravelingSalesmanVisualization(VisualizationSubscriber):
         return TravelingSalesmanProblem
 
 
-    def __init__(self, config: SolverConfig, algorithm: NextStateProvider, **kwargs):
+    def __init__(self, config: SolverConfig, algorithm: SubscribableAlgorithm, **kwargs):
         super().__init__(algorithm, **kwargs)
         self._init_pygame()
         self._init_state(config)
@@ -71,29 +72,23 @@ class TravelingSalesmanVisualization(VisualizationSubscriber):
         }
 
 
-    
-    def _perform_side_effects(self, model: TravelingSalesmanProblem, state: TravelingSalesmanState, from_state: TravelingSalesmanState):
-        self._update_states(model, state, from_state)
+    def _perform_side_effects(self, model: TravelingSalesmanProblem, from_state: TravelingSalesmanState, next_neighbour: TravelingSalesmanState):
+        self._update_states(next_neighbour, from_state)
         self._update_statistics()
         self._handle_pygame_events()
         self._draw(model)
         time.sleep(.01)
 
-    def _update_states(self, model: TravelingSalesmanProblem, new_state: TravelingSalesmanState, from_state: TravelingSalesmanState):
+    def _update_states(self, new_state: TravelingSalesmanState, from_state: TravelingSalesmanState):
         self.states = {
-            **self.states,
+            BEST_STATE: self.algorithm.best_state,
             FROM_STATE: from_state,
             CURR_NEINGHBOR: new_state
         }
-        # TODO: should depdent on optimization strategy
-        if self.states[BEST_STATE] is None or model.cost_for(new_state) <= model.cost_for(self.states[BEST_STATE]):
-            self.states[BEST_STATE] = new_state
     
     def _update_statistics(self):
         self.explored_states_count += 1
         self.current_time = time.time()
-
-
 
     def _handle_pygame_events(self):
         exit_on = [pygame.QUIT, pygame.KEYDOWN, pygame.K_ESCAPE]

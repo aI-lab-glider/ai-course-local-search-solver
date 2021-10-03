@@ -1,11 +1,10 @@
 from abc import abstractmethod
-from typing import Type, Union
-from genetic_algorithms.algorithms.algorithm import Algorithm
+from genetic_algorithms.models.next_state_provider import Algorithm
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems import Model
 
 
-class AlgorithmSubscriber:
+class AlgorithmNextStateSubscriber:
     """
     Allows to add some side effects to algorithm.
     """
@@ -19,15 +18,17 @@ class AlgorithmSubscriber:
         Performs logic related to the plugin.
         """
 
-    def update(self, model: Model, state: State) -> Union[State, None]:
-        next_state = self.algorithm.next_state(model, state)
-        if next_state:
-            self._perform_side_effects(model=model, state=next_state)
+    def notify(self, model: Model, state: State, **kwargs) -> None:
+        if state:
+            self._perform_side_effects(model, state, **kwargs)
         else:
             self._on_solution_found(state=state)
-        return next_state
 
     def _on_solution_found(self, state: State):
         """
         Hook that is called when solution is found.
         """
+
+class AlgorithmNextNeingbourSubscriber(AlgorithmNextStateSubscriber):
+    def notify(self, model: Model, from_state: State, next_neighbour: State):
+        super().notify(model, from_state, next_neighbour=next_neighbour)    
