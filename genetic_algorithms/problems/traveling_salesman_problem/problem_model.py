@@ -21,7 +21,7 @@ class TravelingSalesmanProblem(Model):
                  depot_idx: int,
                  move_generator_name: str):
         self._points: List[Point] = points
-        self._depot_idx = depot_idx
+        self.depot_idx = depot_idx
         initial_solution = self._find_initial_solution()
         move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name](
             depot_idx)
@@ -33,13 +33,13 @@ class TravelingSalesmanProblem(Model):
 
     def _find_initial_solution(self) -> TravelingSalesmanState:
         naive_circle = list(
-            range(0, len(self._points))) + [self._depot_idx]
+            range(0, len(self._points))) + [self.depot_idx]
         return TravelingSalesmanState(model=self, route=naive_circle)
 
     def cost_for(self, state: TravelingSalesmanState) -> int:
         route = [self._points[i]
-                 for i in state.route if i != self._depot_idx]
-        depot = self._points[self._depot_idx]
+                 for i in state.route if i != self.depot_idx]
+        depot = self._points[self.depot_idx]
         return int(Salesman.from_point(depot)
                            .walk_route(route)
                            .walk_to(depot)

@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from re import M
+from genetic_algorithms.algorithm_wrappers.visualizations.visualization_wrapper import VisualizationWrapper
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 from typing import Type, Union
 from genetic_algorithms.problems.base.model import Model
@@ -31,11 +32,12 @@ class Algorithm(NextStateProvider):
     """
     algorithms = {}
 
-    def __init__(self, config: AlgorithmConfig = None):
+    def __init__(self, config: AlgorithmConfig = None, visualization: VisualizationWrapper=None):
         config = config or DEFAULT_CONFIG
         self.config = config
         self._steps_from_last_state_update = 0
         self._best_cost, self._best_state = float('inf'), None
+        self.visualization = visualization
 
     def __init_subclass__(cls) -> None:
         Algorithm.algorithms[camel_to_snake(cls.__name__)] = cls
@@ -68,3 +70,9 @@ class Algorithm(NextStateProvider):
 
     def _is_in_optimal_state(self):
         return self._steps_from_last_state_update >= self.config.max_steps_without_improvement
+
+
+    # TODO: make it better
+    def visualize(self, model, state):
+        if self.visualization:
+            self.visualization._perform_side_effects(model, state)

@@ -158,8 +158,10 @@ def create_visualization_wrapper(options, problem_model: Model, algorithm: Algor
         problem_model), None)
     if visualization_wrapper:
         solver_config = SolverConfig(**options['solver_config'])
-        algorithm = visualization_wrapper(
+        vw = visualization_wrapper(
             algorithm=algorithm, config=solver_config)
+        # TODO: make it better
+        algorithm.visualization = vw
     return algorithm
 
 
