@@ -18,10 +18,22 @@ class SwapTwoEdges(Move[TravelingSalesmanState]):
 class SwapThreeEdges(Move[TravelingSalesmanState]):
     def __init__(self, from_state: TravelingSalesmanState, a: Edge, b: Edge, c: Edge):
         super().__init__(from_state)
-        (self.a, self.b, self.c) = a, b, c
+        self.edges = [a, b, c]
 
     def make(self) -> TravelingSalesmanState:
         indicies = [*self.state.route]
-        indicies[self.a.end], indicies[self.b.end], indicies[self.c.end] = indicies[self.c.end], indicies[self.a.end], indicies[self.b.end]
+        starts = [edge.start for edge in self.edges]
+        ends = [edge.end for edge in self.edges]
+
+        for _ in range(len(self.edges)):
+            loops_count = sum(starts[i] == ends[i] for i in range(len(self.edges)))
+            ends =  ends[1:] + [ends[0]]
+            if loops_count == 0:
+                break
+        
+        for i in range(len(self.edges)):
+            start, end = starts[i], ends[i]
+            indicies[start+1], indicies[end] = indicies[end], indicies[start+1]
+
         return TravelingSalesmanState(model=self.state.model, route=indicies)
 

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any  # TODO: Fix cyclic import and add Model import
+from typing import Any
 
 
 @dataclass

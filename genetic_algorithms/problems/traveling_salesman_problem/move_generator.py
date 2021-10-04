@@ -43,6 +43,7 @@ class KOpt(TravelingSalesmanMoveGenerator):
     
     def random_moves(self, state: TravelingSalesmanState) -> Generator[Move[TravelingSalesmanState], None, None]:
         #TODO Test: should not remove points from state :) 
+        #TODO Test: should be unique points
         def new_move() -> Move[TravelingSalesmanState]: 
             edges = list(state.edges)
             return self.move(state, *random.sample(edges, self.k))
