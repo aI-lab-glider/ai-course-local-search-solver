@@ -35,7 +35,7 @@ class SubscribableAlgorithm(Algorithm):
         super().__init__()
         config = config or DEFAULT_CONFIG
         self.config = config
-        self._steps_from_last_state_update = 0
+        self.steps_from_last_state_update = 0
         self.best_cost, self.best_state = float('inf') if config.optimization_stategy == OptimizationStrategy.Min else float('-inf'), None
         self._next_state_subscribers: List[AlgorithmNextStateSubscriber] = []
         self._next_neighbour_subsribers: List[AlgorithmNextNeingbourSubscriber] = []
@@ -69,13 +69,13 @@ class SubscribableAlgorithm(Algorithm):
         next_state_cost = model.cost_for(new_state)
         if self._is_cost_better_or_same(next_state_cost, self.best_cost) and self.best_state != new_state:
             self.best_cost, self.best_state = next_state_cost, new_state
-            self._steps_from_last_state_update = 0
+            self.steps_from_last_state_update = 0
         else:
-            self._steps_from_last_state_update += 1
+            self.steps_from_last_state_update += 1
 
 
     def _is_in_optimal_state(self):
-        return self._steps_from_last_state_update >= self.config.max_steps_without_improvement
+        return self.steps_from_last_state_update >= self.config.max_steps_without_improvement
 
     def _on_next_state(self, model: Model, next_state: State):
         """Called when algorithm find new best state"""
@@ -97,8 +97,9 @@ class SubscribableAlgorithm(Algorithm):
     
     def _get_neighbours(self, model: Model, state: State, is_stohastic=False) -> Generator[State, None, None]:
         move_gen = model.move_generator.available_moves if not is_stohastic else model.move_generator.random_moves
-        for move in move_gen(state):
-            neighbour = move.make() 
-            self._on_next_neighbour(model, state, neighbour)
-            yield neighbour
+        while True:
+            for move in move_gen(state):
+                neighbour = move.make() 
+                self._on_next_neighbour(model, state, neighbour)
+                yield neighbour
 

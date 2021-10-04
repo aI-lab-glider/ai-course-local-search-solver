@@ -5,7 +5,7 @@ from typing import Any
 
 @dataclass
 class State(ABC):
-    model: Any
+    model: Any #TODO remove
 
     @abstractmethod
     def __str__(self) -> str:
@@ -17,4 +17,10 @@ class State(ABC):
     def __eq__(self, other):
         """
         Compares current states to another state.
+        """
+
+    @abstractmethod
+    def shuffle(self) -> 'State':
+        """
+        Shuffles state and returned an updated one
         """

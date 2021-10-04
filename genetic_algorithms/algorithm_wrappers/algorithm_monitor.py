@@ -51,12 +51,12 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
 
         if self._states[BEST_STATE] != self.algorithm.best_state:
                 self._states[BEST_STATE] = self.algorithm.best_state
-                self._iters_from_last_impr = 0
-                        
-        self._stats["best_state_updates_count"] += 1
+                self._iters_from_last_impr = self.algorithm.steps_from_last_state_update        
+                self._stats["best_state_updates_count"] += 1
+
         self._stats["active_time"] = round(
             time.monotonic() - self._start_time, 2)
-        self._iters_from_last_impr += 1
+        self._iters_from_last_impr = self.algorithm.steps_from_last_state_update
 
 
     def _create_layout(self, model: Model) -> Layout:
