@@ -17,6 +17,8 @@ from rich.table import Table
 CURR_STATE = 'current_state'
 PREV_STATE = 'previous_state'
 BEST_STATE = 'best_state'
+
+
 class AlgorithmMonitor(AlgorithmNextStateSubscriber):
     delay_time = 0.01
 
@@ -35,11 +37,9 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
             CURR_STATE: None,
             PREV_STATE: None
         }
-        self._best_state = None
         self._start_time = time.monotonic()
         self._iters_from_last_impr = 0
-     
-    
+
     def _perform_side_effects(self, model: Model, state: State):
         self._update_stats(state)
         self._live.update(self._create_layout(model), refresh=True)
@@ -50,14 +50,13 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
         self._states[CURR_STATE] = state
 
         if self._states[BEST_STATE] != self.algorithm.best_state:
-                self._states[BEST_STATE] = self.algorithm.best_state
-                self._iters_from_last_impr = self.algorithm.steps_from_last_state_update        
-                self._stats["best_state_updates_count"] += 1
+            self._states[BEST_STATE] = self.algorithm.best_state
+            self._iters_from_last_impr = self.algorithm.steps_from_last_state_update
+            self._stats["best_state_updates_count"] += 1
 
         self._stats["active_time"] = round(
             time.monotonic() - self._start_time, 2)
         self._iters_from_last_impr = self.algorithm.steps_from_last_state_update
-
 
     def _create_layout(self, model: Model) -> Layout:
         layout = Layout()
@@ -72,7 +71,7 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
         for stat_name, value in self._stats.items():
             stat_name = stat_name.capitalize().replace('_', ' ')
             rows.append(f'[cyan]{stat_name}[/cyan]: {value}')
-        
+
         for state_name, state in self._states.items():
             if state is None:
                 continue
@@ -88,7 +87,7 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
             box=box.ASCII,
             height=20)
         return panel
-    
+
     def _create_progress_bar(self):
         completed = self._iters_from_last_impr - 1
         left = self._algorithm_config.max_steps_without_improvement - completed
@@ -101,8 +100,8 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
         layout = Layout()
         layout.split_column(
             *[Panel(str(state), title=name.capitalize().replace("_", " "), box=box.ASCII, height=5)
-                     for name, state in self._states.items()
-                      if state is not None]
+              for name, state in self._states.items()
+              if state is not None]
         )
         return layout
 

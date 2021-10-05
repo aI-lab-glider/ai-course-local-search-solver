@@ -2,10 +2,10 @@
     "problem": {
         "name": "traveling_salesman_problem",
         "benchmark": "tsp_for_visualization_1",
-        "move_generator": "three_opt"
+        "move_generator": "two_opt"
     },
     "algorithm": {
-        "name": "simulated_annealing",
+        "name": "hill_climbing",
         "max_steps_without_improvement": 100,
         "optimization_stategy": "min",
         "initial_temperature": 1000,

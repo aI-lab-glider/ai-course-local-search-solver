@@ -21,10 +21,10 @@ from rich.console import Console
 # TODO
 # [x] Add reference config.
 # [x] Add prefect solution monitor
-# [] Make perfect TSP:
-# [] Add new move generators
-# [] Add algorithms logic
-# [] Add tests
+# [x] Make perfect TSP:
+# [x] Add new move generators
+# [x] Add algorithms logic
+# [x] Add tests
 
 console = Console()
 pretty.install()
@@ -33,7 +33,7 @@ pretty.install()
 @click.command('solve')
 @click.option('-c', '--config_file', type=click.Path(readable=True, exists=True), help='File that provides configuration for run')
 @click.option('-v', '--visualization', is_flag=True)
-@click.option('-s', '--solution_monitor', is_flag=True)
+@click.option('-m', '--algorithm_monitor', is_flag=True)
 def solve(config_file, **cli_options):
     """
     Solves a problem based on config file or cli options. 
@@ -137,7 +137,7 @@ def create_algorithm(problem_model: Model, options) -> SubscribableAlgorithm:
     config = create_dataclass(config, config_type)
 
     algorithm = algorithm_type(config)
-    
+
     add_alrogithm_subscribers(
         options, problem_model, algorithm)
     return algorithm
@@ -146,23 +146,23 @@ def create_algorithm(problem_model: Model, options) -> SubscribableAlgorithm:
 def add_alrogithm_subscribers(options, problem_model: Model, algorithm: SubscribableAlgorithm):
     if options.setdefault('visualization', False):
         add_visualization_subscriber(
-            options, problem_model, algorithm)
+            problem_model, algorithm)
     if options.setdefault('algorithm_monitor', False):
-        add_solution_monitor_subsriber(options, algorithm)
+        add_algorithm_monitor_subsriber(options, algorithm)
 
 
-def add_visualization_subscriber(options, problem_model: Model, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmNextStateSubscriber]:
+def add_visualization_subscriber(problem_model: Model, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmNextStateSubscriber]:
     visualization = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
     if visualization:
-        solver_config = SolverConfig(**options['solver_config'])
         visualization = visualization(
-            algorithm=algorithm, config=solver_config)
+            algorithm=algorithm)
         algorithm.subscribe_to_neinghbour_enter(visualization)
 
 
-def add_solution_monitor_subsriber(options, algorithm: SubscribableAlgorithm):
+def add_algorithm_monitor_subsriber(options, algorithm: SubscribableAlgorithm):
     config = options['algorithm']
     algorithm_config = create_dataclass(config, AlgorithmConfig)
-    algorithm_monitor = AlgorithmMonitor(config=algorithm_config, algorithm=algorithm)
-    algorithm.subsribe_to_state_update(algorithm_monitor) 
+    algorithm_monitor = AlgorithmMonitor(
+        config=algorithm_config, algorithm=algorithm)
+    algorithm.subsribe_to_state_update(algorithm_monitor)
