@@ -1,8 +1,8 @@
 {
     "problem": {
-        "name": "traveling_salesman_problem",
-        "benchmark": "tsp_for_visualization_1",
-        "move_generator": "two_opt"
+        "name": "graph_coloring_problem",
+        "benchmark": "gc_1",
+        "move_generator": "change_color_mg"
     },
     "algorithm": {
         "name": "hill_climbing",

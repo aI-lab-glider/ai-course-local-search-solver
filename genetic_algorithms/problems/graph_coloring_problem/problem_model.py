@@ -20,12 +20,9 @@ class GraphColoringProblem(Model):
         return GraphColoringMoveGenerator.move_generators.keys()
 
     def __init__(self, edges: List[Edge], move_generator_name: str):
-        # ----
-
         self._edges: List[Edge] = edges
         self.graph: Dict[int, Set[int]] = self._create_graph()
         self.n_vertices = len(self.graph)
-        # ---
         move_generator = GraphColoringMoveGenerator.move_generators[move_generator_name](
             self.n_vertices)
         initial_solution = self._find_initial_solution()

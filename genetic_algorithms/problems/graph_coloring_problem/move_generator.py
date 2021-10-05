@@ -18,7 +18,7 @@ class GraphColoringMoveGenerator(MoveGenerator):
         self.n_vertices = n_vertices
 
 
-class ChangeColorMG(GraphColoringMoveGenerator):
+class ChangeColorMg(GraphColoringMoveGenerator):
 
     def random_moves(self, state: GraphColoringState) -> Generator[ChangeColor, None, None]:
         while True:
