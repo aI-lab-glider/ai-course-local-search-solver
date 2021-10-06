@@ -19,6 +19,7 @@ import time
 
 
 ROAD_COLOR = (0, 150, 0)
+PIC_SIZE = 30
 
 
 class TravelingSalesmanVisualization(VisualizationSubscriber):
@@ -42,13 +43,13 @@ class TravelingSalesmanVisualization(VisualizationSubscriber):
         x = x * (screen.get_width() / (max_x - min_x))
         y = y * (screen.get_height() / (max_y - min_y))
         if x == 0:
-            x += 10
+            x += PIC_SIZE / 2
         if y == 0:
-            y += 10
+            y += PIC_SIZE / 2
         if x == screen.get_width():
-            x -= 10
+            x -= PIC_SIZE / 2
         if y == screen.get_height():
-            y -= 10
+            y -= PIC_SIZE / 2
         return x, y
 
     def _find_extreme(self, model: TravelingSalesmanProblem):

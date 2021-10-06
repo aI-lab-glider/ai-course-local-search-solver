@@ -17,6 +17,10 @@ FROM_STATE = 'from_state'
 STATS = 'stats_info'
 
 
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+
+
 class VisualizationSubscriber(AlgorithmSubscriber):
     """
     Provides visualization to algorithm solutions.
@@ -24,6 +28,8 @@ class VisualizationSubscriber(AlgorithmSubscriber):
     visualizations = {}
     _BG_COLOR = (255, 255, 255)
     _FONT_COLOR = (0, 0, 0)
+    _BUTTON_SIZE = (150, 75)
+    _SCREEN_SIZE = (800, 800)
 
     def __init__(self, algorithm: SubscribableAlgorithm, **kwargs):
         self._init_pygame()
@@ -44,20 +50,21 @@ class VisualizationSubscriber(AlgorithmSubscriber):
     def _init_pygame(self):
         pygame.init()
         pygame.font.init()
-        self.main_screen = pygame.display.set_mode((800, 800))
-        self.canvas = pygame.Surface((800, 800))
+        self.main_screen = pygame.display.set_mode(self._SCREEN_SIZE)
+        self.canvas = pygame.Surface(self._SCREEN_SIZE)
         self.screen_coords = {
             FROM_STATE: (0, 0),
-            CURR_NEINGHBOR: (400, 0),
-            BEST_STATE: (0, 400),
-            STATS: (400, 400)
+            CURR_NEINGHBOR: (self._SCREEN_SIZE[0]/2, 0),
+            BEST_STATE: (0, self._SCREEN_SIZE[1]/2),
+            STATS: (self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)
         }
         self.state_screens = {
-            BEST_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[BEST_STATE], 400, 400)),
-            CURR_NEINGHBOR: self.canvas.subsurface(pygame.Rect(*self.screen_coords[CURR_NEINGHBOR], 400, 400)),
-            FROM_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[FROM_STATE], 400, 400)),
-            STATS: self.canvas.subsurface(pygame.Rect(*self.screen_coords[STATS], 400, 400)),
+            BEST_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[BEST_STATE], self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)),
+            CURR_NEINGHBOR: self.canvas.subsurface(pygame.Rect(*self.screen_coords[CURR_NEINGHBOR], self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)),
+            FROM_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[FROM_STATE], self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)),
+            STATS: self.canvas.subsurface(pygame.Rect(*self.screen_coords[STATS], self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)),
         }
+        self._is_freezed = False
 
     def _init_state(self):
         self.explored_states_count = 0
@@ -93,10 +100,14 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         for event in pygame.event.get():
             if event.type in exit_on:
                 sys.exit(0)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self._is_button_clicked((pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])):
+                    self._on_button_clicked()
 
     def _draw(self, model):
         self._draw_states(model)
         self._draw_information(model)
+        self._draw_button()
         pygame.display.flip()
 
     def _draw_states(self, model: Problem):
@@ -146,7 +157,42 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         for idx, item in enumerate(stats.items()):
             stat_name, stat_value = item
             self._draw_text(screen, f'{stat_name.replace("_", " ")}: {stat_value}'.capitalize(),
-                                    ((screen.get_width() - screen.get_width()/2),
-                                     idx * (font_size + padding)),
+                                    ((screen.get_width()/2) - 4 * font_size,
+                                     idx * (font_size + padding) + font_size),
                                     font_size)
+
         self.main_screen.blit(screen, screen_coords)
+
+    def _draw_button(self):
+        screen = self.state_screens[STATS]
+        rect = pygame.Rect(screen.get_width() / 3, screen.get_height() /
+                           2, self._BUTTON_SIZE[0], self._BUTTON_SIZE[1])
+        if self._is_freezed:
+            pygame.draw.rect(screen, RED, rect)
+        else:
+            pygame.draw.rect(screen, GREEN, rect)
+
+        pygame.draw.rect(screen, self._FONT_COLOR, rect, 3)
+        self.main_screen.blit(screen, self.screen_coords[STATS])
+        pygame.display.flip()
+
+    def _is_button_clicked(self, position):
+        screen = self.state_screens[STATS]
+        return screen.get_width() / 3 <= position[0] - self._SCREEN_SIZE[0]/2 <= screen.get_width() / 3 + self._BUTTON_SIZE[0] and \
+            screen.get_height()/2 <= position[1] - self._SCREEN_SIZE[1] / \
+            2 <= screen.get_height()/2 + self._BUTTON_SIZE[1]
+
+    def _on_button_clicked(self):
+        self._is_freezed = not self._is_freezed
+        self._draw_button()
+        if self._is_freezed:
+            self._freeze_screen()
+
+    def _freeze_screen(self):
+        while True:
+            self._handle_pygame_events()
+            if not self._is_freezed:
+                break
+
+    def on_solution(self, **kwargs):
+        self._freeze_screen()

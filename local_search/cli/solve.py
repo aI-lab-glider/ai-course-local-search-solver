@@ -27,7 +27,7 @@ from rich.console import Console
 # [x] Rename things
 # [x] Remove useless methods and fields
 # [x] Add visualization from GC
-# [] Move pause button
+# [x] Add pause button
 # [] Move visualization params to config
 # [] Add documentation
 # [] Add tests
