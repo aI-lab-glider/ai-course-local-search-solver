@@ -31,7 +31,8 @@ pretty.install()
 
 
 @click.command('solve')
-@click.option('-c', '--config_file', type=click.Path(readable=True, exists=True), help='File that provides configuration for run')
+@click.option('-c', '--config_file', type=click.Path(readable=True, exists=True),
+              help='File that provides configuration for run')
 @click.option('-v', '--visualization', is_flag=True)
 @click.option('-m', '--algorithm_monitor', is_flag=True)
 def solve(config_file, **cli_options):
@@ -151,12 +152,13 @@ def add_alrogithm_subscribers(options, problem_model: Model, algorithm: Subscrib
         add_algorithm_monitor_subsriber(options, algorithm)
 
 
-def add_visualization_subscriber(problem_model: Model, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmNextStateSubscriber]:
+def add_visualization_subscriber(problem_model: Model, algorithm: SubscribableAlgorithm) -> Union[
+    SubscribableAlgorithm, AlgorithmNextStateSubscriber]:
     visualization = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
     if visualization:
-        visualization = visualization(
-            algorithm=algorithm)
+        visualization = visualization(model=problem_model,
+                                      algorithm=algorithm)
         algorithm.subscribe_to_neinghbour_enter(visualization)
 
 
