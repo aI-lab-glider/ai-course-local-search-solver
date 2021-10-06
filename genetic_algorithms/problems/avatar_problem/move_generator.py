@@ -4,7 +4,7 @@ from genetic_algorithms.problems.avatar_problem.moves import AddTriangle
 from genetic_algorithms.problems.avatar_problem.models.vertex import Vertex
 from genetic_algorithms.problems.avatar_problem.models.color import Color
 from typing import Tuple, Generator
-import random
+from random import randint
 
 
 class AvatarMoveGenerator(MoveGenerator):
@@ -13,8 +13,8 @@ class AvatarMoveGenerator(MoveGenerator):
         self.offset = self.im_size[0]//5
 
     def _generate_vertex(self) -> Vertex:
-        return Vertex(x=random.randint(0-self.offset, self.im_size[0]+self.offset),
-                      y=random.randint(0-self.offset, self.im_size[1]+self.offset))
+        return Vertex(x=randint(0-self.offset, self.im_size[0]+self.offset),
+                      y=randint(0-self.offset, self.im_size[1]+self.offset))
 
     def _generate_move(self, state: AvatarState):
         while True:
@@ -23,10 +23,10 @@ class AvatarMoveGenerator(MoveGenerator):
             yield AddTriangle(state, vertices=vertices, color=color)
 
     def _generate_color(self) -> Color:
-        return Color(R=random.randint(0, 255),
-                     G=random.randint(0, 255),
-                     B=random.randint(0, 255),
-                     A=random.randint(0, 255))
+        return Color(R=randint(0, 255),
+                     G=randint(0, 255),
+                     B=randint(0, 255),
+                     A=randint(0, 255))
 
     def random_moves(self, state: AvatarState) -> Generator[AddTriangle, None, None]:
         return self._generate_move(state)

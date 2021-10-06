@@ -19,6 +19,7 @@ class GraphColoringState(State):
             return False
         return all(ov.color == sv.color for sv, ov in zip(self.coloring, other.coloring))
 
+    # TODO
     def shuffle(self):
         available_colors = {vertex.color for vertex in self.coloring}
         new_coloring = deepcopy(self.coloring)

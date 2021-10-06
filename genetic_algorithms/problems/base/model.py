@@ -18,6 +18,7 @@ class Model(ABC):
     def __init__(self, initial_solution: State, move_generator: MoveGenerator):
         self.initial_solution = initial_solution
         self.move_generator = move_generator
+        # TODO to remove
         self.best_state = initial_solution
 
     def __init_subclass__(cls):

@@ -21,7 +21,7 @@ class TravelingSalesmanMoveGenerator(MoveGenerator):
     def __init_subclass__(cls):
         TravelingSalesmanMoveGenerator.move_generators[camel_to_snake(
             cls.__name__)] = cls
-    
+
     def _is_depot_start(self, move: Move[TravelingSalesmanState]):
         new_state = move.make()
         return new_state.route[0] == self._depot_idx
@@ -40,30 +40,36 @@ class KOpt(TravelingSalesmanMoveGenerator):
         self.k = k
         self.move = move
         super().__init__(**kwargs)
-    
+
     def random_moves(self, state: TravelingSalesmanState) -> Generator[Move[TravelingSalesmanState], None, None]:
-        #TODO Test: should not remove points from state :) 
-        #TODO Test: should be unique points
-        def new_move() -> Move[TravelingSalesmanState]: 
+        # TODO Test: should not remove points from state :)
+        # TODO Test: should be unique points
+        # TODO Add random.seed
+        def new_move() -> Move[TravelingSalesmanState]:
             edges = list(state.edges)
             return self.move(state, *random.sample(edges, self.k))
         while True:
             random_move = new_move()
             if self._satisfies_constraints(random_move):
                 yield random_move
-    
+
     def available_moves(self, state: TravelingSalesmanState) -> Generator[Move[TravelingSalesmanState], None, None]:
         # TODO Add tests
         # TODO consider direction in permutation
-        # TODO points dissapear from state O_O
+        # TODO points dissapear from state. Prevent loops
         return (self.move(state, *edges) for edges in permutations(state.edges, self.k)
                 if self._satisfies_constraints(self.move(state, *edges)))
 
-        
+
 class TwoOpt(KOpt):
     def __init__(self, depot_idx):
         super().__init__(2, SwapTwoEdges, depot_idx=depot_idx)
 
+
 class ThreeOpt(KOpt):
     def __init__(self, depot_idx):
         super().__init__(3, SwapThreeEdges, depot_idx=depot_idx)
+
+# TODO
+# TSP neingbour
+#

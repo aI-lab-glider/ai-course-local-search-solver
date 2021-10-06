@@ -16,7 +16,7 @@ class FirstChoiceHillClimbing(SubscribableAlgorithm):
     def _find_next_state(self, model: Model, state: State) -> Union[State, None]:
         cost_to_outperform = model.cost_for(state)
         best_state = state
-        for neingbour in self._get_neighbours(model, state):
+        for neingbour in self._get_neighbours(model, state, True):
             new_cost = model.cost_for(neingbour)
             if self._is_cost_strictly_better(new_cost, cost_to_outperform):
                 best_state = neingbour

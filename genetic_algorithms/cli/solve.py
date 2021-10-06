@@ -19,12 +19,11 @@ from rich import pretty
 from rich.console import Console
 
 # TODO
-# [x] Add reference config.
-# [x] Add prefect solution monitor
-# [x] Make perfect TSP:
-# [x] Add new move generators
-# [x] Add algorithms logic
-# [x] Add tests
+# [] Make Avatars compatible
+# [] Change subscription logic
+# [] Renama things
+# [] Remove useless methods
+# [] Add tests
 
 console = Console()
 pretty.install()

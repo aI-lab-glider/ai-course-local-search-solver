@@ -1,3 +1,4 @@
+from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 from genetic_algorithms.problems.base.model import Model
 from genetic_algorithms.problems.avatar_problem.move_generator import AvatarMoveGenerator
 from genetic_algorithms.problems.avatar_problem.state import AvatarState
@@ -7,7 +8,7 @@ from pathlib import Path
 from PIL import Image
 
 
-class AvatarModel(Model):
+class AvatarProblem(Model):
     def __init__(self, reference_image: Image):
         self.reference_image = reference_image
         self._reference_image_data = reference_image.getdata()
@@ -15,6 +16,10 @@ class AvatarModel(Model):
         move_generator = AvatarMoveGenerator(self._image_size)
         initial_solution = self._find_initial_solution()
         super().__init__(initial_solution, move_generator)
+
+    @staticmethod
+    def get_available_move_generation_strategies():
+        return [camel_to_snake(AvatarMoveGenerator.__name__)]
 
     def _find_initial_solution(self) -> AvatarState:
         return AvatarState(model=self, image=Image.new("RGB", self._image_size, "white"))
@@ -30,7 +35,7 @@ class AvatarModel(Model):
                    for y in range(self._image_size[1]) for x in range(self._image_size[0]))
 
     @staticmethod
-    def from_benchmark(benchmark_name: str):
+    def from_benchmark(benchmark_name: str, move_generator_name: str):
         img = Image.open(Path(
             genetic_algorithms.__file__).parent / "problems" / "avatar_problem" / "benchmarks" / benchmark_name)
-        return AvatarModel(img)
+        return AvatarProblem(img)
