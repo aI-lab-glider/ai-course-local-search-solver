@@ -1,15 +1,18 @@
 
-from abc import abstractmethod
-from math import inf
 import sys
 import time
+from abc import abstractmethod
+from dataclasses import dataclass
+from math import inf
 from typing import Type
-from local_search.algorithm_subscribers.algorithm_subscriber import AlgorithmSubscriber
+
+import pygame
+from local_search.algorithm_subscribers.algorithm_subscriber import \
+    AlgorithmSubscriber
+from local_search.algorithms.subscribable_algorithm import \
+    SubscribableAlgorithm
 from local_search.problems import Problem
 from local_search.problems.base.state import State
-import pygame
-from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
-
 
 BEST_STATE = 'best_state'
 CURR_NEINGHBOR = 'curr_neinghbour'
@@ -19,6 +22,11 @@ STATS = 'stats_info'
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+
+
+@dataclass
+class VisualizationSubcriberConfig:
+    min_time_between_steps = 0.01
 
 
 class VisualizationSubscriber(AlgorithmSubscriber):
@@ -31,7 +39,8 @@ class VisualizationSubscriber(AlgorithmSubscriber):
     _BUTTON_SIZE = (150, 75)
     _SCREEN_SIZE = (800, 800)
 
-    def __init__(self, algorithm: SubscribableAlgorithm, **kwargs):
+    def __init__(self, config: VisualizationSubcriberConfig, algorithm: SubscribableAlgorithm, **kwargs):
+        self.config = config
         self._init_pygame()
         self._init_state()
         super().__init__(algorithm, **kwargs)
@@ -81,8 +90,7 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         self._update_statistics()
         self._handle_pygame_events()
         self._draw(model)
-        # TODO move to config
-        time.sleep(.01)
+        time.sleep(self.config.min_time_between_steps)
 
     def _update_states(self, new_state: State, from_state: State):
         self.states = {
@@ -194,5 +202,6 @@ class VisualizationSubscriber(AlgorithmSubscriber):
             if not self._is_freezed:
                 break
 
-    def on_solution(self, **kwargs):
+    def on_solution(self):
+        self._is_freezed = True
         self._freeze_screen()

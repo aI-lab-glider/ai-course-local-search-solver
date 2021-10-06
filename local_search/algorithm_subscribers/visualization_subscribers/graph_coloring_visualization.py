@@ -1,7 +1,7 @@
 from math import sqrt
 from random import randint
 from typing import Tuple
-from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import VisualizationSubscriber
+from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import VisualizationSubcriberConfig, VisualizationSubscriber
 from local_search.problems.graph_coloring_problem.problem import GraphColoringProblem
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
 
@@ -13,8 +13,8 @@ EDGE_COLOR = (0, 0, 0)
 
 class GraphColoringVisualization(VisualizationSubscriber):
 
-    def __init__(self, model: GraphColoringProblem, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, config: VisualizationSubcriberConfig, model: GraphColoringProblem, **kwargs):
+        super().__init__(config=config, **kwargs)
         self._available_colors = None
         self.coords = self._generate_coords(model)
 

@@ -57,6 +57,8 @@ class SubscribableAlgorithm(Algorithm):
         if next_state:
             self._update_algorithm_state(model, next_state)
             self._on_next_state(model, next_state)
+        else:
+            self._on_solution()
         return next_state
 
     def _is_cost_strictly_better(self, better_cost, better_than_cost) -> bool:
@@ -88,8 +90,12 @@ class SubscribableAlgorithm(Algorithm):
 
     def _on_next_neighbour(self, model: Problem, from_state: State, next_neighbour: State):
         """Called when algorithm explores next neighbour"""
-        for subsriber in self._subscribers:
-            subsriber.on_next_neighbour(model, from_state, next_neighbour)
+        for subscriber in self._subscribers:
+            subscriber.on_next_neighbour(model, from_state, next_neighbour)
+
+    def _on_solution(self):
+        for subscriber in self._subscribers:
+            subscriber.on_solution()
 
     def subscribe(self, subsriber: AlgorithmSubscriber):
         self._subscribers.append(subsriber)

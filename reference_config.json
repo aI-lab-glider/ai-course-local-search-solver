@@ -18,6 +18,9 @@
         "max_iter": 10000,
         "time_limit": 60000
     },
-    "visualization": true,
+    "visualization": {
+        "enabled": true,
+        "min_time_between_steps": 0.01
+    },
     "algorithm_monitor": true
 }
