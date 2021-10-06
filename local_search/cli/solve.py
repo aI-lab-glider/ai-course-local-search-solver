@@ -26,7 +26,9 @@ from rich.console import Console
 # [x] Change subscription logic
 # [x] Rename things
 # [x] Remove useless methods and fields
-# [] Add visualization from GC
+# [x] Add visualization from GC
+# [] Move pause button
+# [] Move visualization params to config
 # [] Add documentation
 # [] Add tests
 
@@ -183,7 +185,7 @@ def add_visualization_subscriber(problem_model: Problem, algorithm: Subscribable
     visualization = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
     if visualization:
-        visualization = visualization(algorithm=algorithm)
+        visualization = visualization(algorithm=algorithm, model=problem_model)
 
 
 def add_algorithm_monitor_subsriber(options, algorithm: SubscribableAlgorithm):

@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from local_search.problems.base.state import State
 from local_search.problems import Problem
 
@@ -8,7 +7,7 @@ class AlgorithmSubscriber:
     Allows to subscribe to algorithm updates.
     """
 
-    def __init__(self, algorithm):
+    def __init__(self, algorithm, **kwargs):
         self.algorithm = algorithm
         algorithm.subscribe(self)
 

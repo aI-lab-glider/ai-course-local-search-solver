@@ -1,18 +1,22 @@
+from math import sqrt
+from random import randint
 from typing import Tuple
 from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import VisualizationSubscriber
 from local_search.problems.graph_coloring_problem.problem import GraphColoringProblem
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
-from random import randint
+
 import pygame
+
 
 EDGE_COLOR = (0, 0, 0)
 
 
 class GraphColoringVisualization(VisualizationSubscriber):
 
-    def __init__(self, **kwargs):
+    def __init__(self, model: GraphColoringProblem, **kwargs):
         super().__init__(**kwargs)
         self._available_colors = None
+        self.coords = self._generate_coords(model)
 
     @staticmethod
     def get_corresponding_problem():
@@ -27,30 +31,28 @@ class GraphColoringVisualization(VisualizationSubscriber):
 
     def _draw_lines(self, screen, model: GraphColoringProblem):
         graph = [list(model.graph[i]) for i in range(model.n_vertices)]
-        coords = self._generate_coords(model)
-        extremes = self._find_extremes(coords)
+        extremes = self._find_extremes()
 
         for i in range(len(graph)):
             for j in range(len(graph[i])):
                 pygame.draw.line(screen, EDGE_COLOR,
-                                 self._scale(coords[i], screen, extremes),
+                                 self._scale(self.coords[i], screen, extremes),
                                  self._scale(
-                                     coords[graph[i][j]], screen, extremes),
+                                     self.coords[graph[i][j]], screen, extremes),
                                  3)
 
-    def _find_extremes(self, coords):
-        min_x = min(vertex[0] for vertex in coords)
-        max_x = max(vertex[0] for vertex in coords)
-        min_y = min(vertex[1] for vertex in coords)
-        max_y = max(vertex[1] for vertex in coords)
+    def _find_extremes(self):
+        min_x = min(vertex[0] for vertex in self.coords)
+        max_x = max(vertex[0] for vertex in self.coords)
+        min_y = min(vertex[1] for vertex in self.coords)
+        max_y = max(vertex[1] for vertex in self.coords)
         return min_x, max_x, min_y, max_y
 
     def _draw_vertices(self, screen, model: GraphColoringProblem, state: GraphColoringState):
-        coords = self._generate_coords(model)
-        extremes = self._find_extremes(coords)
+        extremes = self._find_extremes()
         colors = self._get_colors(model)
-        for i in range(len(coords)):
-            x, y = self._scale(coords[i], screen, extremes)
+        for i in range(len(self.coords)):
+            x, y = self._scale(self.coords[i], screen, extremes)
             pygame.draw.circle(
                 screen, colors[state.coloring[i].color], (x, y), 10)
             pygame.draw.circle(screen, (0, 0, 0), (x, y), 10, 2)
@@ -72,11 +74,32 @@ class GraphColoringVisualization(VisualizationSubscriber):
                 model.n_vertices)
         return self._available_colors
 
+    def euclidean_distance(self, v1, v2):
+        d = 0
+
+        for i in range(len(v1)):
+            d += (v1[i] - v2[i])**2
+
+        return sqrt(d)
+
+    def check_similar(self, new_color, colors):
+        for color in colors:
+            self.euclidean_distance(new_color, color)
+            if self.euclidean_distance(new_color, color) < 20:
+                return False
+        return True
+
     def _generate_random_colors(self, n, except_colors=None):
         colors = []
 
         def random_color():
-            return (randint(0, 255), randint(0, 255), randint(0, 255))
+            new_color = (randint(0, 255), randint(0, 255), randint(0, 255))
+
+            while not self.check_similar(new_color, colors):
+                new_color = (randint(0, 255), randint(0, 255), randint(0, 255))
+
+            return new_color
+
         color = random_color()
         except_colors = except_colors or []
         for _ in range(n):
