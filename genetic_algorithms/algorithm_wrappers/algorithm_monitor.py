@@ -4,7 +4,7 @@ import time
 from rich import box
 
 from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import \
-    AlgorithmNextStateSubscriber
+    AlgorithmSubscriber
 from genetic_algorithms.algorithms.algorithm import (AlgorithmConfig,
                                                      OptimizationStrategy)
 from genetic_algorithms.problems.base.model import Model
@@ -19,7 +19,7 @@ PREV_STATE = 'previous_state'
 BEST_STATE = 'best_state'
 
 
-class AlgorithmMonitor(AlgorithmNextStateSubscriber):
+class AlgorithmMonitor(AlgorithmSubscriber):
     delay_time = .001
 
     def __init__(self, config: AlgorithmConfig, **kwargs):
@@ -40,7 +40,7 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
         self._start_time = time.monotonic()
         self._iters_from_last_impr = 0
 
-    def _perform_side_effects(self, model: Model, state: State):
+    def on_next_state(self, model: Model, state: State):
         self._update_stats(state)
         self._live.update(self._create_layout(model), refresh=True)
         time.sleep(self.delay_time)
@@ -105,7 +105,7 @@ class AlgorithmMonitor(AlgorithmNextStateSubscriber):
         )
         return layout
 
-    def _on_solution_found(self, **kwargs):
+    def on_solution(self, **kwargs):
         self._live.stop()
 
     def __del__(self):

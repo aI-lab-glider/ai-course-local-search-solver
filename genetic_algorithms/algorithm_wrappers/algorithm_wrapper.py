@@ -1,34 +1,28 @@
 from abc import abstractmethod
-from genetic_algorithms.models.next_state_provider import Algorithm
 from genetic_algorithms.problems.base.state import State
 from genetic_algorithms.problems import Model
 
 
-class AlgorithmNextStateSubscriber:
+class AlgorithmSubscriber:
     """
-    Allows to add some side effects to algorithm.
+    Allows to subscribe to algorithm updates.
     """
 
-    def __init__(self, algorithm: Algorithm):
+    def __init__(self, algorithm):
         self.algorithm = algorithm
+        algorithm.subscribe(self)
 
-    @abstractmethod
-    def _perform_side_effects(self, model: Model, state: State, **kwargs):
+    def on_next_state(self, model: Model, state: State) -> None:
         """
-        Performs logic related to the plugin.
-        """
-
-    def notify(self, model: Model, state: State, **kwargs) -> None:
-        if state:
-            self._perform_side_effects(model, state, **kwargs)
-        else:
-            self._on_solution_found(state=state)
-
-    def _on_solution_found(self, state: State):
-        """
-        Hook that is called when solution is found.
+        Hook to call when algorithm changes state for which it generates neighbourhood
         """
 
-class AlgorithmNextNeingbourSubscriber(AlgorithmNextStateSubscriber):
-    def notify(self, model: Model, from_state: State, next_neighbour: State):
-        super().notify(model, from_state, next_neighbour=next_neighbour)    
+    def on_next_neighbour(self, model: Model, from_state: State, next_neighbour: State) -> None:
+        """
+        Hook to call when algorithm makes move and checks new neighbour.
+        """
+
+    def on_solution(self, state: State):
+        """
+        Hook to call when algorithm finds solution
+        """

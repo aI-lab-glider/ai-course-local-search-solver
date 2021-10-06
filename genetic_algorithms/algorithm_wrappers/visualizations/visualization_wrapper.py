@@ -4,7 +4,7 @@ from math import inf
 import sys
 import time
 from typing import Type
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmNextNeingbourSubscriber, AlgorithmNextStateSubscriber
+from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmSubscriber
 from genetic_algorithms.problems import Model
 from genetic_algorithms.problems.base.state import State
 import pygame
@@ -17,7 +17,7 @@ FROM_STATE = 'from_state'
 STATS = 'stats_info'
 
 
-class VisualizationSubscriber(AlgorithmNextNeingbourSubscriber):
+class VisualizationSubscriber(AlgorithmSubscriber):
     """
     Provides visualization to algorithm solutions.
     """
@@ -69,7 +69,7 @@ class VisualizationSubscriber(AlgorithmNextNeingbourSubscriber):
             FROM_STATE: None
         }
 
-    def _perform_side_effects(self, model: Model, from_state: State, next_neighbour: State):
+    def on_next_neighbour(self, model: Model, from_state: State, next_neighbour: State):
         self._update_states(next_neighbour, from_state)
         self._update_statistics()
         self._handle_pygame_events()

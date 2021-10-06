@@ -9,7 +9,7 @@ from PIL import Image
 
 
 class AvatarProblem(Model):
-    def __init__(self, reference_image: Image):
+    def __init__(self, reference_image: Image.Image):
         self.reference_image = reference_image
         self._reference_image_data = reference_image.getdata()
         self._image_size = reference_image.size

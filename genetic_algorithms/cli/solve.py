@@ -6,12 +6,15 @@ from inspect import signature
 from typing import Type, Union
 
 import click
-from genetic_algorithms.algorithm_wrappers import (AlgorithmNextStateSubscriber,
+from genetic_algorithms.algorithm_wrappers import (AlgorithmSubscriber,
                                                    VisualizationSubscriber)
 from genetic_algorithms.algorithm_wrappers.algorithm_monitor import \
     AlgorithmMonitor
 from genetic_algorithms.algorithms import SubscribableAlgorithm
 from genetic_algorithms.algorithms.algorithm import AlgorithmConfig
+from genetic_algorithms.algorithms.hill_climbing import HillClimbing
+from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
+from genetic_algorithms.problems.avatar_problem.problem_model import AvatarProblem
 from genetic_algorithms.problems.base.model import Model
 from genetic_algorithms.solvers import LocalSearchSolver
 from genetic_algorithms.solvers.solver import SolverConfig
@@ -19,11 +22,12 @@ from rich import pretty
 from rich.console import Console
 
 # TODO
-# [] Make Avatars compatible
+# [x] Make Avatars compatible
 # [] Change subscription logic
-# [] Renama things
+# [] Rename things
 # [] Remove useless methods
 # [] Add tests
+# [] Add documentation
 
 console = Console()
 pretty.install()
@@ -35,7 +39,7 @@ pretty.install()
 @click.option('-m', '--algorithm_monitor', is_flag=True)
 def solve(config_file, **cli_options):
     """
-    Solves a problem based on config file or cli options. 
+    Solves a problem based on config file or cli options.
     Config file should contain same keys as defined in click.option decorator above.
     """
     options = merge_options(config_file, cli_options)
@@ -59,19 +63,30 @@ def merge_options(config_file_path: str, cli_options):
     return options
 
 
-def prompt_if_not_exists(options, option_key: str, option_config=None) -> str:
+def get_or_prompt_if_not_exists_or_invalid(options, option_key: str, option_config=None) -> str:
     """
-    Prompts for :param option_key: if it doesn't exists in options.
+    Prompts for :param option_key: if it doesn't exists in options or if it is invalid.
     """
+    option_config = option_config or {}
     if options.setdefault(option_key, None) is None:
-        prompt = f'Select {option_key.replace("_", " ")}'
-        option_config = option_config or {}
-        options[option_key] = click.prompt(prompt,
-                                           type=option_config.setdefault(
-                                               'type', None),
-                                           default=option_config.setdefault(
-                                               'default', None)
-                                           )
+        get_or_prompt(option_key, option_config)
+    if option_config.setdefault('type', False):
+        if isinstance(option_config['type'], click.Choice) and options[option_key] not in option_config['type'].choices:
+            console.print(
+                f"Value {options[option_key]} is invalid for for option {option_key} in this context.")
+            get_or_prompt(options, option_key, option_config)
+    return options[option_key]
+
+
+def get_or_prompt(options, option_key: str, option_config=None):
+    prompt = f'Select {option_key.replace("_", " ")}'
+    option_config = option_config or {}
+    options[option_key] = click.prompt(prompt,
+                                       type=option_config.setdefault(
+                                           'type', None),
+                                       default=option_config.setdefault(
+                                           'default', None)
+                                       )
     return options[option_key]
 
 
@@ -86,12 +101,12 @@ def create_dataclass(options, dataclass: Type):
     dataclass_config = {}
     for field in fields(dataclass):
         if issubclass(field.type, Enum):
-            value = prompt_if_not_exists(options, field.name, {
+            value = get_or_prompt_if_not_exists_or_invalid(options, field.name, {
                 'default': field.default.value
             })
             field_value = field.type(value)
         else:
-            field_value = prompt_if_not_exists(options, field.name, {
+            field_value = get_or_prompt_if_not_exists_or_invalid(options, field.name, {
                 'default': field.default
             })
 
@@ -102,16 +117,15 @@ def create_dataclass(options, dataclass: Type):
 def create_problem_model(options):
     config = options.setdefault('problem', {})
     console.print("Configuring problem", style="bold blue")
-    problem_name = prompt_if_not_exists(config, 'name', {
+    problem_name = get_or_prompt_if_not_exists_or_invalid(config, 'name', {
         'type': click.Choice(list(Model.problems.keys()), case_sensitive=True),
     })
     model = Model.problems[problem_name]
 
-    benchmark_file = prompt_if_not_exists(config, 'benchmark', {
+    benchmark_file = get_or_prompt_if_not_exists_or_invalid(config, 'benchmark', {
         'type': click.Choice(get_benchmark_names_for_model(model), case_sensitive=True),
     })
-
-    move_generator_name = prompt_if_not_exists(config, 'move_generator', {
+    move_generator_name = get_or_prompt_if_not_exists_or_invalid(config, 'move_generator', {
         'type': click.Choice(list(model.get_available_move_generation_strategies()), case_sensitive=True)
     })
     return model.from_benchmark(
@@ -125,21 +139,35 @@ def get_benchmark_names_for_model(model_type: Type[Model]):
 
 def create_algorithm(problem_model: Model, options) -> SubscribableAlgorithm:
     config = options['algorithm']
+
     console.print("Configuring algorithm", style="bold blue")
 
-    algo_name = prompt_if_not_exists(config, 'name', {
+    algo_name = assure_problem_is_solvable_by_algo(
+        config, 'name', problem_model)
+
+    get_or_prompt_if_not_exists_or_invalid(config, 'name', {
         'type': click.Choice(list(SubscribableAlgorithm.algorithms.keys()), case_sensitive=True)
     })
-    algorithm_type = SubscribableAlgorithm.algorithms[algo_name]
 
+    algorithm_type = SubscribableAlgorithm.algorithms[algo_name]
     config_type = signature(algorithm_type).parameters['config'].annotation
     config = create_dataclass(config, config_type)
 
     algorithm = algorithm_type(config)
-
     add_alrogithm_subscribers(
         options, problem_model, algorithm)
     return algorithm
+
+
+def assure_problem_is_solvable_by_algo(config, key: str, problem_model: Model):
+    available_algorithms = set(SubscribableAlgorithm.algorithms.keys())
+    if isinstance(problem_model, AvatarProblem):
+        available_algorithms = available_algorithms - \
+            {camel_to_snake(HillClimbing.__name__)}
+    algo_name = get_or_prompt_if_not_exists_or_invalid(config, key, {
+        'type': click.Choice(list(available_algorithms), case_sensitive=True)
+    })
+    return algo_name
 
 
 def add_alrogithm_subscribers(options, problem_model: Model, algorithm: SubscribableAlgorithm):
@@ -150,18 +178,14 @@ def add_alrogithm_subscribers(options, problem_model: Model, algorithm: Subscrib
         add_algorithm_monitor_subsriber(options, algorithm)
 
 
-def add_visualization_subscriber(problem_model: Model, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmNextStateSubscriber]:
+def add_visualization_subscriber(problem_model: Model, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmSubscriber]:
     visualization = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
     if visualization:
-        visualization = visualization(
-            algorithm=algorithm)
-        algorithm.subscribe_to_neinghbour_enter(visualization)
+        visualization = visualization(algorithm=algorithm)
 
 
 def add_algorithm_monitor_subsriber(options, algorithm: SubscribableAlgorithm):
     config = options['algorithm']
     algorithm_config = create_dataclass(config, AlgorithmConfig)
-    algorithm_monitor = AlgorithmMonitor(
-        config=algorithm_config, algorithm=algorithm)
-    algorithm.subsribe_to_state_update(algorithm_monitor)
+    AlgorithmMonitor(config=algorithm_config, algorithm=algorithm)

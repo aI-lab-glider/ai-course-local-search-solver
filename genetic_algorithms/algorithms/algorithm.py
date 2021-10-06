@@ -4,8 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Generator, List, Union
 
-from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import (
-    AlgorithmNextNeingbourSubscriber, AlgorithmNextStateSubscriber)
+from genetic_algorithms.algorithm_wrappers.algorithm_wrapper import AlgorithmSubscriber
 from genetic_algorithms.helpers.camel_to_snake import camel_to_snake
 from genetic_algorithms.models.next_state_provider import Algorithm
 from genetic_algorithms.problems.base.model import Model
@@ -39,9 +38,7 @@ class SubscribableAlgorithm(Algorithm):
         self.steps_from_last_state_update = 0
         self.best_cost, self.best_state = float(
             'inf') if config.optimization_stategy == OptimizationStrategy.Min else float('-inf'), None
-        self._next_state_subscribers: List[AlgorithmNextStateSubscriber] = []
-        self._next_neighbour_subsribers: List[AlgorithmNextNeingbourSubscriber] = [
-        ]
+        self._subscribers: List[AlgorithmSubscriber] = []
 
     def __init_subclass__(cls) -> None:
         SubscribableAlgorithm.algorithms[camel_to_snake(cls.__name__)] = cls
@@ -86,19 +83,16 @@ class SubscribableAlgorithm(Algorithm):
 
     def _on_next_state(self, model: Model, next_state: State):
         """Called when algorithm find new best state"""
-        for subsriber in self._next_state_subscribers:
-            subsriber.notify(model, next_state)
+        for subsriber in self._subscribers:
+            subsriber.on_next_state(model, next_state)
 
     def _on_next_neighbour(self, model: Model, from_state: State, next_neighbour: State):
         """Called when algorithm explores next neighbour"""
-        for subsriber in self._next_neighbour_subsribers:
-            subsriber.notify(model, from_state, next_neighbour)
+        for subsriber in self._subscribers:
+            subsriber.on_next_neighbour(model, from_state, next_neighbour)
 
-    def subsribe_to_state_update(self, subsriber: AlgorithmNextStateSubscriber):
-        self._next_state_subscribers.append(subsriber)
-
-    def subscribe_to_neinghbour_enter(self, subsriber: AlgorithmNextNeingbourSubscriber):
-        self._next_neighbour_subsribers.append(subsriber)
+    def subscribe(self, subsriber: AlgorithmSubscriber):
+        self._subscribers.append(subsriber)
 
     def _get_neighbours(self, model: Model, state: State, is_stohastic=False) -> Generator[State, None, None]:
         move_gen = model.move_generator.available_moves if not is_stohastic else model.move_generator.random_moves
