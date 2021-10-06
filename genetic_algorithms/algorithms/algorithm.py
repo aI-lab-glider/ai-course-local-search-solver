@@ -62,14 +62,14 @@ class SubscribableAlgorithm(Algorithm):
             self._on_next_state(model, next_state)
         return next_state
 
-    def _is_cost_strictly_better(self, is_better_cost, is_better_than_cost) -> bool:
+    def _is_cost_strictly_better(self, better_cost, better_than_cost) -> bool:
         return {
             OptimizationStrategy.Min: op.lt,
             OptimizationStrategy.Max: op.gt,
-        }[self.config.optimization_stategy](is_better_cost, is_better_than_cost)
+        }[self.config.optimization_stategy](better_cost, better_than_cost)
 
-    def _is_cost_better_or_same(self, is_better_cost, is_better_than_cost) -> bool:
-        return self._is_cost_strictly_better(is_better_cost, is_better_than_cost) or is_better_cost == is_better_than_cost
+    def _is_cost_better_or_same(self, better_cost, better_than_cost) -> bool:
+        return self._is_cost_strictly_better(better_cost, better_than_cost) or better_cost == better_than_cost
 
     def _update_algorithm_state(self, model: Model, new_state: State):
         if self.best_state is None:

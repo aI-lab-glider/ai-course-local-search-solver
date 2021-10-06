@@ -1,0 +1,18 @@
+{
+    "problem": {
+        "name": "traveling_salesman_problem",
+        "benchmark": "tsp_for_visualization_1",
+        "move_generator": "two_opt"
+    },
+    "algorithm": {
+        "name": "hill_climbing",
+        "max_steps_without_improvement": 100,
+        "optimization_stategy": "min"
+    },
+    "solver_config": {
+        "max_iter": 10000,
+        "time_limit": 60000
+    },
+    "visualization": true,
+    "algorithm_monitor": true
+}

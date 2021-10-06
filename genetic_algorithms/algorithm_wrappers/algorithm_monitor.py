@@ -20,7 +20,7 @@ BEST_STATE = 'best_state'
 
 
 class AlgorithmMonitor(AlgorithmNextStateSubscriber):
-    delay_time = 0.01
+    delay_time = .001
 
     def __init__(self, config: AlgorithmConfig, **kwargs):
         super().__init__(**kwargs)

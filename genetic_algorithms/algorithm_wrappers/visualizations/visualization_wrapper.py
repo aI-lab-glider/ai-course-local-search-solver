@@ -75,7 +75,7 @@ class VisualizationSubscriber(AlgorithmNextNeingbourSubscriber):
         self._handle_pygame_events()
         self._draw(model)
         # TODO move to config
-        time.sleep(.1)
+        time.sleep(.01)
 
     def _update_states(self, new_state: State, from_state: State):
         self.states = {
