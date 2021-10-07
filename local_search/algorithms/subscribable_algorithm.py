@@ -1,25 +1,35 @@
 import operator as op
 from abc import abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 from typing import Generator, List, Union
 
-from local_search.algorithm_subscribers.algorithm_subscriber import AlgorithmSubscriber
-from local_search.helpers.camel_to_snake import camel_to_snake
+from local_search.algorithm_subscribers.algorithm_subscriber import \
+    AlgorithmSubscriber
 from local_search.algorithms.algorithm import Algorithm
+from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.problem import Problem
 from local_search.problems.base.state import State
 
 
-class OptimizationStrategy(Enum):
-    Min = 'min'
-    Max = 'max'
+class OptimizationStrategy:
+    strategies = {}
 
+    def __init_subclass__(cls):
+        cls.strategies[camel_to_snake(cls.__name__)] = cls
+
+class StrategyA(OptimizationStrategy):
+    def __init__(self, param_1: int):
+        print('Created with param 1', param_1)
+    
+
+class StrategyB(OptimizationStrategy):
+    def __init__(self, param_2: int):
+        print('Created with param 2', param_2)
+    
 
 @dataclass
 class AlgorithmConfig:
     max_steps_without_improvement: int = 10
-    optimization_strategy: OptimizationStrategy = OptimizationStrategy.Min
 
 
 DEFAULT_CONFIG = AlgorithmConfig()
@@ -31,13 +41,14 @@ class SubscribableAlgorithm(Algorithm):
     """
     algorithms = {}
 
-    def __init__(self, config: AlgorithmConfig = None):
+    def __init__(self, opimization_strategy: OptimizationStrategy, algorithm_config: AlgorithmConfig = None):
         super().__init__()
-        config = config or DEFAULT_CONFIG
+        config = algorithm_config or DEFAULT_CONFIG
+        self.opimization_strategy_config = opimization_strategy
         self.config = config
         self.steps_from_last_state_update = 0
         self.best_cost, self.best_state = float(
-            'inf') if config.optimization_strategy == OptimizationStrategy.Min else float('-inf'), None
+            'inf'), None
         self._subscribers: List[AlgorithmSubscriber] = []
 
     def __init_subclass__(cls) -> None:
@@ -62,10 +73,7 @@ class SubscribableAlgorithm(Algorithm):
         return next_state
 
     def _is_cost_strictly_better(self, better_cost, better_than_cost) -> bool:
-        return {
-            OptimizationStrategy.Min: op.lt,
-            OptimizationStrategy.Max: op.gt,
-        }[self.config.optimization_strategy](better_cost, better_than_cost)
+        return better_cost > better_than_cost
 
     def _is_cost_better_or_same(self, better_cost, better_than_cost) -> bool:
         return self._is_cost_strictly_better(better_cost, better_than_cost) or better_cost == better_than_cost

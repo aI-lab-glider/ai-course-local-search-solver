@@ -7,12 +7,14 @@
     "algorithm": {
         "name": "simulated_annealing",
         "max_steps_without_improvement": 100,
-        "optimization_strategy": "min",
         "initial_temperature": 1000,
         "cooling_step": 0.001,
         "min_temperature": 1e-8,
         "on_optimum_strategy": "restart",
         "on_optimum_strategy_repeats": 100
+    },
+    "optimization_strategy": {
+        "name": "strategy_a"
     },
     "solver_config": {
         "max_iter": 10000,

@@ -1,8 +1,8 @@
-import os
 import json
+import os
 from dataclasses import fields
 from enum import Enum
-from inspect import signature
+from inspect import getmro, signature
 from typing import Callable, Type, Union
 
 import click
@@ -11,8 +11,9 @@ from local_search.algorithm_subscribers import (AlgorithmSubscriber,
 from local_search.algorithm_subscribers.algorithm_monitor import \
     AlgorithmMonitor
 from local_search.algorithms import SubscribableAlgorithm
-from local_search.algorithms.subscribable_algorithm import AlgorithmConfig
 from local_search.algorithms.hill_climbing import HillClimbing
+from local_search.algorithms.subscribable_algorithm import (
+    AlgorithmConfig, OptimizationStrategy)
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.avatar_problem.problem import AvatarProblem
 from local_search.problems.base.problem import Problem
@@ -141,30 +142,46 @@ def get_benchmark_names_for_model(model_type: Type[Problem]):
 
 
 def create_algorithm(problem_model: Problem, options) -> SubscribableAlgorithm:
-    config = options['algorithm']
+    algorithm_config = options['algorithm']
 
     console.print("Configuring algorithm", style="bold blue")
 
     algo_name = assure_problem_is_solvable_by_algo(
-        config, 'name', problem_model)
+        algorithm_config, 'name', problem_model)
 
-    get_or_prompt_if_not_exists_or_invalid(config, 'name', {
+    get_or_prompt_if_not_exists_or_invalid(algorithm_config, 'name', {
         'type': click.Choice(list(SubscribableAlgorithm.algorithms.keys()), case_sensitive=True)
     })
 
     algorithm_type = SubscribableAlgorithm.algorithms[algo_name]
-    config_type = get_type_for_param(algorithm_type, 'config')
-    config = create_dataclass(config, config_type)
-
-    algorithm = algorithm_type(config)
+    config_type = get_type_for_param(algorithm_type, 'algorithm_config')
+    print(algorithm_type, config_type)
+    algorithm_config = create_dataclass(algorithm_config, config_type)
+    optimization_strategy = create_optimization_strategy(options)
+    algorithm = algorithm_type(opimization_strategy=optimization_strategy, algorithm_config=algorithm_config)
+        
     add_alrogithm_subscribers(
         options, problem_model, algorithm)
     return algorithm
 
+def create_optimization_strategy(options):
+    config = options.setdefault('optimization_strategy', {})
+    name = get_or_prompt_if_not_exists_or_invalid(config, 'name', {
+        'type': click.Choice(list(OptimizationStrategy.strategies.keys()))
+    })
+    strategy_type = OptimizationStrategy.strategies[name]
+    for param in signature(strategy_type).parameters:
+        get_or_prompt_if_not_exists_or_invalid(config, param)
+    return strategy_type(**{k:v for k,v in config.items() if k!='name'})
+    
 
-def get_type_for_param(callable: Callable, param_name: str):
-    params = signature(callable).parameters
-    return params[param_name].annotation if param_name in params else None
+def get_type_for_param(callable: Type, param_name: str):
+    mro = getmro(callable)
+    for method in mro:
+        params = signature(method).parameters
+        if param_name in params:
+            return params[param_name].annotation
+    return None
 
 
 def assure_problem_is_solvable_by_algo(config, key: str, problem_model: Problem):

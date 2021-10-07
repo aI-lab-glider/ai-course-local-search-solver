@@ -1,12 +1,13 @@
-from typing import Union
-from local_search.algorithms import SubscribableAlgorithm, AlgorithmConfig
-from local_search.algorithms.subscribable_algorithm import OptimizationStrategy
-from local_search.problems.base.state import State
-from local_search.problems.base.problem import Problem
-from random import choices
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from enum import Enum
+from random import choices
+from typing import Union
+
+from local_search.algorithms import AlgorithmConfig, SubscribableAlgorithm
+from local_search.algorithms.subscribable_algorithm import OptimizationStrategy
+from local_search.problems.base.problem import Problem
+from local_search.problems.base.state import State
 
 
 class OnOptimumStrategy(Enum):
@@ -34,16 +35,15 @@ class SimulatedAnnealing(SubscribableAlgorithm):
     A version of stochastic hill climbing, that allows going downhills. 
     """
 
-    def __init__(self, config: SimulatedAnnealingConfig = None):
-        self.config = config or DEFAULT_CONFIG
+    def __init__(self, algorithm_config: SimulatedAnnealingConfig = None, **kwargs):
+        self.config = algorithm_config or DEFAULT_CONFIG
         self.temperature = self.config.initial_temperature
         self._optimum_states_found = 0
-        super().__init__(config=config)
+        super().__init__(algorithm_config=algorithm_config, **kwargs)
 
     # TODO tests
     def _calculate_selection_probability(self, best_state_cost: float, new_state_cost: float) -> float:
-        delta = new_state_cost - \
-            best_state_cost if self.config.optimization_strategy == OptimizationStrategy.Min else best_state_cost - new_state_cost
+        delta = new_state_cost - best_state_cost 
         return math.exp(-delta / self.temperature)
 
     # TODO add plot of temperature

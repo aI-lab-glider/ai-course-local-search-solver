@@ -8,7 +8,7 @@ setup(
         'rich',
         'click',
         'pygame',
-        'Pillow'
+        'pillow'
     ],
     entry_points='''
         [console_scripts]
