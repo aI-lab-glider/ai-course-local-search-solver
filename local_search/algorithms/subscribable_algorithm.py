@@ -1,28 +1,12 @@
-import operator as op
-from abc import abstractmethod
-from dataclasses import dataclass
-from enum import Enum
+from abc import abstractmethod, ABC
 from typing import Generator, List, Union
 
 from local_search.algorithm_subscribers.algorithm_subscriber import AlgorithmSubscriber
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.algorithms.algorithm import Algorithm
+from local_search.algorithms.algorithm_config import DEFAULT_CONFIG, AlgorithmConfig
 from local_search.problems.base.problem import Problem
 from local_search.problems.base.state import State
-
-
-class OptimizationStrategy(Enum):
-    Min = 'min'
-    Max = 'max'
-
-
-@dataclass
-class AlgorithmConfig:
-    max_steps_without_improvement: int = 10
-    optimization_strategy: OptimizationStrategy = OptimizationStrategy.Min
-
-
-DEFAULT_CONFIG = AlgorithmConfig()
 
 
 class SubscribableAlgorithm(Algorithm):
@@ -36,12 +20,12 @@ class SubscribableAlgorithm(Algorithm):
         config = config or DEFAULT_CONFIG
         self.config = config
         self.steps_from_last_state_update = 0
-        self.best_cost, self.best_state = float(
-            'inf') if config.optimization_strategy == OptimizationStrategy.Min else float('-inf'), None
+        self.best_obj, self.best_state = None, None
         self._subscribers: List[AlgorithmSubscriber] = []
 
     def __init_subclass__(cls) -> None:
-        SubscribableAlgorithm.algorithms[camel_to_snake(cls.__name__)] = cls
+        if ABC not in cls.__bases__:
+            SubscribableAlgorithm.algorithms[camel_to_snake(cls.__name__)] = cls
 
     @abstractmethod
     def _find_next_state(self, model: Problem, state: State) -> Union[State, None]:
@@ -49,39 +33,59 @@ class SubscribableAlgorithm(Algorithm):
         Finds next state for model. Returns None in case if state is optimal.
         """
 
+    def _random_restart(self, model: Problem):
+        return model.random_state()
+
+    def _perturb(self, model: Problem, how_much: int):
+        perturbed_state = self.best_state
+        for i in range(how_much):
+            perturbed_state = next(model.move_generator.random_moves(perturbed_state)).make()
+        return perturbed_state
+
+    def _get_neighbours(self, model: Problem, state: State) -> Generator[State, None, None]:
+        while True:
+            for move in model.move_generator.available_moves(state):
+                neighbour = move.make()
+                self._on_next_neighbour(model, state, neighbour)
+                yield neighbour
+
+    def _get_random_neighbours(self, model: Problem, state: State) -> Generator[State, None, None]:
+        while True:
+            for move in model.move_generator.random_moves(state):
+                neighbour = move.make()
+                self._on_next_neighbour(model, state, neighbour)
+                yield neighbour
+
+    def _is_stuck_in_local_optimum(self):
+        return self.steps_from_last_state_update >= self.config.local_optimum_moves_threshold
+
     def next_state(self, model: Problem, state: State) -> Union[State, None]:
         if self.best_state is None:
             self.best_state = state
             self._on_next_state(model, state)
-        next_state = self._find_next_state(model, state)
-        if next_state:
+
+        if self._is_stuck_in_local_optimum():
+            next_state = self.escape_local_optimum(model, state, self.best_state)
+        else:
+            next_state = self._find_next_state(model, state)
+
+        if next_state is not None:
             self._update_algorithm_state(model, next_state)
             self._on_next_state(model, next_state)
         else:
             self._on_solution()
+
         return next_state
-
-    def _is_cost_strictly_better(self, better_cost, better_than_cost) -> bool:
-        return {
-            OptimizationStrategy.Min: op.lt,
-            OptimizationStrategy.Max: op.gt,
-        }[self.config.optimization_strategy](better_cost, better_than_cost)
-
-    def _is_cost_better_or_same(self, better_cost, better_than_cost) -> bool:
-        return self._is_cost_strictly_better(better_cost, better_than_cost) or better_cost == better_than_cost
 
     def _update_algorithm_state(self, model: Problem, new_state: State):
         if self.best_state is None:
             self.best_state = new_state
-        next_state_cost = model.cost_for(new_state)
-        if self._is_cost_better_or_same(next_state_cost, self.best_cost) and self.best_state != new_state:
-            self.best_cost, self.best_state = next_state_cost, new_state
+
+        if model.improvement(new_state, self.best_state) > 0:
+            self.best_obj, self.best_state = model.objective_for(new_state), new_state
             self.steps_from_last_state_update = 0
         else:
             self.steps_from_last_state_update += 1
-
-    def _is_in_optimal_state(self):
-        return self.steps_from_last_state_update >= self.config.max_steps_without_improvement
 
     def _on_next_state(self, model: Problem, next_state: State):
         """Called when algorithm find new best state"""
@@ -100,10 +104,4 @@ class SubscribableAlgorithm(Algorithm):
     def subscribe(self, subsriber: AlgorithmSubscriber):
         self._subscribers.append(subsriber)
 
-    def _get_neighbours(self, model: Problem, state: State, is_stochastic=False) -> Generator[State, None, None]:
-        move_gen = model.move_generator.available_moves if not is_stochastic else model.move_generator.random_moves
-        while True:
-            for move in move_gen(state):
-                neighbour = move.make()
-                self._on_next_neighbour(model, state, neighbour)
-                yield neighbour
+

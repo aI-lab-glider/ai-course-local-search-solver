@@ -1,31 +1,31 @@
+import random
 from typing import Union
 from local_search.algorithms import SubscribableAlgorithm, AlgorithmConfig
-from local_search.algorithms.subscribable_algorithm import OptimizationStrategy
 from local_search.problems.base.state import State
 from local_search.problems.base.problem import Problem
-from random import choices
+import random
 from dataclasses import dataclass
 import math
-from enum import Enum
+from enum import IntEnum, auto
 
 
-class OnOptimumStrategy(Enum):
-    Heat = 'heat'
-    Restart = 'restart'
-    Terminate = 'terminate'
-
+class SAEscapeStrategy(IntEnum):
+    RandomRestart = 0
+    Perturbation = auto()
+    Reheat = auto()
 
 @dataclass
 class SimulatedAnnealingConfig(AlgorithmConfig):
     initial_temperature: int = 1000
     cooling_step: float = 0.001
     min_temperature: float = 1e-8
-    on_optimum_strategy: OnOptimumStrategy = OnOptimumStrategy.Terminate
-    on_optimum_strategy_repeats: int = 5
+    escape_random_restart_probability: float = 0.33
+    escape_perturbation_probability: float = 0.33
+    escape_perturbation_size: int = 50
+    escape_reheat_probability: float = 0.33
 
 
 DEFAULT_CONFIG = SimulatedAnnealingConfig()
-
 
 class SimulatedAnnealing(SubscribableAlgorithm):
     """
@@ -37,13 +37,34 @@ class SimulatedAnnealing(SubscribableAlgorithm):
     def __init__(self, config: SimulatedAnnealingConfig = None):
         self.config = config or DEFAULT_CONFIG
         self.temperature = self.config.initial_temperature
-        self._optimum_states_found = 0
+        self._local_optimum_escapes = 0
+        self._escape_strategies = list(SAEscapeStrategy)
+        self._escape_probabilities = [0 for _ in self._escape_strategies]
+        self._escape_probabilities[SAEscapeStrategy.RandomRestart.value] = self.config.escape_random_restart_probability
+        self._escape_probabilities[SAEscapeStrategy.Perturbation.value] = self.config.escape_perturbation_probability
+        self._escape_probabilities[SAEscapeStrategy.Reheat.value] = self.config.escape_reheat_probability
         super().__init__(config=config)
 
+    def _find_next_state(self, model: Problem, state: State) -> Union[State, None]:
+        next_state = state
+        neighbour = next(self._get_random_neighbours(model, state))
+
+        if model.improvement(neighbour, state) > 0:
+            next_state = neighbour
+        else:
+            transition_probability = self._calculate_transition_probability(model, state, neighbour)
+            if random.random() <= transition_probability:
+                 next_state = neighbour
+
+        self._update_temperature()
+        if self._is_stuck_in_local_optimum():
+            next_state = self._escape_local_optimum(next_state)
+
+        return next_state
+
     # TODO tests
-    def _calculate_selection_probability(self, best_state_cost: float, new_state_cost: float) -> float:
-        delta = new_state_cost - \
-            best_state_cost if self.config.optimization_strategy == OptimizationStrategy.Min else best_state_cost - new_state_cost
+    def _calculate_transition_probability(self, model: Problem, old_state: State, new_state: State) -> float:
+        delta = model.improvement(new_state, old_state)
         return math.exp(-delta / self.temperature)
 
     # TODO add plot of temperature
@@ -52,38 +73,21 @@ class SimulatedAnnealing(SubscribableAlgorithm):
         self.temperature = max(self.temperature - self.config.cooling_step *
                                self.temperature, self.config.min_temperature)
 
-    def _find_next_state(self, model: Problem, state: State) -> Union[State, None]:
-        # TODO is it correct. All other algorithms return best state.
-        neinghbour = next(self._get_neighbours(
-            model, state, is_stochastic=True))
-        old_state_cost, new_state_cost = model.cost_for(
-            state), model.cost_for(neinghbour)
-        if self._is_cost_better_or_same(new_state_cost, old_state_cost):
-            result = neinghbour
-        else:
-            new_state_selection_probability = self._calculate_selection_probability(
-                old_state_cost, new_state_cost)
-            result = choices([neinghbour, state], [
-                             new_state_selection_probability, 1 - new_state_selection_probability], k=1)[0]
-        self._update_temperature()
-        return result if not self._is_in_optimal_state() else self._on_optimum_state(result)
-
-    def _on_optimum_state(self, state: State):
-        self._optimum_states_found += 1
-        if self._optimum_states_found > self.config.on_optimum_strategy_repeats:
+    def escape_local_optimum(self, model: Problem, state: State, best_state: State) -> Union[State, None]:
+        self._local_optimum_escapes += 1
+        if self._local_optimum_escapes > self.config.local_optimum_escapes_max >= 0:
             return None
-        return {
-            OnOptimumStrategy.Terminate: lambda _: None,
-            OnOptimumStrategy.Restart: self._restart,
-            OnOptimumStrategy.Heat: self._heat
-        }[self.config.on_optimum_strategy](state)
 
-    def _restart(self, from_state: State):
-        # TODO add moves from best state.
-        self.steps_from_last_state_update = 0
-        return from_state.shuffle()
+        strategy = random.choices(self._escape_strategies, weights=self._escape_probabilities)[0]
 
-    def _heat(self, from_state: State):
+        if strategy == SAEscapeStrategy.RandomRestart:
+            return self._random_restart(model)
+        if strategy == SAEscapeStrategy.Perturbation:
+            return self._perturb(model, self.config.escape_perturbation_size)
+        if strategy == SAEscapeStrategy.Reheat:
+            return self._reheat(state)
+
+    def _reheat(self, from_state: State):
         self.temperature = self.config.initial_temperature
         self.steps_from_last_state_update = 0
         return from_state

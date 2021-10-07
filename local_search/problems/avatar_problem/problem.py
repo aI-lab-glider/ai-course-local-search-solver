@@ -30,7 +30,7 @@ class AvatarProblem(Problem):
         d_b = ref_pix[2] - pix_to_comp[2]
         return d_r * d_r + d_g * d_g + d_b * d_b
 
-    def cost_for(self, state: AvatarState) -> int:
+    def objective_for(self, state: AvatarState) -> int:
         return sum(self._pix_comp(self.reference_image.getpixel((x, y)), state.image.getpixel((x, y)))
                    for y in range(self._image_size[1]) for x in range(self._image_size[0]))
 

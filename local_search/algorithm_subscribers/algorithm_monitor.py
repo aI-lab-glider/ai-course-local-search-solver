@@ -5,14 +5,12 @@ from rich import box
 
 from local_search.algorithm_subscribers.algorithm_subscriber import \
     AlgorithmSubscriber
-from local_search.algorithms.subscribable_algorithm import (AlgorithmConfig,
-                                                            OptimizationStrategy)
+from local_search.algorithms import AlgorithmConfig
 from local_search.problems.base.problem import Problem
 from local_search.problems.base.state import State
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
-from rich.table import Table
 
 CURR_STATE = 'current_state'
 PREV_STATE = 'previous_state'
@@ -76,7 +74,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             if state is None:
                 continue
             stat_name = f'{state_name.capitalize().replace("_", " ")} cost: '
-            value = model.cost_for(state)
+            value = model.objective_for(state)
             rows.append(f'[blue_violet]{stat_name}[/blue_violet]: {value}')
 
         progress_bar = self._create_progress_bar()
@@ -90,7 +88,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
 
     def _create_progress_bar(self):
         completed = self._iters_from_last_impr - 1
-        left = self._algorithm_config.max_steps_without_improvement - completed
+        left = self._algorithm_config.local_optimum_moves_threshold - completed
         completed_bar = f'[cyan]{"#" * completed}[/cyan]'
         arrow = '[cyan3]>[/cyan3]'
         left_bar = "-" * left

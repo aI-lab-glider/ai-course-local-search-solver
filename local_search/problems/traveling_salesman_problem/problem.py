@@ -1,6 +1,6 @@
 from typing import Iterable, List
-
-from local_search.problems.base.problem import Problem
+import random
+from local_search.problems.base.problem import Problem, Goal
 from local_search.problems.traveling_salesman_problem.models.point import \
     Point
 from local_search.problems.traveling_salesman_problem.models.salesman import \
@@ -13,16 +13,12 @@ from local_search.problems.traveling_salesman_problem.state import \
 
 class TravelingSalesmanProblem(Problem):
 
-    @staticmethod
-    def get_available_move_generation_strategies() -> Iterable[str]:
-        return TravelingSalesmanMoveGenerator.move_generators.keys()
-
     def __init__(self, points: List[Point],
                  depot_idx: int,
                  move_generator_name: str):
         self._points: List[Point] = points
         self.depot_idx = depot_idx
-        initial_solution = self._find_initial_solution()
+        initial_solution = self.random_state()
         move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name](
             depot_idx)
         super().__init__(initial_solution, move_generator)
@@ -31,17 +27,26 @@ class TravelingSalesmanProblem(Problem):
     def points(self):
         return self._points
 
-    def _find_initial_solution(self) -> TravelingSalesmanState:
-        naive_circle = [self.depot_idx] + [idx for idx in range(len(self._points)) if idx != self.depot_idx] + [self.depot_idx]
+    def random_state(self) -> TravelingSalesmanState:
+        route = [idx for idx in range(len(self._points)) if idx != self.depot_idx]
+        random.shuffle(route)
+        naive_circle = [self.depot_idx] + route + [self.depot_idx]
         return TravelingSalesmanState(points=self.points, route=naive_circle)
 
     # TODO: Add tests
-    def cost_for(self, state: TravelingSalesmanState) -> int:
+    def objective_for(self, state: TravelingSalesmanState) -> int:
         route = [self._points[i]
                  for i in state.route]
         return int(Salesman.from_point(route[0])
                            .walk_route(route)
                            .travelled_distance)
+
+    def goal(self) -> Goal:
+        return Goal.MIN
+
+    @staticmethod
+    def get_available_move_generation_strategies() -> Iterable[str]:
+        return TravelingSalesmanMoveGenerator.move_generators.keys()
 
     @classmethod
     def from_benchmark(cls, benchmark_name: str, move_generator_name: str):

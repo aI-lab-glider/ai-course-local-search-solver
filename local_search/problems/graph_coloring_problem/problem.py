@@ -1,5 +1,6 @@
+import random
 from dataclasses import dataclass
-from local_search.problems.base.problem import Problem
+from local_search.problems.base.problem import Problem, Goal
 from typing import Generator, Iterable, List, Set, Dict, Type
 from pathlib import Path
 
@@ -69,10 +70,17 @@ class GraphColoringProblem(Problem):
             color_classes[vertex.color] += 1
         return color_classes
 
-    def cost_for(self, state: GraphColoringState) -> int:
+    def objective_for(self, state: GraphColoringState) -> int:
         bad_edges = self._bad_edges(state)
         color_classes = self._color_classes(state)
         return sum([2*bad_edges[i]*color_classes[i]-color_classes[i]**2 for i in range(self.n_vertices)])
+
+    def goal(self) -> Goal:
+        return Goal.MIN
+
+    def random_state(self) -> 'State':
+        coloring = [Vertex(idx=i, color=random.randrange(self.n_vertices)) for i in range(self.n_vertices)]
+        return GraphColoringState(coloring=coloring)
 
     @classmethod
     def from_benchmark(cls, benchmark_name: str, move_generator_name: str):

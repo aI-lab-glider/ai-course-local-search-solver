@@ -10,9 +10,9 @@ from local_search.algorithm_subscribers import (AlgorithmSubscriber,
                                                 VisualizationSubscriber)
 from local_search.algorithm_subscribers.algorithm_monitor import \
     AlgorithmMonitor
-from local_search.algorithms import SubscribableAlgorithm
-from local_search.algorithms.subscribable_algorithm import AlgorithmConfig
-from local_search.algorithms.hill_climbing import HillClimbing
+from local_search.algorithms.algorithm_config import AlgorithmConfig
+from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
+from local_search.algorithms.hill_climbing.hill_climbing import HillClimbing
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.avatar_problem.problem import AvatarProblem
 from local_search.problems.base.problem import Problem
@@ -102,6 +102,7 @@ def create_solver(options):
 
 def create_dataclass(options, dataclass: Type):
     dataclass_config = {}
+
     for field in fields(dataclass):
         if issubclass(field.type, Enum):
             value = get_or_prompt_if_not_exists_or_invalid(options, field.name, {
@@ -155,9 +156,8 @@ def create_algorithm(problem_model: Problem, options) -> SubscribableAlgorithm:
     algorithm_type = SubscribableAlgorithm.algorithms[algo_name]
     config_type = get_type_for_param(algorithm_type, 'config')
     config = create_dataclass(config, config_type)
-
     algorithm = algorithm_type(config)
-    add_alrogithm_subscribers(
+    add_algorithm_subscribers(
         options, problem_model, algorithm)
     return algorithm
 
@@ -178,7 +178,7 @@ def assure_problem_is_solvable_by_algo(config, key: str, problem_model: Problem)
     return algo_name
 
 
-def add_alrogithm_subscribers(options, problem_model: Problem, algorithm: SubscribableAlgorithm):
+def add_algorithm_subscribers(options, problem_model: Problem, algorithm: SubscribableAlgorithm):
     if options.setdefault('visualization', {}).setdefault('enabled', False):
         add_visualization_subscriber(
             options['visualization'], problem_model, algorithm)

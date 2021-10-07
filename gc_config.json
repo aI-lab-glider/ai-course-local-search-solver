@@ -6,15 +6,15 @@
     },
     "algorithm": {
         "name": "simulated_annealing",
-        "max_steps_without_improvement": 100,
-        "optimization_strategy": "min"
+        "local_optimum_moves_threshold": 100,
+        "local_optimum_escapes_max": 10
     },
     "solver_config": {
         "max_iter": 10000,
         "time_limit": 60000
     },
     "visualization": {
-        "enabled": true,
+        "enabled": false,
         "min_time_between_steps": 0.01
     },
     "algorithm_monitor": true
