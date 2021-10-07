@@ -103,7 +103,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         )
         return layout
 
-    def on_solution(self):
+    def on_solution(self, **kwargs):
         self._live.stop()
 
     def __del__(self):

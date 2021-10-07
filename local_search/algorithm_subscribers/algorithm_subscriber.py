@@ -21,7 +21,7 @@ class AlgorithmSubscriber:
         Hook to call when algorithm makes move and checks new neighbour.
         """
 
-    def on_solution(self):
+    def on_solution(self, model: Problem, solution: State) -> None:
         """
         Hook to call when algorithm finds solution
         """

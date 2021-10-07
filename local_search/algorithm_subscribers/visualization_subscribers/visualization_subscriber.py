@@ -27,6 +27,7 @@ GREEN = (0, 255, 0)
 @dataclass
 class VisualizationSubcriberConfig:
     min_time_between_steps = 0.01
+    show_only_solution = False
 
 
 class VisualizationSubscriber(AlgorithmSubscriber):
@@ -89,6 +90,8 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         self._update_states(next_neighbour, from_state)
         self._update_statistics()
         self._handle_pygame_events()
+        if self.config.show_only_solution:
+            return
         self._draw(model)
         time.sleep(self.config.min_time_between_steps)
 
@@ -203,6 +206,7 @@ class VisualizationSubscriber(AlgorithmSubscriber):
             if not self._is_freezed:
                 break
 
-    def on_solution(self):
+    def on_solution(self, model: Problem, **kwargs):
+        self._draw(model)
         self._is_freezed = True
         self._freeze_screen()
