@@ -18,11 +18,3 @@ class GraphColoringState(State):
         if other is None:
             return False
         return all(ov.color == sv.color for sv, ov in zip(self.coloring, other.coloring))
-
-    # TODO
-    def shuffle(self):
-        available_colors = {vertex.color for vertex in self.coloring}
-        new_coloring = deepcopy(self.coloring)
-        for vertex in new_coloring:
-            vertex.color = random.choice(list(available_colors))
-        return GraphColoringState(new_coloring)

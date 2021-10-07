@@ -16,9 +16,3 @@ class State(ABC):
         """
         Compares current states to another state.
         """
-
-    @abstractmethod
-    def shuffle(self) -> 'State':
-        """
-        Shuffles state and returned an updated one
-        """
