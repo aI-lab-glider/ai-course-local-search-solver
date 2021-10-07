@@ -5,7 +5,7 @@ from local_search.problems.traveling_salesman_problem.models.point import \
     Point
 from local_search.problems.traveling_salesman_problem.models.salesman import \
     Salesman
-from local_search.problems.traveling_salesman_problem.move_generator import \
+from local_search.problems.traveling_salesman_problem.moves.move_generator import \
     TravelingSalesmanMoveGenerator
 from local_search.problems.traveling_salesman_problem.state import \
     TravelingSalesmanState
@@ -19,8 +19,7 @@ class TravelingSalesmanProblem(Problem):
         self._points: List[Point] = points
         self.depot_idx = depot_idx
         initial_solution = self.random_state()
-        move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name](
-            depot_idx)
+        move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name]()
         super().__init__(initial_solution, move_generator)
 
     @property
@@ -33,7 +32,6 @@ class TravelingSalesmanProblem(Problem):
         naive_circle = [self.depot_idx] + route + [self.depot_idx]
         return TravelingSalesmanState(points=self.points, route=naive_circle)
 
-    # TODO: Add tests
     def objective_for(self, state: TravelingSalesmanState) -> int:
         route = [self._points[i]
                  for i in state.route]

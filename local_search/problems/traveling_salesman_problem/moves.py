@@ -11,9 +11,9 @@ class SwapTwoEdges(Move[TravelingSalesmanState]):
         (self.a, self.b) = a, b
 
     def make(self) -> TravelingSalesmanState:
-        indicies = [*self.state.route]
-        indicies[self.a.end], indicies[self.b.end] = indicies[self.b.end], indicies[self.a.end]
-        return TravelingSalesmanState(points=self.state.points, route=indicies)
+        indices = [*self.state.route]
+        indices[self.a.end], indices[self.b.end] = indices[self.b.end], indices[self.a.end]
+        return TravelingSalesmanState(points=self.state.points, route=indices)
 
 class SwapThreeEdges(Move[TravelingSalesmanState]):
     def __init__(self, from_state: TravelingSalesmanState, a: Edge, b: Edge, c: Edge):
@@ -21,7 +21,7 @@ class SwapThreeEdges(Move[TravelingSalesmanState]):
         self.edges = [a, b, c]
 
     def make(self) -> TravelingSalesmanState:
-        indicies = [*self.state.route]
+        indices = [*self.state.route]
         starts = [edge.start for edge in self.edges]
         ends = [edge.end for edge in self.edges]
 
@@ -33,7 +33,7 @@ class SwapThreeEdges(Move[TravelingSalesmanState]):
         
         for i in range(len(self.edges)):
             start, end = starts[i], ends[i]
-            indicies[start+1], indicies[end] = indicies[end], indicies[start+1]
+            indices[start+1], indices[end] = indices[end], indices[start+1]
 
-        return TravelingSalesmanState(points=self.state.points, route=indicies)
+        return TravelingSalesmanState(points=self.state.points, route=indices)
 
