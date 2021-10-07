@@ -2,7 +2,7 @@ import os
 import json
 from dataclasses import fields
 from enum import Enum
-from inspect import signature
+from inspect import signature, getmro
 from typing import Callable, Type, Union
 
 import click
@@ -168,9 +168,13 @@ def create_algorithm(problem_model: Problem, options) -> SubscribableAlgorithm:
     return algorithm
 
 
-def get_type_for_param(callable: Callable, param_name: str):
-    params = signature(callable).parameters
-    return params[param_name].annotation if param_name in params else None
+def get_type_for_param(callable: Type, param_name: str):
+    mro = getmro(callable)
+    for method in mro:
+        params = signature(method).parameters
+        if param_name in params:
+            return params[param_name].annotation
+    return None
 
 
 def assure_problem_is_solvable_by_algo(config, key: str, problem_model: Problem):
@@ -185,11 +189,12 @@ def assure_problem_is_solvable_by_algo(config, key: str, problem_model: Problem)
 
 
 def add_algorithm_subscribers(options, problem_model: Problem, algorithm: SubscribableAlgorithm):
+    if options.setdefault('algorithm_monitor', False):
+        add_algorithm_monitor_subsriber(options, algorithm)
+
     if options.setdefault('visualization', {}).setdefault('enabled', False):
         add_visualization_subscriber(
             options['visualization'], problem_model, algorithm)
-    if options.setdefault('algorithm_monitor', False):
-        add_algorithm_monitor_subsriber(options, algorithm)
 
 
 def add_visualization_subscriber(options, problem_model: Problem, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmSubscriber]:
@@ -208,6 +213,7 @@ def add_visualization_subscriber(options, problem_model: Problem, algorithm: Sub
 
 
 def add_algorithm_monitor_subsriber(options, algorithm: SubscribableAlgorithm):
-    config = options['algorithm']
-    algorithm_config = create_dataclass(config, AlgorithmConfig)
-    AlgorithmMonitor(config=algorithm_config, algorithm=algorithm)
+    algorithm_config = create_dataclass(options['algorithm'], AlgorithmConfig)
+    solver_config = create_dataclass(options['solver_config'], SolverConfig)
+    AlgorithmMonitor(solver_config=solver_config,
+                     algorithm_config=algorithm_config, algorithm=algorithm)

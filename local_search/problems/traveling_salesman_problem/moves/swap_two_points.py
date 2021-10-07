@@ -32,6 +32,3 @@ class SwapTwoPoints(TravelingSalesmanMoveGenerator):
             i1 = random.randrange(1, len(state.route) - 2)
             i2 = random.randrange(i1 + 1, len(state.route) - 1)
             yield SwapTwoPointsMove(state, i1, i2)
-
-
-

@@ -39,7 +39,7 @@ class SubscribableAlgorithm(Algorithm):
 
     def _perturb(self, model: Problem, how_much: int):
         perturbed_state = self.best_state
-        for i in range(how_much):
+        for _ in range(how_much):
             perturbed_state = next(
                 model.move_generator.random_moves(perturbed_state)).make()
         return perturbed_state
@@ -67,6 +67,9 @@ class SubscribableAlgorithm(Algorithm):
         if self._is_stuck_in_local_optimum():
             next_state = self.escape_local_optimum(
                 model, state, self.best_state)
+            self._on_local_optimum_escape(
+                model, from_state=state, to_state=next_state)
+
         else:
             next_state = self._find_next_state(model, state)
 
@@ -105,6 +108,11 @@ class SubscribableAlgorithm(Algorithm):
     def _on_solution(self, model: Problem, solution: State):
         for subscriber in self._subscribers:
             subscriber.on_solution(model=model, solution=solution)
+
+    def _on_local_optimum_escape(self, model: Problem, from_state: State, to_state: Union[State, None]):
+        for subscriber in self._subscribers:
+            subscriber.on_local_optimum_escape(
+                model=model, from_state=from_state, to_state=to_state)
 
     def subscribe(self, subsriber: AlgorithmSubscriber):
         self._subscribers.append(subsriber)
