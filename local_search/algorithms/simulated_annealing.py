@@ -65,7 +65,7 @@ class SimulatedAnnealing(SubscribableAlgorithm):
     # TODO tests
     def _calculate_transition_probability(self, model: Problem, old_state: State, new_state: State) -> float:
         delta = model.improvement(new_state, old_state)
-        return math.exp(-delta / self.temperature)
+        return mpmath.exp(-delta / self.temperature)
 
     # TODO add plot of temperature
     # TODO check
