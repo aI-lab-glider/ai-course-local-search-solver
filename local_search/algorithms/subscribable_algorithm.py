@@ -43,18 +43,16 @@ class SubscribableAlgorithm(Algorithm):
         return perturbed_state
 
     def _get_neighbours(self, model: Problem, state: State) -> Generator[State, None, None]:
-        while True:
-            for move in model.move_generator.available_moves(state):
-                neighbour = move.make()
-                self._on_next_neighbour(model, state, neighbour)
-                yield neighbour
+        for move in model.move_generator.available_moves(state):
+            neighbour = move.make()
+            self._on_next_neighbour(model, state, neighbour)
+            yield neighbour
 
     def _get_random_neighbours(self, model: Problem, state: State) -> Generator[State, None, None]:
-        while True:
-            for move in model.move_generator.random_moves(state):
-                neighbour = move.make()
-                self._on_next_neighbour(model, state, neighbour)
-                yield neighbour
+        for move in model.move_generator.random_moves(state):
+            neighbour = move.make()
+            self._on_next_neighbour(model, state, neighbour)
+            yield neighbour
 
     def _is_stuck_in_local_optimum(self):
         return self.steps_from_last_state_update >= self.config.local_optimum_moves_threshold
