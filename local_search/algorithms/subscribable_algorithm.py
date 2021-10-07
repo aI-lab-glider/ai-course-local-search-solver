@@ -71,23 +71,26 @@ class SubscribableAlgorithm(Algorithm):
             next_state = self._find_next_state(model, state)
 
         if next_state is not None:
-            self._update_algorithm_state(model, next_state)
+            self._update_algorithm_state(model, state, next_state)
             self._on_next_state(model, next_state)
         else:
             self._on_solution(model, state)
 
         return next_state
 
-    def _update_algorithm_state(self, model: Problem, new_state: State):
+    def _update_algorithm_state(self, model: Problem, state, new_state: State):
         if self.best_state is None:
             self.best_state = new_state
+
+        if model.improvement(new_state, state) > 0:
+            self.steps_from_last_state_update = 0
+        else:
+            self.steps_from_last_state_update += 1
 
         if model.improvement(new_state, self.best_state) > 0:
             self.best_obj, self.best_state = model.objective_for(
                 new_state), new_state
-            self.steps_from_last_state_update = 0
-        else:
-            self.steps_from_last_state_update += 1
+
 
     def _on_next_state(self, model: Problem, next_state: State):
         """Called when algorithm find new best state"""
