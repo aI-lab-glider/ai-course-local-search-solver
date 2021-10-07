@@ -30,8 +30,3 @@ class TravelingSalesmanState(State):
         is_any_idx_differs = any(
             self.route[i] != other.route[i] for i in range(len(self.route)))
         return not is_any_idx_differs
-
-    def shuffle(self):
-        new_route = [self.route[0]] + \
-            sample(self.route[1:-1], len(self.route) - 2) + [self.route[-1]]
-        return TravelingSalesmanState(points=self.points, route=new_route)
