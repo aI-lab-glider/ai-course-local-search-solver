@@ -1,6 +1,6 @@
 import os
 import json
-from dataclasses import fields
+from dataclasses import astuple, fields
 from enum import Enum
 from inspect import signature, getmro
 from typing import Callable, Type, Union
