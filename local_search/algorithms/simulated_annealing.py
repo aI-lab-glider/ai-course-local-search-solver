@@ -14,6 +14,7 @@ class SAEscapeStrategy(IntEnum):
     Perturbation = auto()
     Reheat = auto()
 
+
 @dataclass
 class SimulatedAnnealingConfig(AlgorithmConfig):
     initial_temperature: int = 1000
@@ -26,6 +27,7 @@ class SimulatedAnnealingConfig(AlgorithmConfig):
 
 
 DEFAULT_CONFIG = SimulatedAnnealingConfig()
+
 
 class SimulatedAnnealing(SubscribableAlgorithm):
     """
@@ -52,14 +54,12 @@ class SimulatedAnnealing(SubscribableAlgorithm):
         if model.improvement(neighbour, state) > 0:
             next_state = neighbour
         else:
-            transition_probability = self._calculate_transition_probability(model, state, neighbour)
+            transition_probability = self._calculate_transition_probability(
+                model, state, neighbour)
             if random.random() <= transition_probability:
-                 next_state = neighbour
+                next_state = neighbour
 
         self._update_temperature()
-        if self._is_stuck_in_local_optimum():
-            next_state = self._escape_local_optimum(next_state)
-
         return next_state
 
     # TODO tests
@@ -78,7 +78,8 @@ class SimulatedAnnealing(SubscribableAlgorithm):
         if self._local_optimum_escapes > self.config.local_optimum_escapes_max >= 0:
             return None
 
-        strategy = random.choices(self._escape_strategies, weights=self._escape_probabilities)[0]
+        strategy = random.choices(
+            self._escape_strategies, weights=self._escape_probabilities)[0]
 
         if strategy == SAEscapeStrategy.RandomRestart:
             return self._random_restart(model)
