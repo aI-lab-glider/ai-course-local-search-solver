@@ -5,7 +5,7 @@ from local_search.problems.base.state import State
 from local_search.problems.base.problem import Problem
 import random
 from dataclasses import dataclass
-import math
+import mpmath
 from enum import IntEnum, auto
 
 
