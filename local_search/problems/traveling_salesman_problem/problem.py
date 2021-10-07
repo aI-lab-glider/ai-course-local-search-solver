@@ -19,7 +19,8 @@ class TravelingSalesmanProblem(Problem):
         self._points: List[Point] = points
         self.depot_idx = depot_idx
         initial_solution = self.random_state()
-        move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name]()
+        move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name](
+        )
         super().__init__(initial_solution, move_generator)
 
     @property
@@ -27,7 +28,8 @@ class TravelingSalesmanProblem(Problem):
         return self._points
 
     def random_state(self) -> TravelingSalesmanState:
-        route = [idx for idx in range(len(self._points)) if idx != self.depot_idx]
+        route = [idx for idx in range(
+            len(self._points)) if idx != self.depot_idx]
         random.shuffle(route)
         naive_circle = [self.depot_idx] + route + [self.depot_idx]
         return TravelingSalesmanState(points=self.points, route=naive_circle)
@@ -54,10 +56,10 @@ class TravelingSalesmanProblem(Problem):
             def line_to_point(line: str):
                 (x, y) = map(int, line.split(sep=' '))
                 return Point(x, y)
-            points = list(map(line_to_point, [line for line in benchmark_file]))
+            points = list(
+                map(line_to_point, [line for line in benchmark_file]))
             return TravelingSalesmanProblem(
                 points=list(points),
                 depot_idx=depot_idx,
                 move_generator_name=move_generator_name
             )
-

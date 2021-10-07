@@ -14,7 +14,7 @@
         "time_limit": 60000
     },
     "visualization": {
-        "enabled": true,
+        "enabled": false,
         "min_time_between_steps": 0.01
     },
     "algorithm_monitor": true

@@ -20,7 +20,8 @@
     },
     "visualization": {
         "enabled": true,
-        "min_time_between_steps": 0.01
+        "min_time_between_steps": 0.01,
+        "show_only_solution": true
     },
     "algorithm_monitor": true
 }

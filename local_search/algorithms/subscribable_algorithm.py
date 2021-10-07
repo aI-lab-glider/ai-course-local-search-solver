@@ -25,7 +25,8 @@ class SubscribableAlgorithm(Algorithm):
 
     def __init_subclass__(cls) -> None:
         if ABC not in cls.__bases__:
-            SubscribableAlgorithm.algorithms[camel_to_snake(cls.__name__)] = cls
+            SubscribableAlgorithm.algorithms[camel_to_snake(
+                cls.__name__)] = cls
 
     @abstractmethod
     def _find_next_state(self, model: Problem, state: State) -> Union[State, None]:
@@ -39,7 +40,8 @@ class SubscribableAlgorithm(Algorithm):
     def _perturb(self, model: Problem, how_much: int):
         perturbed_state = self.best_state
         for i in range(how_much):
-            perturbed_state = next(model.move_generator.random_moves(perturbed_state)).make()
+            perturbed_state = next(
+                model.move_generator.random_moves(perturbed_state)).make()
         return perturbed_state
 
     def _get_neighbours(self, model: Problem, state: State) -> Generator[State, None, None]:
@@ -63,7 +65,8 @@ class SubscribableAlgorithm(Algorithm):
             self._on_next_state(model, state)
 
         if self._is_stuck_in_local_optimum():
-            next_state = self.escape_local_optimum(model, state, self.best_state)
+            next_state = self.escape_local_optimum(
+                model, state, self.best_state)
         else:
             next_state = self._find_next_state(model, state)
 
@@ -71,7 +74,7 @@ class SubscribableAlgorithm(Algorithm):
             self._update_algorithm_state(model, next_state)
             self._on_next_state(model, next_state)
         else:
-            self._on_solution()
+            self._on_solution(model, state)
 
         return next_state
 
@@ -80,7 +83,8 @@ class SubscribableAlgorithm(Algorithm):
             self.best_state = new_state
 
         if model.improvement(new_state, self.best_state) > 0:
-            self.best_obj, self.best_state = model.objective_for(new_state), new_state
+            self.best_obj, self.best_state = model.objective_for(
+                new_state), new_state
             self.steps_from_last_state_update = 0
         else:
             self.steps_from_last_state_update += 1
@@ -95,11 +99,9 @@ class SubscribableAlgorithm(Algorithm):
         for subscriber in self._subscribers:
             subscriber.on_next_neighbour(model, from_state, next_neighbour)
 
-    def _on_solution(self):
+    def _on_solution(self, model: Problem, solution: State):
         for subscriber in self._subscribers:
-            subscriber.on_solution()
+            subscriber.on_solution(model=model, solution=solution)
 
     def subscribe(self, subsriber: AlgorithmSubscriber):
         self._subscribers.append(subsriber)
-
-
