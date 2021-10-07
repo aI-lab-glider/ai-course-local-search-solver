@@ -6,6 +6,7 @@ from local_search.problems.traveling_salesman_problem.moves.move_generator impor
 from local_search.problems.traveling_salesman_problem.state import TravelingSalesmanState
 import random
 
+
 class SwapTwoPointsMove(Move[TravelingSalesmanState]):
 
     def __init__(self, from_state: TravelingSalesmanState, i1: int, i2: int):
@@ -17,6 +18,7 @@ class SwapTwoPointsMove(Move[TravelingSalesmanState]):
         new_route[self.i1] = self.state.route[self.i2]
         new_route[self.i2] = self.state.route[self.i1]
         return TravelingSalesmanState(new_route, self.state.points)
+
 
 class SwapTwoPoints(TravelingSalesmanMoveGenerator):
 
