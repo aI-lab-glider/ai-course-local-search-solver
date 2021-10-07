@@ -1,17 +1,12 @@
 import random
-from dataclasses import dataclass
 from local_search.problems.base.problem import Problem, Goal
-from typing import Generator, Iterable, List, Set, Dict, Type
-from pathlib import Path
+from typing import Iterable, List, Set, Dict
 
-import local_search
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
-from local_search.problems.graph_coloring_problem.moves import ChangeColor
-
 
 from local_search.problems.graph_coloring_problem.models.edge import Edge
 from local_search.problems.graph_coloring_problem.models.vertex import Vertex
-from local_search.problems.graph_coloring_problem.move_generator import GraphColoringMoveGenerator
+from local_search.problems.graph_coloring_problem.moves.move_generator import GraphColoringMoveGenerator
 
 
 class GraphColoringProblem(Problem):
