@@ -15,6 +15,7 @@ from rich.panel import Panel
 CURR_STATE = 'current_state'
 PREV_STATE = 'previous_state'
 BEST_STATE = 'best_state'
+BEST_STATE_HUMAN = 'best_result'
 
 
 class AlgorithmMonitor(AlgorithmSubscriber):
@@ -28,10 +29,12 @@ class AlgorithmMonitor(AlgorithmSubscriber):
 
         self._stats = {
             'active_time': 0.0,
-            'best_state_updates_count': 0
+            'best_state_updates_count': 0,
+            BEST_STATE_HUMAN: None
         }
         self._states = {
             BEST_STATE: None,
+            BEST_STATE_HUMAN: None,
             CURR_STATE: None,
             PREV_STATE: None
         }
@@ -39,11 +42,11 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         self._iters_from_last_impr = 0
 
     def on_next_state(self, model: Problem, state: State):
-        self._update_stats(state)
+        self._update_stats(model, state)
         self._live.update(self._create_layout(model), refresh=True)
         time.sleep(self.delay_time)
 
-    def _update_stats(self, state):
+    def _update_stats(self, model, state):
         self._states[PREV_STATE] = self._states[CURR_STATE]
         self._states[CURR_STATE] = state
 
@@ -51,6 +54,8 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             self._states[BEST_STATE] = self.algorithm.best_state
             self._iters_from_last_impr = self.algorithm.steps_from_last_state_update
             self._stats["best_state_updates_count"] += 1
+            self._stats[BEST_STATE_HUMAN] = model.goal.human_readable_objective_for(self.algorithm.best_state)
+
 
         self._stats["active_time"] = round(
             time.monotonic() - self._start_time, 2)
@@ -73,7 +78,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         for state_name, state in self._states.items():
             if state is None:
                 continue
-            stat_name = f'{state_name.capitalize().replace("_", " ")} cost: '
+            stat_name = f'{state_name.capitalize().replace("_", " ")} objective: '
             value = model.objective_for(state)
             rows.append(f'[blue_violet]{stat_name}[/blue_violet]: {value}')
 
@@ -92,7 +97,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         completed_bar = f'[cyan]{"#" * completed}[/cyan]'
         arrow = '[cyan3]>[/cyan3]'
         left_bar = "-" * left
-        return f'Steps from last best state change: [{completed_bar}{arrow}{left_bar}]'
+        return f'Steps without improvement: [{completed_bar}{arrow}{left_bar}]'
 
     def _create_state_column(self) -> Layout:
         layout = Layout()
