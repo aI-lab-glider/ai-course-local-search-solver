@@ -2,7 +2,6 @@ from typing import List, Dict, Set
 
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.move_generator import MoveGenerator
-from local_search.problems.graph_coloring_problem.models.edge import Edge
 
 
 class GraphColoringMoveGenerator(MoveGenerator):

@@ -1,6 +1,7 @@
 from typing import Iterable, List
 import random
 from local_search.problems.base.problem import Problem, Goal
+from local_search.problems.traveling_salesman_problem.goal import TravelingSalesmanGoal, Distance
 from local_search.problems.traveling_salesman_problem.models.point import \
     Point
 from local_search.problems.traveling_salesman_problem.models.salesman import \
@@ -15,13 +16,14 @@ class TravelingSalesmanProblem(Problem):
 
     def __init__(self, points: List[Point],
                  depot_idx: int,
-                 move_generator_name: str):
+                 move_generator_name: str,
+                 goal_name: str):
         self._points: List[Point] = points
         self.depot_idx = depot_idx
         initial_solution = self.random_state()
-        move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name](
-        )
-        super().__init__(initial_solution, move_generator)
+        move_generator = TravelingSalesmanMoveGenerator.move_generators[move_generator_name]()
+        goal = TravelingSalesmanGoal.goals[goal_name](self._points)
+        super().__init__(initial_solution, move_generator, goal)
 
     @property
     def points(self):
@@ -34,22 +36,16 @@ class TravelingSalesmanProblem(Problem):
         naive_circle = [self.depot_idx] + route + [self.depot_idx]
         return TravelingSalesmanState(points=self.points, route=naive_circle)
 
-    def objective_for(self, state: TravelingSalesmanState) -> int:
-        route = [self._points[i]
-                 for i in state.route]
-        return int(Salesman.from_point(route[0])
-                           .walk_route(route)
-                           .travelled_distance)
-
-    def goal(self) -> Goal:
-        return Goal.MIN
-
     @staticmethod
     def get_available_move_generation_strategies() -> Iterable[str]:
         return TravelingSalesmanMoveGenerator.move_generators.keys()
 
+    @staticmethod
+    def get_available_goals() -> Iterable[str]:
+        return TravelingSalesmanGoal.goals.keys()
+
     @classmethod
-    def from_benchmark(cls, benchmark_name: str, move_generator_name: str):
+    def from_benchmark(cls, benchmark_name: str, move_generator_name: str, goal_name: str):
         with open(cls.get_path_to_benchmarks()/benchmark_name) as benchmark_file:
             depot_idx = int(benchmark_file.readline())
 
@@ -61,5 +57,6 @@ class TravelingSalesmanProblem(Problem):
             return TravelingSalesmanProblem(
                 points=list(points),
                 depot_idx=depot_idx,
-                move_generator_name=move_generator_name
+                move_generator_name=move_generator_name,
+                goal_name=goal_name
             )

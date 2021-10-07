@@ -2,6 +2,7 @@ import random
 from local_search.problems.base.problem import Problem, Goal
 from typing import Iterable, List, Set, Dict
 
+from local_search.problems.graph_coloring_problem.goals.goal import GraphColoringGoal
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
 
 from local_search.problems.graph_coloring_problem.models.edge import Edge
@@ -11,18 +12,15 @@ from local_search.problems.graph_coloring_problem.moves.move_generator import Gr
 
 class GraphColoringProblem(Problem):
 
-    @staticmethod
-    def get_available_move_generation_strategies() -> Iterable[str]:
-        return GraphColoringMoveGenerator.move_generators.keys()
-
-    def __init__(self, edges: List[Edge], move_generator_name: str):
+    def __init__(self, edges: List[Edge], move_generator_name: str, goal_name: str):
         self._edges: List[Edge] = edges
         self.graph: Dict[int, Set[int]] = self._create_graph()
         self.n_vertices = len(self.graph)
         move_generator = GraphColoringMoveGenerator.move_generators[move_generator_name](
-            self.n_vertices)
+            self.graph, self.n_vertices)
+        goal = GraphColoringGoal.goals[goal_name](self.edges, self.n_vertices)
         initial_solution = self._find_initial_solution()
-        super().__init__(initial_solution, move_generator)
+        super().__init__(initial_solution, move_generator, goal)
 
     @property
     def edges(self):
@@ -52,33 +50,12 @@ class GraphColoringProblem(Problem):
             coloring[vertex].color = available_colors[0]
         return GraphColoringState(coloring=coloring)
 
-    def _bad_edges(self, state: GraphColoringState) -> List[int]:
-        bad_edges = [0 for _ in range(self.n_vertices)]
-        for edge in self._edges:
-            if state.coloring[edge.start].color == state.coloring[edge.end].color:
-                bad_edges[state.coloring[edge.start].color] += 1
-        return bad_edges
-
-    def _color_classes(self, state: GraphColoringState) -> List[int]:
-        color_classes = [0 for _ in range(self.n_vertices)]
-        for vertex in state.coloring:
-            color_classes[vertex.color] += 1
-        return color_classes
-
-    def objective_for(self, state: GraphColoringState) -> int:
-        bad_edges = self._bad_edges(state)
-        color_classes = self._color_classes(state)
-        return sum([2*bad_edges[i]*color_classes[i]-color_classes[i]**2 for i in range(self.n_vertices)])
-
-    def goal(self) -> Goal:
-        return Goal.MIN
-
     def random_state(self) -> 'State':
         coloring = [Vertex(idx=i, color=random.randrange(self.n_vertices)) for i in range(self.n_vertices)]
         return GraphColoringState(coloring=coloring)
 
     @classmethod
-    def from_benchmark(cls, benchmark_name: str, move_generator_name: str):
+    def from_benchmark(cls, benchmark_name: str, move_generator_name: str, goal_name: str):
         with open(cls.get_path_to_benchmarks()/benchmark_name) as benchmark_file:
 
             def line_to_edge(line: str):
@@ -86,4 +63,12 @@ class GraphColoringProblem(Problem):
                 return Edge(start, end)
 
             edges = [line_to_edge(line) for line in benchmark_file]
-            return GraphColoringProblem(edges=edges, move_generator_name=move_generator_name)
+            return GraphColoringProblem(edges=edges, move_generator_name=move_generator_name, goal_name=goal_name)
+
+    @staticmethod
+    def get_available_move_generation_strategies() -> Iterable[str]:
+        return GraphColoringMoveGenerator.move_generators.keys()
+
+    @staticmethod
+    def get_available_goals() -> Iterable[str]:
+        return GraphColoringGoal.goals.keys()

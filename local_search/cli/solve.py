@@ -132,9 +132,15 @@ def create_problem_model(options):
     move_generator_name = get_or_prompt_if_not_exists_or_invalid(config, 'move_generator', {
         'type': click.Choice(list(model.get_available_move_generation_strategies()), case_sensitive=True)
     })
+
+    goal_name = get_or_prompt_if_not_exists_or_invalid(config, 'goal', {
+        'type': click.Choice(list(model.get_available_goals()), case_sensitive=True)
+    })
+
     return model.from_benchmark(
         benchmark_name=benchmark_file,
-        move_generator_name=move_generator_name)
+        move_generator_name=move_generator_name,
+        goal_name=goal_name)
 
 
 def get_benchmark_names_for_model(model_type: Type[Problem]):

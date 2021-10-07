@@ -24,7 +24,7 @@ class ChangeColor(GraphColoringMoveGenerator):
         used_colors = set([v.color for v in state.coloring])
         while True:
             idx = random.randrange(self.n_vertices)
-            available_colors = used_colors.difference(state.coloring[idx].color)
+            available_colors = tuple(used_colors.difference({state.coloring[idx].color}))
             yield ChangeColorMove(state,
                               idx=random.randrange(self.n_vertices),
                               color=random.choice(available_colors))
