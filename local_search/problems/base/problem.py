@@ -2,18 +2,19 @@ import local_search
 from abc import ABC, abstractmethod
 from pathlib import Path
 from enum import Enum
-from typing import Iterable, Type
+from typing import Dict, Iterable, Type
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.goal import Goal
 from local_search.problems.base.state import State
 from local_search.problems.base.move_generator import MoveGenerator
 from dataclasses import dataclass
 
+
 class Problem(ABC):
     """
     Contains all information about problem we are trying to solve.
     """
-    problems = {}
+    problems: Dict[str, Type['Problem']] = {}
 
     def __init__(self, initial_solution: State, move_generator: MoveGenerator, goal: Goal):
         self.initial_solution = initial_solution
@@ -40,7 +41,8 @@ class Problem(ABC):
         A helper method. Calculates how much the new_state is better than the old_state.
         Takes optimization goal under consideration.
         """
-        improvement = self.objective_for(new_state) - self.objective_for(old_state)
+        improvement = self.objective_for(
+            new_state) - self.objective_for(old_state)
         return improvement * self.goal.type().value
 
     @staticmethod
@@ -59,11 +61,26 @@ class Problem(ABC):
 
     @staticmethod
     @abstractmethod
-    def from_benchmark(benchmark_name: str, move_generator_name: str, goal_name: str) -> 'Problem':
+    def from_benchmark(benchmark_name: str, move_generator_name: str = None, goal_name: str = None) -> 'Problem':
         """
         Creates model from behcmark file
         """
 
     @classmethod
+    @abstractmethod
+    def from_solution(cls, problem_name: str) -> 'Problem':
+        """
+        Creates model from solution file
+        """
+
+    @classmethod
+    def get_path_to_module(cls) -> Path:
+        return Path(local_search.__file__).parent / "problems" / camel_to_snake(cls.__name__)
+
+    @classmethod
     def get_path_to_benchmarks(cls) -> Path:
-        return Path(local_search.__file__).parent / "problems" / camel_to_snake(cls.__name__) / "benchmarks"
+        return cls.get_path_to_module() / "benchmarks"
+
+    @classmethod
+    def get_path_to_solutions(cls) -> Path:
+        return cls.get_path_to_module() / "expected_solutions"

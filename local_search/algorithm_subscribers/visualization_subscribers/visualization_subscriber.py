@@ -1,10 +1,10 @@
 
 import sys
 import time
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import inf
-from typing import Type
+from typing import Dict, Type
 
 import pygame
 from local_search.algorithm_subscribers.algorithm_subscriber import \
@@ -30,18 +30,27 @@ class VisualizationSubcriberConfig:
     show_only_solution: bool = False
 
 
+class StateDrawer(ABC):
+    @abstractmethod
+    def draw_state(self, screen, model: Problem, state: State):
+        """
+        Draws state on provided screen.
+        """
+
+
 class VisualizationSubscriber(AlgorithmSubscriber):
     """
     Provides visualization to algorithm solutions.
     """
-    visualizations = {}
+    visualizations: Dict[Type[Problem], Type['VisualizationSubscriber']] = {}
     _BG_COLOR = (255, 255, 255)
     _FONT_COLOR = (0, 0, 0)
     _BUTTON_SIZE = (150, 75)
     _SCREEN_SIZE = (800, 800)
 
-    def __init__(self, config: VisualizationSubcriberConfig, algorithm: SubscribableAlgorithm, **kwargs):
+    def __init__(self, config: VisualizationSubcriberConfig, algorithm: SubscribableAlgorithm, model: Problem, **kwargs):
         self.config = config
+        self.state_drawer = self.create_state_drawer(model)
         if not self.config.show_only_solution:
             self._init_pygame()
         self._init_state()
@@ -50,6 +59,13 @@ class VisualizationSubscriber(AlgorithmSubscriber):
     def __init_subclass__(cls):
         VisualizationSubscriber.visualizations[cls.get_corresponding_problem(
         )] = cls
+
+    @classmethod
+    @abstractmethod
+    def create_state_drawer(cls, model: Problem) -> StateDrawer:
+        """
+        Returns state drawer for problem
+        """
 
     @staticmethod
     @abstractmethod
@@ -130,16 +146,10 @@ class VisualizationSubscriber(AlgorithmSubscriber):
             if not state:
                 continue
             screen.fill(self._BG_COLOR)
-            self._draw_state(screen, model, state)
+            self.state_drawer.draw_state(screen, model, state)
             self._draw_text(screen, state_name.capitalize().replace(
                 '_', ' '), (caption_font_size, caption_font_size), caption_font_size)
             self.main_screen.blit(screen, screen_coords)
-
-    @abstractmethod
-    def _draw_state(self, screen, model: Problem, state: State):
-        """
-        Draws state
-        """
 
     def _draw_text(self, screen, text, position, font_size):
         font = pygame.font.SysFont('arial', font_size)
