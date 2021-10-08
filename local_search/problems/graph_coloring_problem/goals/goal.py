@@ -9,7 +9,7 @@ from local_search.problems.graph_coloring_problem.state import GraphColoringStat
 
 class GraphColoringGoal(Goal, ABC):
     """
-    Base class for goals of the traveling salesman problem
+    Base class for goals of the graph coloring problem
     """
     goals = {}
 

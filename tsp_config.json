@@ -1,7 +1,7 @@
 {
     "problem": {
         "name": "traveling_salesman_problem",
-        "benchmark": "problem_2",
+        "benchmark": "problem_3",
         "move_generator": "two_opt"
     },
     "algorithm": {
