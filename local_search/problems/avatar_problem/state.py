@@ -8,7 +8,7 @@ class AvatarState(State):
     image: Image.Image
 
     def __str__(self):
-        return str(self.image.getdata())
+        return 'There is no string representation of avatar state.'
 
     def __eq__(self, other: 'AvatarState'):
         if other is None:
@@ -17,6 +17,3 @@ class AvatarState(State):
 
     def show_image(self):
         self.image.show()
-
-    def shuffle(self):
-        return self

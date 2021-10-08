@@ -5,7 +5,7 @@ from local_search.problems.base.goal import Goal, GoalType
 from local_search.problems.base.state import State
 
 
-class AvatarProblemGoal(Goal):
+class ApproximateAvatar(Goal):
 
     def __init__(self, reference_image: Image.Image):
         self._ref = reference_image

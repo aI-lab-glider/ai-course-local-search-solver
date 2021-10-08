@@ -2,7 +2,8 @@
     "problem": {
         "name": "avatar_problem",
         "benchmark": "monalisa.jpg",
-        "move_generator": "avatar_move_generator"
+        "move_generator": "add_triangle",
+        "goal": "approximate_avatar"
     },
     "algorithm": {
         "name": "first_choice_hill_climbing",
@@ -14,7 +15,7 @@
         "time_limit": 60000
     },
     "visualization": {
-        "enabled": false,
+        "enabled": true,
         "min_time_between_steps": 0.01
     },
     "algorithm_monitor": true
