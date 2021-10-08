@@ -34,7 +34,7 @@ class Distance(TravelingSalesmanGoal):
                            .travelled_distance)
 
     def human_readable_objective_for(self, state: TravelingSalesmanState) -> str:
-        return f"distance: {self.objective_for(state)}"
+        return f"{self.objective_for(state)} km"
 
     def type(self) -> GoalType:
         return GoalType.MIN

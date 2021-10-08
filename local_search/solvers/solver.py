@@ -7,9 +7,6 @@ from time import time
 
 @dataclass
 class SolverConfig:
-    """
-    Parameters that are required to correct solver work
-    """
     max_iter: int = 1000
     time_limit: int = 60
 
