@@ -7,11 +7,13 @@ from local_search.problems.traveling_salesman_problem.models.edge import \
     Edge
 from random import sample
 
+from local_search.problems.traveling_salesman_problem.models.point import Point
+
 
 @dataclass
 class TravelingSalesmanState(State):
     route: List[int]
-    points: List[Tuple[int,int]]
+    points: List[Point]
 
     def __str__(self):
         return str.join(" -> ", map(lambda idx: f'({self.points[idx].x}, {self.points[idx].y})', self.route))

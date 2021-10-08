@@ -1,6 +1,7 @@
 import click
 from local_search.cli.solve import solve
 from local_search.cli.describe_algorithm import describe_algorithm
+from local_search.cli.show import show
 
 
 @click.group()
@@ -12,3 +13,4 @@ def entry_point():
 
 entry_point.add_command(solve)
 entry_point.add_command(describe_algorithm)
+entry_point.add_command(show)
