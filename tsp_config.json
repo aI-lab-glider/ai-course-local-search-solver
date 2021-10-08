@@ -1,14 +1,14 @@
 {
     "problem": {
         "name": "traveling_salesman_problem",
-        "benchmark": "problem_3",
-        "move_generator": "two_opt"
+        "benchmark": "problem_2",
+        "move_generator": "swap_two_points"
     },
     "algorithm": {
         "name": "simulated_annealing",
-        "local_optimum_moves_threshold": 100,
-        "local_optimum_escapes_max": 100,
-        "initial_temperature": 1000,
+        "local_optimum_moves_threshold": 500,
+        "local_optimum_escapes_max": 200,
+        "initial_temperature": 10000,
         "cooling_step": 0.001,
         "min_temperature": 1e-8,
         "escape_random_restart_probability": 0.33
@@ -18,8 +18,8 @@
         "time_limit": 60000
     },
     "visualization": {
-        "enabled": false,
-        "min_time_between_steps": 0.01
+        "enabled": true,
+        "min_time_between_steps": 0
     },
     "algorithm_monitor": true
 }

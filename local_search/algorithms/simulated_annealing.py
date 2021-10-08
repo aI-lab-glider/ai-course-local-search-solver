@@ -14,11 +14,12 @@ class SAEscapeStrategy(IntEnum):
     Perturbation = auto()
     Reheat = auto()
 
+
 @dataclass
 class SimulatedAnnealingConfig(AlgorithmConfig):
-    initial_temperature: int = 1000
-    cooling_step: float = 0.001
-    min_temperature: float = 1e-8
+    initial_temperature: int = 5
+    cooling_step: float = 0.999
+    min_temperature: float = 1e-10
     escape_random_restart_probability: float = 0.33
     escape_perturbation_probability: float = 0.33
     escape_perturbation_size: int = 50
@@ -26,6 +27,7 @@ class SimulatedAnnealingConfig(AlgorithmConfig):
 
 
 DEFAULT_CONFIG = SimulatedAnnealingConfig()
+
 
 class SimulatedAnnealing(SubscribableAlgorithm):
     """
@@ -43,42 +45,58 @@ class SimulatedAnnealing(SubscribableAlgorithm):
         self._escape_probabilities[SAEscapeStrategy.RandomRestart.value] = self.config.escape_random_restart_probability
         self._escape_probabilities[SAEscapeStrategy.Perturbation.value] = self.config.escape_perturbation_probability
         self._escape_probabilities[SAEscapeStrategy.Reheat.value] = self.config.escape_reheat_probability
+        self.cooling_time = 0
         super().__init__(config=config)
 
     def _find_next_state(self, model: Problem, state: State) -> Union[State, None]:
+        # TODO:
+        # — find random neighbour (self._get_random_neighbours + `next` to read a single element)
+        # — if the neighbour is better then mark is as the next state
+        # — otherwise calculate the probability of transition using self._calculate_transition_probability
+        #   * use random.random() to check whether the neighbor should be a new state
+        # — update temperature
+        # — return the new state
         next_state = state
         neighbour = next(self._get_random_neighbours(model, state))
 
         if model.improvement(neighbour, state) > 0:
             next_state = neighbour
         else:
-            transition_probability = self._calculate_transition_probability(model, state, neighbour)
+            transition_probability = self._calculate_transition_probability(
+                model, state, neighbour)
             if random.random() <= transition_probability:
-                 next_state = neighbour
+                next_state = neighbour
 
         self._update_temperature()
-        if self._is_stuck_in_local_optimum():
-            next_state = self._escape_local_optimum(next_state)
-
         return next_state
 
-    # TODO tests
     def _calculate_transition_probability(self, model: Problem, old_state: State, new_state: State) -> float:
+        # TODO:
+        # - calculate probability of transition according to the metropolis function
+        #   p = exp(delta / temperature)
+        #   where: delta is the improvement of the objective function (model has a corresponding method)
+        # - use mpmath to calculate the exponential
         delta = model.improvement(new_state, old_state)
-        return mpmath.exp(-delta / self.temperature)
+        return mpmath.exp(delta / self.temperature)
 
-    # TODO add plot of temperature
-    # TODO check
     def _update_temperature(self):
-        self.temperature = max(self.temperature - self.config.cooling_step *
-                               self.temperature, self.config.min_temperature)
+        # TODO:
+        # — update self.temperature according to the exponential decrease function:
+        #   T_k = T * a^k
+        #   where 'a' can be found in the config as the cooling_step
+        #   and k is stored as self.cooling_time
+        # - update self.cooling_time
+        # - the temperature can't go below self.config.min_temperature
+        self.temperature = max(self.temperature * (self.config.cooling_step ** self.cooling_time), self.config.min_temperature)
+        self.cooling_time += 1
 
     def escape_local_optimum(self, model: Problem, state: State, best_state: State) -> Union[State, None]:
         self._local_optimum_escapes += 1
         if self._local_optimum_escapes > self.config.local_optimum_escapes_max >= 0:
             return None
 
-        strategy = random.choices(self._escape_strategies, weights=self._escape_probabilities)[0]
+        strategy = random.choices(
+            self._escape_strategies, weights=self._escape_probabilities)[0]
 
         if strategy == SAEscapeStrategy.RandomRestart:
             return self._random_restart(model)
@@ -88,6 +106,12 @@ class SimulatedAnnealing(SubscribableAlgorithm):
             return self._reheat(state)
 
     def _reheat(self, from_state: State):
+        # TODO:
+        # — restore the initial temperature from config
+        # — reset cooling schedule (self.cooling_steps)
+        # — reset self.steps_from_last_state_update
+        # return the from state
         self.temperature = self.config.initial_temperature
         self.steps_from_last_state_update = 0
+        self.cooling_time = 0
         return from_state
