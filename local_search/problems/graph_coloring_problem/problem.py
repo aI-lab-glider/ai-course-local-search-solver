@@ -1,3 +1,4 @@
+from io import TextIOWrapper
 import random
 from local_search.problems.base.problem import Problem, Goal
 from typing import Iterable, List, Set, Dict, Union
@@ -12,7 +13,7 @@ from local_search.problems.graph_coloring_problem.moves.move_generator import Gr
 
 class GraphColoringProblem(Problem):
 
-    def __init__(self, edges: List[Edge], move_generator_name: Union[str, None], goal_name: Union[str, None]):
+    def __init__(self, edges: List[Edge], move_generator_name: Union[str, None] = None, goal_name: Union[str, None] = None):
         self._edges: List[Edge] = edges
         self.graph: Dict[int, Set[int]] = self._create_graph()
         self.n_vertices = len(self.graph)
@@ -61,13 +62,32 @@ class GraphColoringProblem(Problem):
     @classmethod
     def from_benchmark(cls, benchmark_name: str, move_generator_name: str = None, goal_name: str = None):
         with open(cls.get_path_to_benchmarks()/benchmark_name) as benchmark_file:
-
-            def line_to_edge(line: str):
-                (start, end) = map(int, line.split(sep=' '))
-                return Edge(start, end)
-
-            edges = [line_to_edge(line) for line in benchmark_file]
+            edges = cls.parse_edges(benchmark_file)
             return GraphColoringProblem(edges=edges, move_generator_name=move_generator_name, goal_name=goal_name)
+
+    @classmethod
+    def parse_edges(cls, file_buffer: TextIOWrapper):
+        def line_to_edge(line: str):
+            (start, end) = map(int, line.split(sep=' '))
+            return Edge(start, end)
+        edges = [line_to_edge(line) for line in file_buffer]
+        return edges
+
+    @classmethod
+    def from_solution(cls, solution_name: str):
+        with open(cls.get_path_to_solutions()/solution_name, 'r') as solution_file:
+            coloring = cls.parse_coloring(solution_file)
+            _ = solution_file.readline()
+            edges = cls.parse_edges(solution_file)
+        model = cls(edges=edges)
+        model.initial_solution = GraphColoringState(coloring=coloring)
+        return model
+
+    @classmethod
+    def parse_coloring(cls, file_buffer: TextIOWrapper):
+        line = file_buffer.readline()
+        coloring = line.replace('State:', '').strip().split(' ')
+        return [Vertex(i, int(c)) for i, c in enumerate(coloring)]
 
     @staticmethod
     def get_available_move_generation_strategies() -> Iterable[str]:

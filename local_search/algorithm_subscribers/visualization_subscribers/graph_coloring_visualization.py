@@ -9,6 +9,7 @@ import pygame
 
 
 EDGE_COLOR = (0, 0, 0)
+WHITE = (255, 255, 255)
 
 
 class GraphColoringVisualization(VisualizationSubscriber):
@@ -45,6 +46,7 @@ class GraphColoringStateDrawer(StateDrawer):
         """
         Draws state
         """
+        screen.fill(WHITE)
         self._draw_lines(screen, model)
         self._draw_vertices(screen, model, state)
 
