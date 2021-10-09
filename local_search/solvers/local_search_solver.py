@@ -1,7 +1,7 @@
 from typing import Any, Callable, Dict, Generic, List, Type, TypeVar
 from local_search.algorithm_subscribers.algorithm_monitor import AlgorithmStatistics
 from local_search.algorithms.algorithm import Algorithm
-from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
+from local_search.algorithms.subscribable_algorithm import MIN_NICENCESS, SubscribableAlgorithm
 from local_search.problems.base import State, Problem
 from local_search.solvers.solver import Solver
 from dataclasses import dataclass
@@ -46,7 +46,8 @@ class LocalSearchSolver(Solver):
     """
 
     def solve(self, model: Problem, algorithm: SubscribableAlgorithm) -> Solution:
-        statistics_subscription = algorithm.subscribe(self.algorithm_monitor)
+        statistics_subscription = algorithm.subscribe(
+            self.algorithm_monitor, niceness=MIN_NICENCESS)
         # TODO delegate to algorithm monitor
         self.start_timer()
         solution_state = model.initial_state
