@@ -11,7 +11,8 @@
     },
     "solver_config": {
         "max_iter": 10000,
-        "time_limit": 60000
+        "time_limit": 60000,
+        "show_statistics": true
     },
     "visualization": {
         "enabled": true,
