@@ -1,6 +1,7 @@
 from io import TextIOWrapper
 from typing import Iterable, List, Union
 import random
+from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.problem import Problem, Goal
 from local_search.problems.traveling_salesman_problem.goal import TravelingSalesmanGoal, Distance
 from local_search.problems.traveling_salesman_problem.models.point import \
@@ -83,7 +84,7 @@ class TravelingSalesmanProblem(Problem):
             points=points,
             depot_idx=depot_idx
         )
-        model.initial_solution = TravelingSalesmanState(
+        model.initial_state = TravelingSalesmanState(
             route=route, points=points)
         return model
 
@@ -91,3 +92,11 @@ class TravelingSalesmanProblem(Problem):
     def parse_route(cls, file_buffer: TextIOWrapper):
         idxs = file_buffer.readline().replace('State:', '').strip().split(' ')
         return list(map(int, idxs))
+
+    def asdict(self):
+        return {
+            'goal_name': camel_to_snake(type(self.goal).__name__),
+            'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
+            'depot_idx': self.depot_idx,
+            'points': self.points
+        }

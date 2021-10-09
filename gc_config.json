@@ -15,9 +15,8 @@
         "show_statistics": true
     },
     "visualization": {
-        "enabled": true,
+        "enabled": false,
         "min_time_between_steps": 0.01,
         "show_only_solution": false
-    },
-    "algorithm_monitor": true
+    }
 }

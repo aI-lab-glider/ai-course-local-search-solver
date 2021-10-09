@@ -32,3 +32,9 @@ class TravelingSalesmanState(State):
         is_any_idx_differs = any(
             self.route[i] != other.route[i] for i in range(len(self.route)))
         return not is_any_idx_differs
+
+    def asdict(self):
+        return {
+            'route': self.route,
+            'points': self.points
+        }

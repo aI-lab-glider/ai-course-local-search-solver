@@ -1,13 +1,17 @@
+from itertools import chain
 import local_search
 from abc import ABC, abstractmethod
 from pathlib import Path
 from enum import Enum
-from typing import Dict, Iterable, Type
+from typing import Dict, Iterable, Type, TypeVar
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.goal import Goal
 from local_search.problems.base.state import State
 from local_search.problems.base.move_generator import MoveGenerator
 from dataclasses import dataclass
+from inspect import getmro, signature
+
+TProblem = TypeVar("TProblem", bound='Problem')
 
 
 class Problem(ABC):
@@ -17,7 +21,7 @@ class Problem(ABC):
     problems: Dict[str, Type['Problem']] = {}
 
     def __init__(self, initial_solution: State, move_generator: MoveGenerator, goal: Goal):
-        self.initial_solution = initial_solution
+        self.initial_state = initial_solution
         self.move_generator = move_generator
         self.goal = goal
 
@@ -84,3 +88,22 @@ class Problem(ABC):
     @classmethod
     def get_path_to_solutions(cls) -> Path:
         return cls.get_path_to_module() / "expected_solutions"
+
+    @abstractmethod
+    def asdict():
+        """
+        Creates dictionary with keys same as parameters from __init__ method.
+        """
+
+    @classmethod
+    def from_dict(cls: Type[TProblem], data) -> TProblem:
+        """
+        Creates problem representation as a dict.
+        """
+        params = set(chain(signature(method).parameters.keys()
+                     for method in getmro(cls)))
+        missing_params = set(data.keys()) - params
+        if missing_params:
+            raise ValueError(
+                f'Cannot create {cls.__name__} from passed dict. Missing params are: {",".join(missing_params)}')
+        return cls(**data)

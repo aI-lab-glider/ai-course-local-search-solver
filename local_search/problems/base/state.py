@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from inspect import signature, getmro
+from itertools import chain
 
 
 @dataclass
@@ -16,3 +18,22 @@ class State(ABC):
         """
         Compares current states to another state.
         """
+
+    @abstractmethod
+    def asdict(self):
+        """
+        Creates dictionary with keys same as parameters from __init__ method.
+        """
+
+    @classmethod
+    def from_dict(cls, data) -> 'State':
+        """
+        Creates state from dictionary
+        """
+        params = set(chain(signature(method).parameters.keys()
+                     for method in getmro(cls)))
+        missing_params = set(data.keys()) - params
+        if missing_params:
+            raise ValueError(
+                f'Cannot create {cls.__name__} from passed dict. Missing params are: {",".join(missing_params)}')
+        return cls(**data)
