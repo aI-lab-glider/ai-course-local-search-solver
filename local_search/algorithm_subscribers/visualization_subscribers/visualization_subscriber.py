@@ -30,6 +30,9 @@ class VisualizationSubcriberConfig:
     show_only_solution: bool = False
 
 
+DEFAULT_CONFIG = VisualizationSubcriberConfig()
+
+
 class StateDrawer(ABC):
     @abstractmethod
     def draw_state(self, screen, model: Problem, state: State):
@@ -48,13 +51,13 @@ class VisualizationSubscriber(AlgorithmSubscriber):
     _BUTTON_SIZE = (150, 75)
     _SCREEN_SIZE = (800, 800)
 
-    def __init__(self, config: VisualizationSubcriberConfig, algorithm: SubscribableAlgorithm, model: Problem, **kwargs):
-        self.config = config
+    def __init__(self, model: Problem, config: VisualizationSubcriberConfig = None):
+        self.config = config or DEFAULT_CONFIG
         self.state_drawer = self.create_state_drawer(model)
         if not self.config.show_only_solution:
             self._init_pygame()
         self._init_state()
-        super().__init__(algorithm, **kwargs)
+        super().__init__()
 
     def __init_subclass__(cls):
         VisualizationSubscriber.visualizations[cls.get_corresponding_problem(

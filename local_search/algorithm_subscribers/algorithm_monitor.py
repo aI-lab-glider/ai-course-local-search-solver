@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import operator as op
 import time
 from typing import Union
-from local_search.solvers.solver import SolverConfig
+from local_search.solvers.solver_config import SolverConfig
 
 from rich import box
 
@@ -35,12 +35,12 @@ class Event:
 class AlgorithmMonitor(AlgorithmSubscriber):
     delay_time = .001
 
-    def __init__(self, solver_config: SolverConfig, algorithm_config: AlgorithmConfig, **kwargs):
+    def __init__(self, solver_config: SolverConfig, **kwargs):
         super().__init__(**kwargs)
-        self._algorithm_config = algorithm_config
         self._solver_config = solver_config
         self._live = Live(auto_refresh=False)
-        self._live.start()
+        if self._solver_config.show_statistics:
+            self._live.start()
 
         self._stats = {
             ACTIVE_TIME: 0.0,
@@ -145,7 +145,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
 
     def _create_progress_bar(self):
         completed = self._stats[ITERS_FROM_LAST_IMPROVEMENT] - 1
-        left = self._algorithm_config.local_optimum_moves_threshold - completed
+        left = self.algorithm.config.local_optimum_moves_threshold - completed
         completed_bar = f'[cyan]{"#" * completed}[/cyan]'
         arrow = '[cyan3]>[/cyan3]'
         left_bar = "-" * left

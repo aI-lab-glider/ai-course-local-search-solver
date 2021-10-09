@@ -1,18 +1,16 @@
-import os
 import json
-from dataclasses import astuple, fields
+import os
+from dataclasses import fields
 from enum import Enum
-from inspect import signature, getmro
-from typing import Callable, Type, Union
+from inspect import getmro, signature
+from typing import Type
 
 import click
-from local_search.algorithm_subscribers import (AlgorithmSubscriber,
-                                                VisualizationSubscriber)
-from local_search.algorithm_subscribers.algorithm_monitor import \
-    AlgorithmMonitor
-from local_search.algorithms.algorithm_config import AlgorithmConfig
-from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
+from local_search.algorithm_subscribers import (
+    VisualizationSubscriber)
 from local_search.algorithms.hill_climbing.hill_climbing import HillClimbing
+from local_search.algorithms.subscribable_algorithm import \
+    SubscribableAlgorithm
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.avatar_problem.problem import AvatarProblem
 from local_search.problems.base.problem import Problem
@@ -189,20 +187,16 @@ def assure_problem_is_solvable_by_algo(config, key: str, problem_model: Problem)
 
 
 def add_algorithm_subscribers(options, problem_model: Problem, algorithm: SubscribableAlgorithm):
-    if options.setdefault('algorithm_monitor', False):
-        add_algorithm_monitor_subsriber(options, algorithm)
-
     if options.setdefault('visualization', {}).setdefault('enabled', False):
         add_visualization_subscriber(
             options['visualization'], problem_model, algorithm)
 
 
-def add_visualization_subscriber(options, problem_model: Problem, algorithm: SubscribableAlgorithm) -> Union[SubscribableAlgorithm, AlgorithmSubscriber]:
+def add_visualization_subscriber(options, problem_model: Problem, algorithm: SubscribableAlgorithm) -> None:
     visualization = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
     if visualization:
         visualization_params = {
-            'algorithm': algorithm,
             'model': problem_model
         }
         config_type = get_type_for_param(visualization, 'config')
@@ -210,10 +204,4 @@ def add_visualization_subscriber(options, problem_model: Problem, algorithm: Sub
             visualization_params['config'] = create_dataclass(
                 options, config_type)
         visualization = visualization(**visualization_params)
-
-
-def add_algorithm_monitor_subsriber(options, algorithm: SubscribableAlgorithm):
-    algorithm_config = create_dataclass(options['algorithm'], AlgorithmConfig)
-    solver_config = create_dataclass(options['solver_config'], SolverConfig)
-    AlgorithmMonitor(solver_config=solver_config,
-                     algorithm_config=algorithm_config, algorithm=algorithm)
+        algorithm.subscribe(visualization)
