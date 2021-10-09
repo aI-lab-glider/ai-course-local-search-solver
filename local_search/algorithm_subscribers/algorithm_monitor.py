@@ -1,16 +1,14 @@
-from dataclasses import dataclass
-import operator as op
 import time
+from dataclasses import asdict, dataclass
 from typing import Union
-from local_search.solvers.solver_config import SolverConfig
-
-from rich import box
 
 from local_search.algorithm_subscribers.algorithm_subscriber import \
     AlgorithmSubscriber
 from local_search.algorithms import AlgorithmConfig
 from local_search.problems.base.problem import Problem
 from local_search.problems.base.state import State
+from local_search.solvers.solver_config import SolverConfig
+from rich import box
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
@@ -24,6 +22,22 @@ ACTIVE_TIME = 'active_time'
 BEST_STATES_UPDATE_COUNT = 'best_state_updates_count'
 LOCAL_OPTIMUM_ESCAPES_COUNT = 'local_optimum_escapes_count'
 ITERS_FROM_LAST_IMPROVEMENT = 'iters_from_last_impr'
+EXPLORED_STATES_COUNT = 'explored_states_count'
+
+
+@dataclass
+class AlgorithmStatistics:
+    local_optimum_escapes_count: int = 0
+    best_states_update_count: int = 0
+    explored_states_count: int = 0
+    active_time: float = 0
+
+    def asdict(self):
+        return asdict(self)
+
+    @staticmethod
+    def from_dict(data) -> 'AlgorithmStatistics':
+        return AlgorithmStatistics(**data)
 
 
 @dataclass
@@ -46,8 +60,11 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             ACTIVE_TIME: 0.0,
             BEST_STATES_UPDATE_COUNT: 0,
             LOCAL_OPTIMUM_ESCAPES_COUNT: 0,
-            BEST_STATE_HUMAN: None
+            BEST_STATE_HUMAN: None,
+            ITERS_FROM_LAST_IMPROVEMENT: 0,
+            EXPLORED_STATES_COUNT: 0
         }
+
         self._states = {
             BEST_STATE: None,
             BEST_STATE_HUMAN: None,
@@ -56,6 +73,15 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         }
         self._start_time = time.monotonic()
         self._last_event = None
+
+    @property
+    def statistics(self):
+        return AlgorithmStatistics(
+            local_optimum_escapes_count=self._stats[LOCAL_OPTIMUM_ESCAPES_COUNT],
+            best_states_update_count=self._stats[BEST_STATES_UPDATE_COUNT],
+            explored_states_count=self._stats[EXPLORED_STATES_COUNT],
+            active_time=self._stats[ACTIVE_TIME]
+        )
 
     def on_next_state(self, model: Problem, state: State):
         self._update_info(model, state)

@@ -1,5 +1,6 @@
 from io import TextIOWrapper
 import random
+from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.problem import Problem, Goal
 from typing import Iterable, List, Set, Dict, Union
 
@@ -80,7 +81,7 @@ class GraphColoringProblem(Problem):
             _ = solution_file.readline()
             edges = cls.parse_edges(solution_file)
         model = cls(edges=edges)
-        model.initial_solution = GraphColoringState(coloring=coloring)
+        model.initial_state = GraphColoringState(coloring=coloring)
         return model
 
     @classmethod
@@ -96,3 +97,10 @@ class GraphColoringProblem(Problem):
     @staticmethod
     def get_available_goals() -> Iterable[str]:
         return GraphColoringGoal.goals.keys()
+
+    def asdict(self):
+        return {
+            'edges': self.edges,
+            'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
+            'goal_name': camel_to_snake(type(self.goal).__name__),
+        }

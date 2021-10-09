@@ -30,7 +30,7 @@ def show(problem_name: str, solution_file: str):
     state_drawer = VisualizationSubscriber.visualizations[problem_type].create_state_drawer(
         problem)
     screen = create_screen()
-    state_drawer.draw_state(screen, problem, problem.initial_solution)
+    state_drawer.draw_state(screen, problem, problem.initial_state)
     pygame.display.flip()
     freeze()
 

@@ -18,3 +18,8 @@ class GraphColoringState(State):
         if other is None:
             return False
         return all(ov.color == sv.color for sv, ov in zip(self.coloring, other.coloring))
+
+    def asdict(self):
+        return {
+            'coloring': self.coloring,
+        }

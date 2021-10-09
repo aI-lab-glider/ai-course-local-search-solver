@@ -49,7 +49,7 @@ class Solver(ABC):
     def wall_time(self) -> float:
         return time() - self.start_time
 
-    def timeout(self) -> bool:
+    def is_timeout(self) -> bool:
         return self.wall_time() > self._time_limit
 
     @abstractmethod

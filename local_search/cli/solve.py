@@ -3,6 +3,7 @@ import os
 from dataclasses import fields
 from enum import Enum
 from inspect import getmro, signature
+from pathlib import Path
 from typing import Type
 
 import click
@@ -19,16 +20,6 @@ from local_search.solvers.solver import SolverConfig
 from rich import pretty
 from rich.console import Console
 
-# TODO
-# [x] Make Avatars compatible
-# [x] Change subscription logic
-# [x] Rename things
-# [x] Remove useless methods and fields
-# [x] Add visualization from GC
-# [x] Add pause button
-# [] Move visualization params to config
-# [] Add documentation
-# [] Add tests
 
 console = Console()
 pretty.install()
@@ -48,7 +39,7 @@ def solve(config_file, **cli_options):
     problem_model = create_problem_model(options)
     algorithm = create_algorithm(problem_model, options)
     solution = solver.solve(problem_model, algorithm)
-    console.print("Solution: ", str(solution))
+    solution.to_json(Path('solution.json'))
 
 
 def merge_options(config_file_path: str, cli_options):
