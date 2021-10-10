@@ -1,0 +1,230 @@
+import json
+import os
+from dataclasses import fields
+from enum import Enum
+from inspect import getmro, signature
+from pathlib import Path
+from typing import Type
+
+import click
+from local_search.algorithm_subscribers import (
+    VisualizationSubscriber)
+from local_search.algorithms.hill_climbing.hill_climbing import HillClimbing
+from local_search.algorithms.subscribable_algorithm import \
+    SubscribableAlgorithm
+from local_search.helpers.camel_to_snake import camel_to_snake
+from local_search.problems.avatar_problem.problem import AvatarProblem
+from local_search.problems.base.problem import Problem
+from local_search.problems.base.solution import Solution
+from local_search.solvers import LocalSearchSolver
+from local_search.solvers.solver import SolverConfig
+from rich import pretty
+from rich.console import Console
+import local_search
+
+
+console = Console()
+pretty.install()
+
+
+@click.command('solve')
+@click.option('-c', '--config_file', type=click.Path(readable=True, exists=True), help='File that provides configuration for run')
+@click.option('-v', '--visualization', is_flag=True)
+@click.option('-m', '--algorithm_monitor', is_flag=True)
+def solve(config_file, **cli_options):
+    """
+    Solves a problem based on config file or cli options.
+    Config file should contain same keys as defined in click.option decorator above.
+    """
+    options = merge_options(config_file, cli_options)
+    solver = create_solver(options)
+    problem_model = create_problem_model(options)
+    algorithm = create_algorithm(problem_model, options)
+    solution = solver.solve(problem_model, algorithm)
+    if get_or_prompt_if_not_exists_or_invalid(options, 'save_solution', {
+        'type': bool,
+        'default': True
+    }):
+        path = create_path_to_save_solution(options)
+        while path.exists():
+            should_overwrite = click.confirm(
+                f"There is already a solution saved to {path}. Do you want to overwrite it?", default=True)
+            if not should_overwrite:
+                new_name = click.prompt(
+                    f'New name to save in folder {path.parent} (without extension)', type=str)
+                path = path.parent/f'{new_name}.json'
+            else:
+                break
+        solution.to_json(path)
+        console.print(f'Solution is saved to file {path}')
+
+
+def merge_options(config_file_path: str, cli_options):
+    options = cli_options
+    if config_file_path:
+        with open(config_file_path, 'r') as config:
+            config = json.load(config)
+            options = {
+                k: cli_options.setdefault(
+                    k, None) or config.setdefault(k, None)
+                for k in set([*cli_options.keys(), *config.keys()])}
+    console.log("Initialized with options: ", options)
+    return options
+
+
+def get_or_prompt_if_not_exists_or_invalid(options, option_key: str, option_config=None) -> str:
+    """
+    Prompts for :param option_key: if it doesn't exists in options or if it is invalid.
+    """
+    option_config = option_config or {}
+    if options.setdefault(option_key, None) is None:
+        get_or_prompt(options, option_key, option_config)
+    if option_config.setdefault('type', False):
+        if isinstance(option_config['type'], click.Choice) and options[option_key] not in option_config['type'].choices:
+            console.print(
+                f"Value {options[option_key]} is invalid for for option {option_key} in this context.")
+            get_or_prompt(options, option_key, option_config)
+    return options[option_key]
+
+
+def get_or_prompt(options, option_key: str, option_config=None):
+    prompt = f'Select {option_key.replace("_", " ")}'
+    option_config = option_config or {}
+    options[option_key] = click.prompt(prompt,
+                                       type=option_config.setdefault(
+                                           'type', None),
+                                       default=option_config.setdefault(
+                                           'default', None)
+                                       )
+    return options[option_key]
+
+
+def create_solver(options):
+    config = options.setdefault('solver_config', {})
+    print_section_name("Configuring solver")
+    config = create_dataclass(config, SolverConfig)
+    return LocalSearchSolver(config)
+
+
+def print_section_name(section_name: str):
+    console.print(section_name, style="bold blue")
+
+
+def create_dataclass(options, dataclass: Type):
+    dataclass_config = {}
+
+    for field in fields(dataclass):
+        if issubclass(field.type, Enum):
+            value = get_or_prompt_if_not_exists_or_invalid(options, field.name, {
+                'default': field.default.value
+            })
+            field_value = field.type(value)
+        else:
+            field_value = get_or_prompt_if_not_exists_or_invalid(options, field.name, {
+                'default': field.default
+            })
+
+        dataclass_config[field.name] = field_value
+    return dataclass(**dataclass_config)
+
+
+def create_problem_model(options):
+    config = options.setdefault('problem', {})
+    print_section_name("Configuring problem")
+    problem_name = get_or_prompt_if_not_exists_or_invalid(config, 'name', {
+        'type': click.Choice(list(Problem.problems.keys()), case_sensitive=True),
+    })
+    model = Problem.problems[problem_name]
+
+    benchmark_file = get_or_prompt_if_not_exists_or_invalid(config, 'benchmark', {
+        'type': click.Choice(get_benchmark_names_for_model(model), case_sensitive=True),
+    })
+    move_generator_name = get_or_prompt_if_not_exists_or_invalid(config, 'move_generator', {
+        'type': click.Choice(list(model.get_available_move_generation_strategies()), case_sensitive=True)
+    })
+
+    goal_name = get_or_prompt_if_not_exists_or_invalid(config, 'goal', {
+        'type': click.Choice(list(model.get_available_goals()), case_sensitive=True)
+    })
+
+    return model.from_benchmark(
+        benchmark_name=benchmark_file,
+        move_generator_name=move_generator_name,
+        goal_name=goal_name)
+
+
+def get_benchmark_names_for_model(model_type: Type[Problem]):
+    return os.listdir(model_type.get_path_to_benchmarks())
+
+
+def create_algorithm(problem_model: Problem, options) -> SubscribableAlgorithm:
+    config = options['algorithm']
+
+    print_section_name("Configuring algorithm")
+
+    algo_name = assure_problem_is_solvable_by_algo(
+        config, 'name', problem_model)
+
+    get_or_prompt_if_not_exists_or_invalid(config, 'name', {
+        'type': click.Choice(list(SubscribableAlgorithm.algorithms.keys()), case_sensitive=True)
+    })
+
+    algorithm_type = SubscribableAlgorithm.algorithms[algo_name]
+    config_type = get_type_for_param(algorithm_type, 'config')
+    config = create_dataclass(config, config_type)
+    algorithm = algorithm_type(config)
+    add_algorithm_subscribers(
+        options, problem_model, algorithm)
+    return algorithm
+
+
+def get_type_for_param(callable: Type, param_name: str):
+    mro = getmro(callable)
+    for method in mro:
+        params = signature(method).parameters
+        if param_name in params:
+            return params[param_name].annotation
+    return None
+
+
+def assure_problem_is_solvable_by_algo(config, key: str, problem_model: Problem):
+    available_algorithms = set(SubscribableAlgorithm.algorithms.keys())
+    if isinstance(problem_model, AvatarProblem):
+        available_algorithms = available_algorithms - \
+            {camel_to_snake(HillClimbing.__name__)}
+    algo_name = get_or_prompt_if_not_exists_or_invalid(config, key, {
+        'type': click.Choice(list(available_algorithms), case_sensitive=True)
+    })
+    return algo_name
+
+
+def add_algorithm_subscribers(options, problem_model: Problem, algorithm: SubscribableAlgorithm):
+    if options.setdefault('visualization', {}).setdefault('enabled', False):
+        add_visualization_subscriber(
+            options['visualization'], problem_model, algorithm)
+
+
+def add_visualization_subscriber(options, problem_model: Problem, algorithm: SubscribableAlgorithm) -> None:
+    print_section_name("Configuring visulization")
+    visualization = VisualizationSubscriber.visualizations.setdefault(type(
+        problem_model), None)
+    if visualization:
+        visualization_params = {
+            'model': problem_model
+        }
+        config_type = get_type_for_param(visualization, 'config')
+        if config_type:
+            visualization_params['config'] = create_dataclass(
+                options, config_type)
+        visualization = visualization(**visualization_params)
+        algorithm.subscribe(visualization)
+
+
+def create_path_to_save_solution(config):
+    solution_dir = Path("solutions")
+    if not solution_dir.exists():
+        os.mkdir(solution_dir)
+    file_name = 'solution'
+    for section_name in ['problem', 'algorithm']:
+        file_name += f'_{config[section_name]["name"]}'
+    return solution_dir/f'{file_name}.json'

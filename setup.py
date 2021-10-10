@@ -1,16 +1,18 @@
 from setuptools import setup
 
 setup(
-    name='Genetic algorithms',
+    name='Local search',
     version='1.0.0',
     install_requires=[
         'numpy',
         'rich',
         'click',
         'pygame',
+        'Pillow',
+        "mpmath"
     ],
     entry_points='''
         [console_scripts]
-        genetic_algortihms=genetic_algorithms.cli.entry_point:entry_point
+        local_search_solver=local_search.cli.entry_point:entry_point
     '''
 )

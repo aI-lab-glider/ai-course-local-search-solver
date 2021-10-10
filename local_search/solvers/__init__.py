@@ -1,0 +1,1 @@
+from local_search.solvers.local_search_solver import LocalSearchSolver

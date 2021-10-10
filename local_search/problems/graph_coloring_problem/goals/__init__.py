@@ -1,0 +1,3 @@
+from local_search.problems.graph_coloring_problem.goals.max_classes import MaxClasses
+from local_search.problems.graph_coloring_problem.goals.min_colors import MinColors
+from local_search.problems.graph_coloring_problem.goals.min_feasible import MinFeasible
