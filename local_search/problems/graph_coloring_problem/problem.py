@@ -1,7 +1,7 @@
 from io import TextIOWrapper
 import random
 from local_search.helpers.camel_to_snake import camel_to_snake
-from local_search.problems.base.problem import Problem, Goal
+from local_search.problems.base.problem import Problem
 from typing import Iterable, List, Set, Dict, Union
 
 from local_search.problems.graph_coloring_problem.goals.goal import GraphColoringGoal
@@ -100,7 +100,14 @@ class GraphColoringProblem(Problem):
 
     def asdict(self):
         return {
-            'edges': self.edges,
+            'edges': [(edge.start, edge.end) for edge in self.edges],
             'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
             'goal_name': camel_to_snake(type(self.goal).__name__),
         }
+
+    @classmethod
+    def from_dict(cls, data):
+        cls.validate_data(data)
+        data['edges'] = [Edge(start=edge_tuple[0], end=edge_tuple[1])
+                         for edge_tuple in data['edges']]
+        return cls(**data)

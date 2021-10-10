@@ -130,7 +130,8 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         exit_on = [pygame.QUIT, pygame.K_ESCAPE]
         for event in pygame.event.get():
             if event.type in exit_on:
-                sys.exit(0)
+                self._is_freezed = False
+                return
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self._is_button_clicked((pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])):
                     self._on_button_clicked()
