@@ -48,6 +48,12 @@ def create_path_to_save_solution(config):
     if not solution_dir.exists():
         os.mkdir(solution_dir)
     file_name = 'solution'
-    for section_name in ['problem', 'algorithm']:
-        file_name += f'_{config[section_name]["name"]}'
+
+    name_fragments = {
+        'problem': ['name', 'benchmark', 'move_generator', 'goal'],
+        'algorithm': ['name']
+    }
+    for section in name_fragments:
+        for key in name_fragments[section]:
+            file_name += f'_{config[section][key]}'
     return solution_dir/f'{file_name}.json'

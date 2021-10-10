@@ -37,7 +37,7 @@ def create_comparison_for_solutions(solutions: List[Solution]):
                'Move generator name',
                'Goal name',
                'Objective value',
-               'Active time',
+               'Time until optimum found',
                'Local optimum escapes count',
                'Explored states count']
     for column in columns:
@@ -50,7 +50,7 @@ def create_comparison_for_solutions(solutions: List[Solution]):
             str(camel_to_snake(type(solution.problem.move_generator).__name__)),
             str(camel_to_snake(type(solution.problem.goal).__name__)),
             str(solution.problem.human_readable_objective_for(solution.state)),
-            str(solution.statistics.active_time),
+            str(solution.statistics.time_untill_optimum_found),
             str(solution.statistics.local_optimum_escapes_count),
             str(solution.statistics.explored_states_count)
         )
