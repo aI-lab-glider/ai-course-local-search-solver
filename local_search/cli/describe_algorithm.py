@@ -3,7 +3,7 @@ from local_search.algorithms import SubscribableAlgorithm
 from rich import inspect
 
 
-@click.command('describe_algo')
+@click.command('describe')
 @click.argument('algorithm', required=True, type=click.Choice(list(SubscribableAlgorithm.algorithms.keys())))
 def describe_algorithm(algorithm):
     """

@@ -1,19 +1,12 @@
-from pathlib import Path
-from typing import Type
-import click
-from enum import IntEnum, auto
-from local_search import problems
-from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import StateDrawer, VisualizationSubscriber
-from local_search.problems import Problem
-from inspect import signature
-from rich.console import Console
-from enum import Enum
 import sys
+from inspect import signature
+
+import click
 import pygame
-
+from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import VisualizationSubscriber
+from local_search.cli.utils.console import console
+from local_search.problems import Problem
 from local_search.problems.base.state import State
-
-console = Console()
 
 
 @click.command('show', help='Shows solution for benchmark')
