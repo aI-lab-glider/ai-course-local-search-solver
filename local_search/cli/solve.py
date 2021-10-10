@@ -85,9 +85,13 @@ def get_or_prompt(options, option_key: str, option_config=None):
 
 def create_solver(options):
     config = options.setdefault('solver_config', {})
-    console.print("Configuring solver", style="bold blue")
+    print_section_name("Configuring solver")
     config = create_dataclass(config, SolverConfig)
     return LocalSearchSolver(config)
+
+
+def print_section_name(section_name: str):
+    console.print(section_name, style="bold blue")
 
 
 def create_dataclass(options, dataclass: Type):
@@ -110,7 +114,7 @@ def create_dataclass(options, dataclass: Type):
 
 def create_problem_model(options):
     config = options.setdefault('problem', {})
-    console.print("Configuring problem", style="bold blue")
+    print_section_name("Configuring problem")
     problem_name = get_or_prompt_if_not_exists_or_invalid(config, 'name', {
         'type': click.Choice(list(Problem.problems.keys()), case_sensitive=True),
     })
@@ -140,7 +144,7 @@ def get_benchmark_names_for_model(model_type: Type[Problem]):
 def create_algorithm(problem_model: Problem, options) -> SubscribableAlgorithm:
     config = options['algorithm']
 
-    console.print("Configuring algorithm", style="bold blue")
+    print_section_name("Configuring algorithm")
 
     algo_name = assure_problem_is_solvable_by_algo(
         config, 'name', problem_model)
@@ -185,6 +189,7 @@ def add_algorithm_subscribers(options, problem_model: Problem, algorithm: Subscr
 
 
 def add_visualization_subscriber(options, problem_model: Problem, algorithm: SubscribableAlgorithm) -> None:
+    print_section_name("Configuring visulization")
     visualization = VisualizationSubscriber.visualizations.setdefault(type(
         problem_model), None)
     if visualization:
