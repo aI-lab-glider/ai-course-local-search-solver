@@ -20,8 +20,10 @@ class GraphColoringState(State):
         return all(ov.color == sv.color for sv, ov in zip(self.coloring, other.coloring))
 
     def asdict(self):
+        base = super().asdict()
         return {
             'coloring': [(vertex.idx, vertex.color) for vertex in self.coloring],
+            **base
         }
 
     @classmethod

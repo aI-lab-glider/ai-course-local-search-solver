@@ -34,14 +34,15 @@ class TravelingSalesmanState(State):
         return not is_any_idx_differs
 
     def asdict(self):
+        base = super().asdict()
         return {
             'route': self.route,
-            'points': [(point.x, point.y) for point in self.points]
+            'points': [(point.x, point.y) for point in self.points],
+            **base
         }
 
     @classmethod
     def from_dict(cls, data):
-        cls.validate_data(data)
         data['points'] = [Point(x=point_tuple[0], y=point_tuple[1])
                           for point_tuple in data['points']]
         return cls(**data)

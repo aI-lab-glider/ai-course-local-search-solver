@@ -40,6 +40,9 @@ class Problem(ABC):
         """
         return self.goal.objective_for(state)
 
+    def human_readable_objective_for(self, state: State) -> str:
+        return self.goal.human_readable_objective_for(state)
+
     def improvement(self, new_state: State, old_state: State) -> int:
         """
         A helper method. Calculates how much the new_state is better than the old_state.
@@ -89,11 +92,15 @@ class Problem(ABC):
     def get_path_to_solutions(cls) -> Path:
         return cls.get_path_to_module() / "expected_solutions"
 
-    @abstractmethod
-    def asdict():
+    def asdict(self):
         """
         Creates dictionary with keys same as parameters from __init__ method.
         """
+        return {
+            'name': camel_to_snake(type(self).__name__),
+            'goal_name': camel_to_snake(type(self.goal).__name__),
+            'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
+        }
 
     @classmethod
     def validate_data(cls, data):
@@ -101,7 +108,7 @@ class Problem(ABC):
         Validates if data contains all params from class signature.
         """
         params = set(signature(cls).parameters.keys())
-        missing_params = set(data.keys()) - params
+        missing_params = params - set(data.keys())
         if missing_params:
             raise ValueError(
                 f'Cannot create {cls.__name__} from passed dict. Missing params are: {",".join(missing_params)}')
@@ -110,5 +117,10 @@ class Problem(ABC):
     @abstractmethod
     def from_dict(cls: Type[TProblem], data) -> TProblem:
         """
-        Creates problem representation as a dict.
+        Creates problem from dict representation.
         """
+        name = data['name']
+        problem_type = cls.problems[name]
+        problem_type.validate_data(data)
+        del data['name']
+        return problem_type.from_dict(data)

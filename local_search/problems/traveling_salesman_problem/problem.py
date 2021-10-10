@@ -94,16 +94,15 @@ class TravelingSalesmanProblem(Problem):
         return list(map(int, idxs))
 
     def asdict(self):
+        base = super().asdict()
         return {
-            'goal_name': camel_to_snake(type(self.goal).__name__),
-            'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
             'depot_idx': self.depot_idx,
-            'points': [(point.x, point.y) for point in self.points]
+            'points': [(point.x, point.y) for point in self.points],
+            **base
         }
 
     @classmethod
     def from_dict(cls, data):
-        cls.validate_data(data)
         data['points'] = [Point(x=point_tuple[0], y=point_tuple[1])
                           for point_tuple in data['points']]
         return cls(**data)

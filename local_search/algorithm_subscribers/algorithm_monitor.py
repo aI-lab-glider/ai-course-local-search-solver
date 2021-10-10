@@ -5,6 +5,7 @@ from typing import Union
 from local_search.algorithm_subscribers.algorithm_subscriber import \
     AlgorithmSubscriber
 from local_search.algorithms import AlgorithmConfig
+from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.problem import Problem
 from local_search.problems.base.state import State
 from local_search.solvers.solver_config import SolverConfig
@@ -27,6 +28,7 @@ EXPLORED_STATES_COUNT = 'explored_states_count'
 
 @dataclass
 class AlgorithmStatistics:
+    algorithm_name: str = ''
     local_optimum_escapes_count: int = 0
     best_states_update_count: int = 0
     explored_states_count: int = 0
@@ -80,7 +82,8 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             local_optimum_escapes_count=self._stats[LOCAL_OPTIMUM_ESCAPES_COUNT],
             best_states_update_count=self._stats[BEST_STATES_UPDATE_COUNT],
             explored_states_count=self._stats[EXPLORED_STATES_COUNT],
-            active_time=self._stats[ACTIVE_TIME]
+            active_time=self._stats[ACTIVE_TIME],
+            algorithm_name=camel_to_snake(type(self.algorithm).__name__),
         )
 
     def on_next_state(self, model: Problem, state: State):

@@ -9,8 +9,6 @@ from typing import Dict, Type
 import pygame
 from local_search.algorithm_subscribers.algorithm_subscriber import \
     AlgorithmSubscriber
-from local_search.algorithms.subscribable_algorithm import \
-    SubscribableAlgorithm
 from local_search.problems import Problem
 from local_search.problems.base.state import State
 

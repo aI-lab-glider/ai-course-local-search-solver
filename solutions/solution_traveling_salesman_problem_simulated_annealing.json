@@ -1,0 +1,133 @@
+{
+    "state": {
+        "route": [
+            11,
+            2,
+            1,
+            6,
+            3,
+            10,
+            8,
+            0,
+            9,
+            7,
+            5,
+            4,
+            11
+        ],
+        "points": [
+            [
+                2482,
+                1183
+            ],
+            [
+                3854,
+                923
+            ],
+            [
+                376,
+                825
+            ],
+            [
+                2519,
+                135
+            ],
+            [
+                2945,
+                1622
+            ],
+            [
+                953,
+                268
+            ],
+            [
+                2628,
+                1479
+            ],
+            [
+                2097,
+                981
+            ],
+            [
+                890,
+                1846
+            ],
+            [
+                2139,
+                1806
+            ],
+            [
+                2421,
+                1007
+            ],
+            [
+                2290,
+                1810
+            ]
+        ],
+        "name": "traveling_salesman_state"
+    },
+    "problem": {
+        "depot_idx": 11,
+        "points": [
+            [
+                2482,
+                1183
+            ],
+            [
+                3854,
+                923
+            ],
+            [
+                376,
+                825
+            ],
+            [
+                2519,
+                135
+            ],
+            [
+                2945,
+                1622
+            ],
+            [
+                953,
+                268
+            ],
+            [
+                2628,
+                1479
+            ],
+            [
+                2097,
+                981
+            ],
+            [
+                890,
+                1846
+            ],
+            [
+                2139,
+                1806
+            ],
+            [
+                2421,
+                1007
+            ],
+            [
+                2290,
+                1810
+            ]
+        ],
+        "name": "traveling_salesman_problem",
+        "goal_name": "distance",
+        "move_generator_name": "swap_two_points"
+    },
+    "statistics": {
+        "algorithm_name": "simulated_annealing",
+        "local_optimum_escapes_count": 2,
+        "best_states_update_count": 2,
+        "explored_states_count": 0,
+        "active_time": 0.05
+    }
+}

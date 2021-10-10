@@ -1,21 +1,14 @@
-import sys
-import time
-from math import inf
 from pathlib import Path
 from typing import Literal, Union
 
 import local_search
-from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
 import pygame
 from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import \
     StateDrawer, VisualizationSubscriber
-from local_search.algorithms.algorithm import Algorithm
 from local_search.problems.traveling_salesman_problem.problem import \
     TravelingSalesmanProblem
 from local_search.problems.traveling_salesman_problem.state import \
     TravelingSalesmanState
-from local_search.solvers.solver import SolverConfig
-import time
 
 
 ROAD_COLOR = (0, 150, 0)

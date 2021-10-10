@@ -99,15 +99,14 @@ class GraphColoringProblem(Problem):
         return GraphColoringGoal.goals.keys()
 
     def asdict(self):
+        base = super().asdict()
         return {
             'edges': [(edge.start, edge.end) for edge in self.edges],
-            'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
-            'goal_name': camel_to_snake(type(self.goal).__name__),
+            **base
         }
 
     @classmethod
     def from_dict(cls, data):
-        cls.validate_data(data)
         data['edges'] = [Edge(start=edge_tuple[0], end=edge_tuple[1])
                          for edge_tuple in data['edges']]
         return cls(**data)

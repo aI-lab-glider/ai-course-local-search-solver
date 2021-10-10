@@ -3,7 +3,6 @@ from local_search.problems.base import State, Problem
 from local_search.algorithm_subscribers.algorithm_monitor import AlgorithmStatistics
 from pathlib import Path
 import json
-from typing import Type
 
 
 @dataclass
@@ -21,14 +20,14 @@ class Solution:
 
     def to_json(self, path: Path):
         with open(path, 'w+') as target:
-            json.dump(self.to_dict(), target)
+            json.dump(self.to_dict(), target, indent=4)
 
     @staticmethod
-    def from_json(path: Path, problem_type: Type[Problem], state_type: Type[State]):
+    def from_json(path: Path):
         with open(path) as source:
             data = json.load(source)
-            problem = problem_type.from_dict(data["problem"])
-            state = state_type.from_dict(data["state"])
+            problem = Problem.from_dict(data["problem"])
+            state = State.from_dict(data["state"])
             statistics = AlgorithmStatistics.from_dict(data["statistics"])
         return Solution(
             state=state,
