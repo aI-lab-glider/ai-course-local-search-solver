@@ -15,6 +15,7 @@ from local_search.algorithms.subscribable_algorithm import \
 from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.avatar_problem.problem import AvatarProblem
 from local_search.problems.base.problem import Problem
+from local_search.problems.base.solution import Solution
 from local_search.solvers import LocalSearchSolver
 from local_search.solvers.solver import SolverConfig
 from rich import pretty
@@ -40,7 +41,22 @@ def solve(config_file, **cli_options):
     problem_model = create_problem_model(options)
     algorithm = create_algorithm(problem_model, options)
     solution = solver.solve(problem_model, algorithm)
-    solution.to_json(Path(local_search.__file__).parent/"solution.json")
+    if get_or_prompt_if_not_exists_or_invalid(options, 'save_solution', {
+        'type': bool,
+        'default': True
+    }):
+        path = create_path_to_save_solution(options)
+        while path.exists():
+            should_overwrite = click.confirm(
+                f"There is already a solution saved to {path}. Do you want to overwrite it?", default=True)
+            if not should_overwrite:
+                new_name = click.prompt(
+                    f'New name to save in folder {path.parent} (without extension)', type=str)
+                path = path.parent/f'{new_name}.json'
+            else:
+                break
+        solution.to_json(path)
+        console.print(f'Solution is saved to file {path}')
 
 
 def merge_options(config_file_path: str, cli_options):
@@ -202,3 +218,13 @@ def add_visualization_subscriber(options, problem_model: Problem, algorithm: Sub
                 options, config_type)
         visualization = visualization(**visualization_params)
         algorithm.subscribe(visualization)
+
+
+def create_path_to_save_solution(config):
+    solution_dir = Path("solutions")
+    if not solution_dir.exists():
+        os.mkdir(solution_dir)
+    file_name = 'solution'
+    for section_name in ['problem', 'algorithm']:
+        file_name += f'_{config[section_name]["name"]}'
+    return solution_dir/f'{file_name}.json'
