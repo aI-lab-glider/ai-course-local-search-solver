@@ -23,7 +23,7 @@ class Solution:
         }
 
     def to_json(self, path: Path):
-        with open(path) as target:
+        with open(path, 'w+') as target:
             json.dump(self.to_dict(), target)
 
     @staticmethod

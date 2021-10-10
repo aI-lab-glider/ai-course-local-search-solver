@@ -21,5 +21,12 @@ class GraphColoringState(State):
 
     def asdict(self):
         return {
-            'coloring': self.coloring,
+            'coloring': [(vertex.idx, vertex.color) for vertex in self.coloring],
         }
+
+    @classmethod
+    def from_dict(cls, data):
+        cls.validate_data(data)
+        coloring = [Vertex(idx=vertex_tuple[0], color=vertex_tuple[1])
+                    for vertex_tuple in data['coloring']]
+        return cls(coloring)

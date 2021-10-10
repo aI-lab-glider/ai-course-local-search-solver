@@ -26,9 +26,9 @@ class State(ABC):
         """
 
     @classmethod
-    def from_dict(cls, data) -> 'State':
+    def validate_data(cls, data) -> None:
         """
-        Creates state from dictionary
+        Validates if data contains all params required by class.
         """
         params = set(chain(signature(method).parameters.keys()
                      for method in getmro(cls)))
@@ -36,4 +36,10 @@ class State(ABC):
         if missing_params:
             raise ValueError(
                 f'Cannot create {cls.__name__} from passed dict. Missing params are: {",".join(missing_params)}')
-        return cls(**data)
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, data) -> 'State':
+        """
+        Creates state from dictionary
+        """

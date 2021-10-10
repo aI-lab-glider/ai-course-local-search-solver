@@ -19,6 +19,7 @@ from local_search.solvers import LocalSearchSolver
 from local_search.solvers.solver import SolverConfig
 from rich import pretty
 from rich.console import Console
+import local_search
 
 
 console = Console()
@@ -39,7 +40,7 @@ def solve(config_file, **cli_options):
     problem_model = create_problem_model(options)
     algorithm = create_algorithm(problem_model, options)
     solution = solver.solve(problem_model, algorithm)
-    solution.to_json(Path('solution.json'))
+    solution.to_json(Path(local_search.__file__).parent/"solution.json")
 
 
 def merge_options(config_file_path: str, cli_options):

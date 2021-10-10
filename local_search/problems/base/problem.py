@@ -96,14 +96,19 @@ class Problem(ABC):
         """
 
     @classmethod
-    def from_dict(cls: Type[TProblem], data) -> TProblem:
+    def validate_data(cls, data):
         """
-        Creates problem representation as a dict.
+        Validates if data contains all params from class signature.
         """
-        params = set(chain(signature(method).parameters.keys()
-                     for method in getmro(cls)))
+        params = set(signature(cls).parameters.keys())
         missing_params = set(data.keys()) - params
         if missing_params:
             raise ValueError(
                 f'Cannot create {cls.__name__} from passed dict. Missing params are: {",".join(missing_params)}')
-        return cls(**data)
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls: Type[TProblem], data) -> TProblem:
+        """
+        Creates problem representation as a dict.
+        """
