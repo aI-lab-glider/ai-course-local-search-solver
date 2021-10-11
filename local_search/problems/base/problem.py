@@ -74,13 +74,6 @@ class Problem(ABC):
         """
 
     @classmethod
-    @abstractmethod
-    def from_solution(cls, problem_name: str) -> 'Problem':
-        """
-        Creates model from solution file
-        """
-
-    @classmethod
     def get_path_to_module(cls) -> Path:
         return Path(local_search.__file__).parent / "problems" / camel_to_snake(cls.__name__)
 

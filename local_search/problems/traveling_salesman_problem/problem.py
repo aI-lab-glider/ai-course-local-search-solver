@@ -73,22 +73,6 @@ class TravelingSalesmanProblem(Problem):
         return depot_idx, points
 
     @classmethod
-    def from_solution(cls, solution_name: str):
-        with open(cls.get_path_to_solutions()/solution_name) as solution_file:
-            objective = float(
-                solution_file.readline().replace('Objective:', ''))
-            route = cls.parse_route(solution_file)
-            _ = solution_file.readline()
-            depot_idx, points = cls.parse_model(solution_file)
-        model = cls(
-            points=points,
-            depot_idx=depot_idx
-        )
-        model.initial_state = TravelingSalesmanState(
-            route=route, points=points)
-        return model
-
-    @classmethod
     def parse_route(cls, file_buffer: TextIOWrapper):
         idxs = file_buffer.readline().replace('State:', '').strip().split(' ')
         return list(map(int, idxs))

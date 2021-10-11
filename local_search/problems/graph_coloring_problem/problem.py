@@ -75,16 +75,6 @@ class GraphColoringProblem(Problem):
         return edges
 
     @classmethod
-    def from_solution(cls, solution_name: str):
-        with open(cls.get_path_to_solutions()/solution_name, 'r') as solution_file:
-            coloring = cls.parse_coloring(solution_file)
-            _ = solution_file.readline()
-            edges = cls.parse_edges(solution_file)
-        model = cls(edges=edges)
-        model.initial_state = GraphColoringState(coloring=coloring)
-        return model
-
-    @classmethod
     def parse_coloring(cls, file_buffer: TextIOWrapper):
         line = file_buffer.readline()
         coloring = line.replace('State:', '').strip().split(' ')

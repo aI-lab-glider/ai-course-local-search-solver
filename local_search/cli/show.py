@@ -1,29 +1,20 @@
+from pathlib import Path
 import sys
-from inspect import signature
 
 import click
+from local_search.solvers.solution import Solution
 import pygame
 from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import VisualizationSubscriber
-from local_search.cli.utils.console import console
-from local_search.problems import Problem
-from local_search.problems.base.state import State
 
 
 @click.command('show', help='Shows solution for benchmark')
-@click.option('-p', '--problem_name', type=click.Choice(list(Problem.problems.keys())), required=True, prompt=True)
-@click.option('-s', '--solution_file', help='File with data for visualization', required=True, prompt=True)
-def show(problem_name: str, solution_file: str):
-    problem_type = Problem.problems[problem_name]
-    state_type: State = signature(problem_type.random_state).return_annotation
-    if state_type is State or state_type is None:
-        console.print(
-            f"Cannot show solution for problem {problem_name} because return type is invalid.")
-    problem = problem_type.from_solution(solution_file)
-
-    state_drawer = VisualizationSubscriber.visualizations[problem_type].create_state_drawer(
-        problem)
+@click.argument('path_to_solution', type=click.Path(exists=True, readable=True), required=True)
+def show(path_to_solution: str):
+    solution = Solution.from_json(Path(path_to_solution))
+    state_drawer = VisualizationSubscriber.visualizations[type(solution.problem)].create_state_drawer(
+        solution.problem)
     screen = create_screen()
-    state_drawer.draw_state(screen, problem, problem.initial_state)
+    state_drawer.draw_state(screen, solution.problem, solution.state)
     pygame.display.flip()
     freeze()
 
