@@ -47,7 +47,7 @@ class AvatarProblem(Problem):
 
     def asdict(self):
         return {
-            'reference_image': f"{self.to_b64(self.reference_image)}",
+            'reference_image': f"{self.to_b64(self.reference_image)}".replace("b'", ""),
             'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
             'goal_name': camel_to_snake(type(self.goal).__name__),
         }

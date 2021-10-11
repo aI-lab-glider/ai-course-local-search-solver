@@ -26,7 +26,7 @@ class AvatarState(State):
 
     def asdict(self):
         return {
-            'image': f"{self.to_b64(self.image)}"
+            'image': f"{self.to_b64(self.image)}".replace("b'", "")
         }
 
     @classmethod
