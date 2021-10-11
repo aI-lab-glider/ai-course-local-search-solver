@@ -24,6 +24,7 @@ class SimulatedAnnealingConfig(AlgorithmConfig):
     escape_perturbation_probability: float = 0.33
     escape_perturbation_size: int = 50
     escape_reheat_probability: float = 0.33
+    escape_reheat_ratio: float = 0.1
 
 
 DEFAULT_CONFIG = SimulatedAnnealingConfig()
@@ -107,11 +108,11 @@ class SimulatedAnnealing(SubscribableAlgorithm):
 
     def _reheat(self, from_state: State):
         # TODO:
-        # — restore the initial temperature from config
+        # — restore the initial temperature from config (reheat_ratio * initial_temperature)
         # — reset cooling schedule (self.cooling_steps)
         # — reset self.steps_from_last_state_update
         # return the from state
-        self.temperature = self.config.initial_temperature
+        self.temperature = self.config.escape_reheat_ratio * self.config.initial_temperature
         self.steps_from_last_state_update = 0
         self.cooling_time = 0
         return from_state
