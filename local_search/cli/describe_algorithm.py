@@ -7,7 +7,7 @@ from rich import inspect
 @click.argument('algorithm', required=True, type=click.Choice(list(SubscribableAlgorithm.algorithms.keys())))
 def describe_algorithm(algorithm):
     """
-    Desribes an algorithm passed as an argument
+    Describes an algorithm passed as an argument
     """
     algo = SubscribableAlgorithm.algorithms[algorithm]
     inspect(algo, methods=True)

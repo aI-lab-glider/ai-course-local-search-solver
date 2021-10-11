@@ -19,7 +19,7 @@ class TravelingSalesmanProblem(Problem):
     def __init__(self, points: List[Point],
                  depot_idx: int,
                  move_generator_name: Union[str, None] = None,
-                 goal_name: Union[str, None] = None):
+                 goal_name: Union[str, None] = "distance"):
         self._points: List[Point] = points
         self.depot_idx = depot_idx
         initial_solution = self.random_state()
@@ -51,7 +51,7 @@ class TravelingSalesmanProblem(Problem):
         return TravelingSalesmanGoal.goals.keys()
 
     @classmethod
-    def from_benchmark(cls, benchmark_name: str, move_generator_name: str = None, goal_name: str = None):
+    def from_benchmark(cls, benchmark_name: str, move_generator_name: str = None, goal_name: str = "distance"):
         with open(cls.get_path_to_benchmarks()/benchmark_name) as benchmark_file:
             depot_idx, points = cls.parse_model(benchmark_file)
             return cls(
