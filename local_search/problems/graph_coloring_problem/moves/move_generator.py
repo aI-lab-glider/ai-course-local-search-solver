@@ -14,5 +14,3 @@ class GraphColoringMoveGenerator(MoveGenerator):
     def __init__(self, graph: Dict[int, Set[int]], n_vertices: int):
         self.n_vertices = n_vertices
         self.graph = graph
-
-# TODO add Kemp Chain

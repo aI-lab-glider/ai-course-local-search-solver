@@ -1,6 +1,8 @@
+from io import TextIOWrapper
 import random
-from local_search.problems.base.problem import Problem, Goal
-from typing import Iterable, List, Set, Dict
+from local_search.helpers.camel_to_snake import camel_to_snake
+from local_search.problems.base.problem import Problem
+from typing import Iterable, List, Set, Dict, Union
 
 from local_search.problems.graph_coloring_problem.goals.goal import GraphColoringGoal
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
@@ -12,12 +14,15 @@ from local_search.problems.graph_coloring_problem.moves.move_generator import Gr
 
 class GraphColoringProblem(Problem):
 
-    def __init__(self, edges: List[Edge], move_generator_name: str, goal_name: str):
+    def __init__(self, edges: List[Edge], move_generator_name: Union[str, None] = None, goal_name: Union[str, None] = None):
         self._edges: List[Edge] = edges
         self.graph: Dict[int, Set[int]] = self._create_graph()
         self.n_vertices = len(self.graph)
+        move_generator_name = move_generator_name or list(
+            GraphColoringMoveGenerator.move_generators.keys())[0]
         move_generator = GraphColoringMoveGenerator.move_generators[move_generator_name](
             self.graph, self.n_vertices)
+        goal_name = goal_name or list(GraphColoringGoal.goals.keys())[0]
         goal = GraphColoringGoal.goals[goal_name](self.edges, self.n_vertices)
         initial_solution = self._find_initial_solution()
         super().__init__(initial_solution, move_generator, goal)
@@ -50,20 +55,30 @@ class GraphColoringProblem(Problem):
             coloring[vertex].color = available_colors[0]
         return GraphColoringState(coloring=coloring)
 
-    def random_state(self) -> 'State':
-        coloring = [Vertex(idx=i, color=random.randrange(self.n_vertices)) for i in range(self.n_vertices)]
+    def random_state(self) -> GraphColoringState:
+        coloring = [Vertex(idx=i, color=random.randrange(self.n_vertices))
+                    for i in range(self.n_vertices)]
         return GraphColoringState(coloring=coloring)
 
     @classmethod
-    def from_benchmark(cls, benchmark_name: str, move_generator_name: str, goal_name: str):
+    def from_benchmark(cls, benchmark_name: str, move_generator_name: str = None, goal_name: str = None):
         with open(cls.get_path_to_benchmarks()/benchmark_name) as benchmark_file:
-
-            def line_to_edge(line: str):
-                (start, end) = map(int, line.split(sep=' '))
-                return Edge(start, end)
-
-            edges = [line_to_edge(line) for line in benchmark_file]
+            edges = cls.parse_edges(benchmark_file)
             return GraphColoringProblem(edges=edges, move_generator_name=move_generator_name, goal_name=goal_name)
+
+    @classmethod
+    def parse_edges(cls, file_buffer: TextIOWrapper):
+        def line_to_edge(line: str):
+            (start, end) = map(int, line.split(sep=' '))
+            return Edge(start, end)
+        edges = [line_to_edge(line) for line in file_buffer]
+        return edges
+
+    @classmethod
+    def parse_coloring(cls, file_buffer: TextIOWrapper):
+        line = file_buffer.readline()
+        coloring = line.replace('State:', '').strip().split(' ')
+        return [Vertex(i, int(c)) for i, c in enumerate(coloring)]
 
     @staticmethod
     def get_available_move_generation_strategies() -> Iterable[str]:
@@ -72,3 +87,16 @@ class GraphColoringProblem(Problem):
     @staticmethod
     def get_available_goals() -> Iterable[str]:
         return GraphColoringGoal.goals.keys()
+
+    def asdict(self):
+        base = super().asdict()
+        return {
+            'edges': [(edge.start, edge.end) for edge in self.edges],
+            **base
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        data['edges'] = [Edge(start=edge_tuple[0], end=edge_tuple[1])
+                         for edge_tuple in data['edges']]
+        return cls(**data)

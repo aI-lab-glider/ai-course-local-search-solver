@@ -1,34 +1,34 @@
-import sys
-import time
-from math import inf
 from pathlib import Path
 from typing import Literal, Union
 
 import local_search
-from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
 import pygame
 from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import \
-    VisualizationSubscriber
-from local_search.algorithms.algorithm import Algorithm
+    StateDrawer, VisualizationSubscriber
 from local_search.problems.traveling_salesman_problem.problem import \
     TravelingSalesmanProblem
 from local_search.problems.traveling_salesman_problem.state import \
     TravelingSalesmanState
-from local_search.solvers.solver import SolverConfig
-import time
 
 
 ROAD_COLOR = (0, 150, 0)
 PIC_SIZE = 30
+WHITE = (255, 255, 255)
 
 
 class TravelingSalesmanVisualization(VisualizationSubscriber):
-
     @staticmethod
     def get_corresponding_problem():
         return TravelingSalesmanProblem
 
-    def _draw_state(self, screen, model: TravelingSalesmanProblem, state: TravelingSalesmanState):
+    @classmethod
+    def create_state_drawer(cls, *_, **kwargs):
+        return TravelingSalesmanStateDrawer()
+
+
+class TravelingSalesmanStateDrawer(StateDrawer):
+    def draw_state(self, screen, model: TravelingSalesmanProblem, state: TravelingSalesmanState):
+        screen.fill(WHITE)
         self._draw_buildings(model, state, screen)
         route = [(self._scale(model.points[idx], model, screen))
                  for idx in state.route]

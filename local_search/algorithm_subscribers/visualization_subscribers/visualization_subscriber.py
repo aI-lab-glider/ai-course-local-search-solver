@@ -1,16 +1,14 @@
 
 import sys
 import time
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from math import inf
-from typing import Type
+from typing import Dict, Type
 
 import pygame
 from local_search.algorithm_subscribers.algorithm_subscriber import \
     AlgorithmSubscriber
-from local_search.algorithms.subscribable_algorithm import \
-    SubscribableAlgorithm
 from local_search.problems import Problem
 from local_search.problems.base.state import State
 
@@ -30,26 +28,45 @@ class VisualizationSubcriberConfig:
     show_only_solution: bool = False
 
 
+DEFAULT_CONFIG = VisualizationSubcriberConfig()
+
+
+class StateDrawer(ABC):
+    @abstractmethod
+    def draw_state(self, screen, model: Problem, state: State):
+        """
+        Draws state on provided screen.
+        """
+
+
 class VisualizationSubscriber(AlgorithmSubscriber):
     """
     Provides visualization to algorithm solutions.
     """
-    visualizations = {}
+    visualizations: Dict[Type[Problem], Type['VisualizationSubscriber']] = {}
     _BG_COLOR = (255, 255, 255)
     _FONT_COLOR = (0, 0, 0)
     _BUTTON_SIZE = (150, 75)
     _SCREEN_SIZE = (800, 800)
 
-    def __init__(self, config: VisualizationSubcriberConfig, algorithm: SubscribableAlgorithm, **kwargs):
-        self.config = config
+    def __init__(self, model: Problem, config: VisualizationSubcriberConfig = None):
+        self.config = config or DEFAULT_CONFIG
+        self.state_drawer = self.create_state_drawer(model)
         if not self.config.show_only_solution:
             self._init_pygame()
         self._init_state()
-        super().__init__(algorithm, **kwargs)
+        super().__init__()
 
     def __init_subclass__(cls):
         VisualizationSubscriber.visualizations[cls.get_corresponding_problem(
         )] = cls
+
+    @classmethod
+    @abstractmethod
+    def create_state_drawer(cls, model: Problem) -> StateDrawer:
+        """
+        Returns state drawer for problem
+        """
 
     @staticmethod
     @abstractmethod
@@ -111,7 +128,8 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         exit_on = [pygame.QUIT, pygame.K_ESCAPE]
         for event in pygame.event.get():
             if event.type in exit_on:
-                sys.exit(0)
+                self._is_freezed = False
+                return
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self._is_button_clicked((pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])):
                     self._on_button_clicked()
@@ -130,16 +148,10 @@ class VisualizationSubscriber(AlgorithmSubscriber):
             if not state:
                 continue
             screen.fill(self._BG_COLOR)
-            self._draw_state(screen, model, state)
+            self.state_drawer.draw_state(screen, model, state)
             self._draw_text(screen, state_name.capitalize().replace(
                 '_', ' '), (caption_font_size, caption_font_size), caption_font_size)
             self.main_screen.blit(screen, screen_coords)
-
-    @abstractmethod
-    def _draw_state(self, screen, model: Problem, state: State):
-        """
-        Draws state
-        """
 
     def _draw_text(self, screen, text, position, font_size):
         font = pygame.font.SysFont('arial', font_size)

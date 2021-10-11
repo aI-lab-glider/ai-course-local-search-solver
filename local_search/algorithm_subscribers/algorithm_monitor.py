@@ -1,16 +1,15 @@
-from dataclasses import dataclass
-import operator as op
 import time
+from dataclasses import asdict, dataclass
 from typing import Union
-from local_search.solvers.solver import SolverConfig
-
-from rich import box
 
 from local_search.algorithm_subscribers.algorithm_subscriber import \
     AlgorithmSubscriber
 from local_search.algorithms import AlgorithmConfig
+from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.problem import Problem
 from local_search.problems.base.state import State
+from local_search.solvers.solver_config import SolverConfig
+from rich import box
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
@@ -20,10 +19,28 @@ PREV_STATE = 'previous_state'
 BEST_STATE = 'best_state'
 BEST_STATE_HUMAN = 'best_result'
 
+TIME_UNTILL_OPTIMUM_FOUND = 'time_untill_optimum_found'
 ACTIVE_TIME = 'active_time'
 BEST_STATES_UPDATE_COUNT = 'best_state_updates_count'
 LOCAL_OPTIMUM_ESCAPES_COUNT = 'local_optimum_escapes_count'
 ITERS_FROM_LAST_IMPROVEMENT = 'iters_from_last_impr'
+EXPLORED_STATES_COUNT = 'explored_states_count'
+
+
+@dataclass
+class AlgorithmStatistics:
+    algorithm_name: str = ''
+    local_optimum_escapes_count: int = 0
+    best_states_update_count: int = 0
+    explored_states_count: int = 0
+    time_untill_optimum_found: float = 0
+
+    def asdict(self):
+        return asdict(self)
+
+    @staticmethod
+    def from_dict(data) -> 'AlgorithmStatistics':
+        return AlgorithmStatistics(**data)
 
 
 @dataclass
@@ -35,19 +52,22 @@ class Event:
 class AlgorithmMonitor(AlgorithmSubscriber):
     delay_time = .001
 
-    def __init__(self, solver_config: SolverConfig, algorithm_config: AlgorithmConfig, **kwargs):
+    def __init__(self, solver_config: SolverConfig, **kwargs):
         super().__init__(**kwargs)
-        self._algorithm_config = algorithm_config
         self._solver_config = solver_config
         self._live = Live(auto_refresh=False)
-        self._live.start()
+        if self._solver_config.show_statistics:
+            self._live.start()
 
         self._stats = {
-            ACTIVE_TIME: 0.0,
+            TIME_UNTILL_OPTIMUM_FOUND: 0.0,
             BEST_STATES_UPDATE_COUNT: 0,
             LOCAL_OPTIMUM_ESCAPES_COUNT: 0,
-            BEST_STATE_HUMAN: None
+            BEST_STATE_HUMAN: None,
+            ITERS_FROM_LAST_IMPROVEMENT: 0,
+            EXPLORED_STATES_COUNT: 0
         }
+
         self._states = {
             BEST_STATE: None,
             BEST_STATE_HUMAN: None,
@@ -57,6 +77,16 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         self._start_time = time.monotonic()
         self._last_event = None
 
+    @property
+    def statistics(self):
+        return AlgorithmStatistics(
+            local_optimum_escapes_count=self._stats[LOCAL_OPTIMUM_ESCAPES_COUNT],
+            best_states_update_count=self._stats[BEST_STATES_UPDATE_COUNT],
+            explored_states_count=self._stats[EXPLORED_STATES_COUNT],
+            time_untill_optimum_found=self._stats[TIME_UNTILL_OPTIMUM_FOUND],
+            algorithm_name=camel_to_snake(type(self.algorithm).__name__),
+        )
+
     def on_next_state(self, model: Problem, state: State):
         self._update_info(model, state)
         self._update_live_display(self._create_layout(model))
@@ -65,8 +95,8 @@ class AlgorithmMonitor(AlgorithmSubscriber):
     def _update_info(self, model: Problem, state: State):
         self._update_states(model, state)
         self._update_stats({
-            ACTIVE_TIME: round(time.monotonic() - self._start_time, 2),
-            ITERS_FROM_LAST_IMPROVEMENT: self.algorithm.steps_from_last_state_update
+            ITERS_FROM_LAST_IMPROVEMENT: self.algorithm.steps_from_last_state_update,
+            ACTIVE_TIME: round(time.monotonic() - self._start_time, 2)
         })
 
     def _update_states(self, model, state):
@@ -77,6 +107,8 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             self._stats[BEST_STATES_UPDATE_COUNT] += 1
             self._stats[BEST_STATE_HUMAN] = model.goal.human_readable_objective_for(
                 self.algorithm.best_state)
+            self._stats[TIME_UNTILL_OPTIMUM_FOUND] = round(
+                time.monotonic() - self._start_time, 2)
 
     def _update_stats(self, new_stats):
         self._stats = {**self._stats, **new_stats}
@@ -107,6 +139,8 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             rows[format_stat_name(stat_name)] = value
 
         pad_time = len(str(self._solver_config.time_limit))
+        rows[format_stat_name(
+            TIME_UNTILL_OPTIMUM_FOUND)] = f'{rows[format_stat_name(TIME_UNTILL_OPTIMUM_FOUND)]:>{pad_time}} s'
         rows[format_stat_name(
             ACTIVE_TIME)] = f'{rows[format_stat_name(ACTIVE_TIME)]:>{pad_time}} | {self._solver_config.time_limit} s'
 
@@ -145,7 +179,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
 
     def _create_progress_bar(self):
         completed = self._stats[ITERS_FROM_LAST_IMPROVEMENT] - 1
-        left = self._algorithm_config.local_optimum_moves_threshold - completed
+        left = self.algorithm.config.local_optimum_moves_threshold - completed
         completed_bar = f'[cyan]{"#" * completed}[/cyan]'
         arrow = '[cyan3]>[/cyan3]'
         left_bar = "-" * left

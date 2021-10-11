@@ -1,5 +1,7 @@
 from abc import abstractmethod, ABC
-from typing import Generator, List, Union
+import dataclasses
+from typing import Generator, Generic, List, TypeVar, Union
+from bisect import insort_right
 
 from local_search.algorithm_subscribers.algorithm_subscriber import AlgorithmSubscriber
 from local_search.helpers.camel_to_snake import camel_to_snake
@@ -7,6 +9,29 @@ from local_search.algorithms.algorithm import Algorithm
 from local_search.algorithms.algorithm_config import DEFAULT_CONFIG, AlgorithmConfig
 from local_search.problems.base.problem import Problem
 from local_search.problems.base.state import State
+from dataclasses import dataclass
+
+
+TSubscriber = TypeVar("TSubscriber", bound=AlgorithmSubscriber)
+
+MIN_NICENCESS = -20
+MAX_NICENCESS = 19
+
+
+@dataclass
+class Subscription(Generic[TSubscriber]):
+    niceness: int
+    subscribable: 'SubscribableAlgorithm'
+    subscriber: TSubscriber
+
+    def __post_init__(self):
+        self.subscriber.bind(self.subscribable)
+
+    def close(self):
+        self.subscribable.unsubscribe(self)
+
+    def __lt__(self, other):
+        return self.niceness < other.niceness
 
 
 class SubscribableAlgorithm(Algorithm):
@@ -16,12 +41,13 @@ class SubscribableAlgorithm(Algorithm):
     algorithms = {}
 
     def __init__(self, config: AlgorithmConfig = None):
-        super().__init__()
-        config = config or DEFAULT_CONFIG
-        self.config = config
+        super().__init__(
+            best_obj=None,
+            best_state=None,
+            config=config or DEFAULT_CONFIG
+        )
         self.steps_from_last_state_update = 0
-        self.best_obj, self.best_state = None, None
-        self._subscribers: List[AlgorithmSubscriber] = []
+        self._subscribtions: List[Subscription] = []
 
     def __init_subclass__(cls) -> None:
         if ABC not in cls.__bases__:
@@ -94,25 +120,34 @@ class SubscribableAlgorithm(Algorithm):
             self.best_obj, self.best_state = model.objective_for(
                 new_state), new_state
 
-
     def _on_next_state(self, model: Problem, next_state: State):
         """Called when algorithm find new best state"""
-        for subscriber in self._subscribers:
-            subscriber.on_next_state(model, next_state)
+        for subscribtion in self._subscribtions:
+            subscribtion.subscriber.on_next_state(model, next_state)
 
     def _on_next_neighbour(self, model: Problem, from_state: State, next_neighbour: State):
         """Called when algorithm explores next neighbour"""
-        for subscriber in self._subscribers:
-            subscriber.on_next_neighbour(model, from_state, next_neighbour)
+        for subscribtion in self._subscribtions:
+            subscribtion.subscriber.on_next_neighbour(
+                model, from_state, next_neighbour)
 
     def _on_solution(self, model: Problem, solution: State):
-        for subscriber in self._subscribers:
-            subscriber.on_solution(model=model, solution=solution)
+        for subscribtion in self._subscribtions:
+            subscribtion.subscriber.on_solution(model=model, solution=solution)
 
     def _on_local_optimum_escape(self, model: Problem, from_state: State, to_state: Union[State, None]):
-        for subscriber in self._subscribers:
-            subscriber.on_local_optimum_escape(
+        for subscribtion in self._subscribtions:
+            subscribtion.subscriber.on_local_optimum_escape(
                 model=model, from_state=from_state, to_state=to_state)
 
-    def subscribe(self, subsriber: AlgorithmSubscriber):
-        self._subscribers.append(subsriber)
+    def subscribe(self, subscriber: TSubscriber, niceness=0) -> Subscription[TSubscriber]:
+        subscription = Subscription(
+            niceness=niceness,
+            subscriber=subscriber,
+            subscribable=self
+        )
+        insort_right(self._subscribtions, subscription)
+        return subscription
+
+    def unsubscribe(self, subscription: Subscription) -> None:
+        self._subscribtions.remove(subscription)

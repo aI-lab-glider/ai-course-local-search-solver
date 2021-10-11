@@ -1,7 +1,7 @@
 from math import sqrt
 from random import randint
 from typing import Tuple
-from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import VisualizationSubcriberConfig, VisualizationSubscriber
+from local_search.algorithm_subscribers.visualization_subscribers.visualization_subscriber import StateDrawer, VisualizationSubcriberConfig, VisualizationSubscriber
 from local_search.problems.graph_coloring_problem.problem import GraphColoringProblem
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
 
@@ -9,23 +9,44 @@ import pygame
 
 
 EDGE_COLOR = (0, 0, 0)
+WHITE = (255, 255, 255)
 
 
 class GraphColoringVisualization(VisualizationSubscriber):
-
-    def __init__(self, config: VisualizationSubcriberConfig, model: GraphColoringProblem, **kwargs):
-        super().__init__(config=config, **kwargs)
-        self._available_colors = None
-        self.coords = self._generate_coords(model)
 
     @staticmethod
     def get_corresponding_problem():
         return GraphColoringProblem
 
-    def _draw_state(self, screen, model: GraphColoringProblem, state: GraphColoringState):
+    @classmethod
+    def create_state_drawer(cls, model: GraphColoringProblem = None):
+        if model is None:
+            return None
+        return GraphColoringStateDrawer(model)
+
+
+class GraphColoringStateDrawer(StateDrawer):
+    def __init__(self, model: GraphColoringProblem):
+        self._available_colors = None
+        self.coords = self._generate_coords(model)
+
+    @staticmethod
+    def _generate_coords(model: GraphColoringProblem):
+        coord = []
+        x, y = 1, 1
+        for _ in range(model.n_vertices):
+            while (x, y) in coord:
+                x, y = randint(0, model.n_vertices), randint(
+                    0, model.n_vertices)
+            coord.append((x, y))
+
+        return coord
+
+    def draw_state(self, screen, model: GraphColoringProblem, state: GraphColoringState):
         """
         Draws state
         """
+        screen.fill(WHITE)
         self._draw_lines(screen, model)
         self._draw_vertices(screen, model, state)
 
@@ -56,17 +77,6 @@ class GraphColoringVisualization(VisualizationSubscriber):
             pygame.draw.circle(
                 screen, colors[state.coloring[i].color], (x, y), 10)
             pygame.draw.circle(screen, (0, 0, 0), (x, y), 10, 2)
-
-    def _generate_coords(self, model: GraphColoringProblem):
-        coord = []
-        x, y = 1, 1
-        for _ in range(model.n_vertices):
-            while (x, y) in coord:
-                x, y = randint(0, model.n_vertices), randint(
-                    0, model.n_vertices)
-            coord.append((x, y))
-
-        return coord
 
     def _get_colors(self, model: GraphColoringProblem):
         if not self._available_colors:
