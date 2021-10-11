@@ -8,6 +8,7 @@ from typing import Tuple, Union
 from pathlib import Path
 from PIL import Image
 from io import BytesIO, TextIOWrapper
+import base64
 import numpy as np
 
 
@@ -38,14 +39,15 @@ class AvatarProblem(Problem):
         return AvatarState(img)
 
     @staticmethod
-    def to_string(image: Image.Image):
-        byte_io = BytesIO()
-        image.save(byte_io, 'PNG')
-        return byte_io.getvalue().decode('ISO-8859-1')
+    def to_b64(image: Image.Image):
+        im_file = BytesIO()
+        image.save(im_file, format="JPEG")
+        im_bytes = im_file.getvalue()
+        return base64.b64encode(im_bytes)
 
     def asdict(self):
         return {
-            'reference_image': self.to_string(self.reference_image),
+            'reference_image': f"{self.to_b64(self.reference_image)}",
             'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
             'goal_name': camel_to_snake(type(self.goal).__name__),
         }
@@ -53,13 +55,13 @@ class AvatarProblem(Problem):
     @classmethod
     def from_dict(cls, data):
         cls.validate_data(data)
-        data['reference_image'] = Image.open(BytesIO(data['reference_image'].encode('ISO-8859-1')))
+        data['reference_image'] = Image.open(BytesIO(base64.b64decode(data['reference_image'])))
         return cls(**data)
 
     @classmethod
     def parse_image(cls, file_buffer: TextIOWrapper):
-        line = file_buffer.readline()
-        return Image.open(BytesIO(line.encode('ISO-8859-1')))
+        im_b64 = file_buffer.readline().replace('Reference image:', '').replace('Image:', '')
+        return Image.open(BytesIO(base64.b64decode(im_b64)))
 
     @classmethod
     def from_solution(cls, solution_name: str):
