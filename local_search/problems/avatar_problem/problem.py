@@ -14,7 +14,8 @@ import numpy as np
 class AvatarProblem(Problem):
     def __init__(self,
                  reference_image: Image.Image,
-                 move_generator_name: Union[str, None] = None
+                 move_generator_name: Union[str, None] = None,
+                 goal_name: str = "approximate_avatar"
                  ):
         self.reference_image = reference_image
         self._reference_image_data = reference_image.getdata()
@@ -23,11 +24,12 @@ class AvatarProblem(Problem):
                     self.get_available_move_generation_strategies())[0]
         move_generator = AvatarMoveGenerator.generators[move_generator_name](
             self._image_size)
+        goal = AvatarProblem.get_available_goals()[goal_name]
         initial_solution = self._find_initial_solution()
         super().__init__(
             initial_solution,
             move_generator,
-            ApproximateAvatar(reference_image))
+            goal)
 
     def random_state(self) -> AvatarState:
         """
@@ -83,10 +85,11 @@ class AvatarProblem(Problem):
         return AvatarState(image=Image.new("RGB", self._image_size, "white"))
 
     @staticmethod
-    def from_benchmark(benchmark_name: str, move_generator_name: str, **kwargs):
+    def from_benchmark(benchmark_name: str, move_generator_name: str, goal_name: str = 'approximate_avatar', **kwargs):
         img = Image.open(Path(
             local_search.__file__).parent / "problems" / "avatar_problem" / "benchmarks" / benchmark_name)
         return AvatarProblem(
             img,
-            move_generator_name
+            move_generator_name,
+            goal_name
         )
