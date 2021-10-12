@@ -10,6 +10,9 @@ from local_search.cli.utils.merge_options import merge_options
 from local_search.cli.utils.prompt import \
     get_or_prompt_if_not_exists_or_invalid
 
+import random
+random.seed(42)
+
 
 @click.command('solve')
 @click.option('-c', '--config_file', type=click.Path(readable=True, exists=True), help='File that provides configuration for run')
