@@ -21,6 +21,7 @@ class LocalSearchSolver(Solver):
             if next_state:
                 solution_state = next_state
             else:
+                solution_state = algorithm.best_state
                 break
         self.stop_timer()
         statistics = statistics_subscription.subscriber.statistics
