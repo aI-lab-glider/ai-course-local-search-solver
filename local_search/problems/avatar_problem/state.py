@@ -34,6 +34,3 @@ class AvatarState(State):
         cls.validate_data(data)
         image = Image.open(BytesIO(base64.b64decode(data['image'])))
         return cls(image)
-
-    def show_image(self):
-        self.image.show()

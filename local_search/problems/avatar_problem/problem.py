@@ -60,21 +60,6 @@ class AvatarProblem(Problem):
         data['reference_image'] = Image.open(BytesIO(base64.b64decode(data['reference_image'])))
         return cls(**data)
 
-    @classmethod
-    def parse_image(cls, file_buffer: TextIOWrapper):
-        im_b64 = file_buffer.readline().replace('Reference image:', '').replace('Image:', '')
-        return Image.open(BytesIO(base64.b64decode(im_b64)))
-
-    @classmethod
-    def from_solution(cls, solution_name: str):
-        with open(cls.get_path_to_solutions() / solution_name, 'r') as solution_file:
-            image = cls.parse_image(solution_file)
-            _ = solution_file.readline()
-            reference_image = cls.parse_image(solution_file)
-        model = cls(reference_image=reference_image)
-        model.initial_state = AvatarState(image=image)
-        return model
-
     @staticmethod
     def get_available_move_generation_strategies():
         return AvatarMoveGenerator.generators.keys()
