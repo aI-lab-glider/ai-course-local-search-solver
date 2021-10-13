@@ -1,18 +1,24 @@
-from genetic_algorithms.problems.base.state import State
-from genetic_algorithms.problems.limited_avatar_problem.models.polygon import Polygon
-from genetic_algorithms.problems.limited_avatar_problem.models.vertex import Vertex
-from genetic_algorithms.problems.limited_avatar_problem.models.color import Color
+from local_search.problems.base.state import State
+from local_search.problems.limited_avatar_problem.models.polygon import Polygon
+from local_search.problems.limited_avatar_problem.models.vertex import Vertex
+from local_search.problems.limited_avatar_problem.models.color import Color
 from dataclasses import dataclass
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageChops
 from typing import List, Tuple
 
 
 @dataclass
 class LimitedAvatarState(State):
     polygons: List[Polygon]
+    image_size: Tuple[int, int]
 
     def __str__(self):
-        return self.image.getdata()
+        return 'There is no string representation of limited avatar state.'
+
+    def __eq__(self, other: 'LimitedAvatarState'):
+        if other is None:
+            return False
+        return ImageChops.difference(self.image, other.image).getbbox() is None
 
     def _to_coordinates(self, vertices: List[Vertex]) -> List[Tuple[int, int]]:
         return [(vertex.x, vertex.y) for vertex in vertices]
@@ -26,12 +32,23 @@ class LimitedAvatarState(State):
 
     @property
     def image(self) -> Image:
-        image = Image.new("RGB", self.model.image_size, "white")
+        image = Image.new("RGB", self.image_size, "white")
         image_draw = ImageDraw.Draw(image, "RGBA")
         for polygon in self.polygons:
             self._draw_polygon(polygon, image_draw)
         return image
 
-    def show_image(self):
-        self.image.show()
+    def asdict(self):
+        return {
+            'polygons': [[[(vertex.x, vertex.y) for vertex in polygon.vertices],
+                          (polygon.color.R, polygon.color.G, polygon.color.B, polygon.color.A)]
+                         for polygon in self.polygons]
+        }
 
+    @classmethod
+    def from_dict(cls, data):
+        cls.validate_data(data)
+        data['polygons'] = [Polygon(vertices=[Vertex(x=vertex[0], y=vertex[1]) for vertex in polygon[0]],
+                                    color=Color(polygon[1][0], polygon[1][1], polygon[1][2], polygon[1][3]))
+                            for polygon in data['polygons']]
+        return cls(**data)

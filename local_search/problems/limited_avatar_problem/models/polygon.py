@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Tuple
-from genetic_algorithms.problems.limited_avatar_problem.models.vertex import Vertex
-from genetic_algorithms.problems.limited_avatar_problem.models.color import Color
+from local_search.problems.limited_avatar_problem.models.vertex import Vertex
+from local_search.problems.limited_avatar_problem.models.color import Color
 
 
 @dataclass
