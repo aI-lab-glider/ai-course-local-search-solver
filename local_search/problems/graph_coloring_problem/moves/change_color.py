@@ -27,7 +27,7 @@ class ChangeColor(GraphColoringMoveGenerator):
             if not available_colors:
                 break
             yield ChangeColorMove(state,
-                                  idx=random.randrange(self.n_vertices),
+                                  idx=idx,
                                   color=random.choice(available_colors))
 
     def available_moves(self, state: GraphColoringState) -> Generator[ChangeColorMove, None, None]:
