@@ -22,10 +22,10 @@ class AvatarProblem(Problem):
         self._reference_image_data = reference_image.getdata()
         self._image_size = reference_image.size
         move_generator_name = move_generator_name or list(
-                    self.get_available_move_generation_strategies())[0]
+            self.get_available_move_generation_strategies())[0]
         move_generator = AvatarMoveGenerator.generators[move_generator_name](
             self._image_size)
-        goal = AvatarProblem.get_available_goals()[goal_name]
+        goal = AvatarProblem.get_available_goals()[goal_name](reference_image)
         initial_solution = self._find_initial_solution()
         super().__init__(
             initial_solution,
@@ -57,7 +57,8 @@ class AvatarProblem(Problem):
     @classmethod
     def from_dict(cls, data):
         cls.validate_data(data)
-        data['reference_image'] = Image.open(BytesIO(base64.b64decode(data['reference_image'])))
+        data['reference_image'] = Image.open(
+            BytesIO(base64.b64decode(data['reference_image'])))
         return cls(**data)
 
     @staticmethod
@@ -66,7 +67,9 @@ class AvatarProblem(Problem):
 
     @staticmethod
     def get_available_goals():
-        return [camel_to_snake(ApproximateAvatar.__name__)]
+        return {
+            camel_to_snake(ApproximateAvatar.__name__): ApproximateAvatar
+        }
 
     def _find_initial_solution(self) -> AvatarState:
         return AvatarState(image=Image.new("RGB", self._image_size, "white"))

@@ -8,7 +8,12 @@
     "algorithm": {
         "name": "first_choice_hill_climbing",
         "max_steps_without_improvement": 100,
-        "optimization_strategy": "min"
+        "optimization_strategy": "min",
+        "local_optimum_moves_threshold": 10,
+        "local_optimum_escapes_max": 10,
+        "escape_random_restart_probability": 0.5,
+        "escape_perturbation_probability": 0.5,
+        "escape_perturbation_size": 50
     },
     "solver_config": {
         "max_iter": 10000,
@@ -16,7 +21,7 @@
         "show_statistics": true
     },
     "visualization": {
-        "enabled": false,
+        "enabled": true,
         "min_time_between_steps": 0,
         "show_only_solution": false
     }

@@ -99,7 +99,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             ACTIVE_TIME: round(time.monotonic() - self._start_time, 2)
         })
 
-    def _update_states(self, model, state):
+    def _update_states(self, model: Problem, state: State):
         self._states[PREV_STATE] = self._states[CURR_STATE]
         self._states[CURR_STATE] = state
         if self._states[BEST_STATE] != self.algorithm.best_state:
