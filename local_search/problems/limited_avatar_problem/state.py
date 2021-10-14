@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from PIL import Image, ImageDraw, ImageChops
 from typing import List, Tuple
 
+import numpy as np
+
 
 @dataclass
 class LimitedAvatarState(State):
@@ -36,7 +38,7 @@ class LimitedAvatarState(State):
         image_draw = ImageDraw.Draw(image, "RGBA")
         for polygon in self.polygons:
             self._draw_polygon(polygon, image_draw)
-        return image
+        return np.asarray(image)
 
     def asdict(self):
         return {
