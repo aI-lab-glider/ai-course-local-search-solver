@@ -18,7 +18,5 @@ class GraphColoringMoveGenerator(MoveGenerator):
 
     def get_available_colors(self, idx: int, state: GraphColoringState):
         used_colors = set([v.color for v in state.coloring])
-        neighbour_coloring = set(
-            [state.coloring[neighbour].color for neighbour in self.graph[idx]])
         return tuple(
-            used_colors.difference({state.coloring[idx].color, *neighbour_coloring}))
+            used_colors.difference({state.coloring[idx].color}))
