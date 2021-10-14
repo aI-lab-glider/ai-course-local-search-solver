@@ -66,8 +66,11 @@ class SubscribableAlgorithm(Algorithm):
     def _perturb(self, model: Problem, how_much: int):
         perturbed_state = self.best_state
         for _ in range(how_much):
-            perturbed_state = next(
-                model.move_generator.random_moves(perturbed_state)).make()
+            try:
+                perturbed_state = next(
+                    model.move_generator.random_moves(perturbed_state)).make()
+            except StopIteration:
+                pass
         return perturbed_state
 
     def _get_neighbours(self, model: Problem, state: State) -> Generator[State, None, None]:

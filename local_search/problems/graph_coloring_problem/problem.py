@@ -24,7 +24,7 @@ class GraphColoringProblem(Problem):
             self.graph, self.n_vertices)
         goal_name = goal_name or list(GraphColoringGoal.goals.keys())[0]
         goal = GraphColoringGoal.goals[goal_name](self.edges, self.n_vertices)
-        initial_solution = self._find_initial_solution()
+        initial_solution = self._find_random_solution()
         super().__init__(initial_solution, move_generator, goal)
 
     @property
@@ -44,7 +44,7 @@ class GraphColoringProblem(Problem):
                 graph[edge.end] = {edge.start}
         return graph
 
-    def _find_initial_solution(self) -> GraphColoringState:
+    def _find_random_solution(self) -> GraphColoringState:
         coloring = [Vertex(idx=i, color=-1) for i in range(self.n_vertices)]
         coloring[0].color = 0
         for vertex in self.graph:
@@ -52,13 +52,11 @@ class GraphColoringProblem(Problem):
             for neighbour in self.graph[vertex]:
                 if coloring[neighbour].color in available_colors:
                     available_colors.remove(coloring[neighbour].color)
-            coloring[vertex].color = available_colors[0]
+            coloring[vertex].color = random.choice(available_colors)
         return GraphColoringState(coloring=coloring)
 
     def random_state(self) -> GraphColoringState:
-        coloring = [Vertex(idx=i, color=random.randrange(self.n_vertices))
-                    for i in range(self.n_vertices)]
-        return GraphColoringState(coloring=coloring)
+        return self._find_random_solution()
 
     @classmethod
     def from_benchmark(cls, benchmark_name: str, move_generator_name: str = None, goal_name: str = None):
@@ -73,12 +71,6 @@ class GraphColoringProblem(Problem):
             return Edge(start, end)
         edges = [line_to_edge(line) for line in file_buffer]
         return edges
-
-    @classmethod
-    def parse_coloring(cls, file_buffer: TextIOWrapper):
-        line = file_buffer.readline()
-        coloring = line.replace('State:', '').strip().split(' ')
-        return [Vertex(i, int(c)) for i, c in enumerate(coloring)]
 
     @staticmethod
     def get_available_move_generation_strategies() -> Iterable[str]:

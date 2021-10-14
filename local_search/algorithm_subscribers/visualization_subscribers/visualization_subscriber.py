@@ -13,7 +13,7 @@ from local_search.problems import Problem
 from local_search.problems.base.state import State
 
 BEST_STATE = 'best_state'
-CURR_NEIGHBOR = 'curr_neinghbour'
+CURR_NEIGHBOUR = 'curr_neinghbour'
 FROM_STATE = 'from_state'
 STATS = 'stats_info'
 
@@ -82,13 +82,13 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         self.canvas = pygame.Surface(self._SCREEN_SIZE)
         self.screen_coords = {
             FROM_STATE: (0, 0),
-            CURR_NEIGHBOR: (self._SCREEN_SIZE[0] / 2, 0),
+            CURR_NEIGHBOUR: (self._SCREEN_SIZE[0] / 2, 0),
             BEST_STATE: (0, self._SCREEN_SIZE[1]/2),
             STATS: (self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)
         }
         self.state_screens = {
             BEST_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[BEST_STATE], self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)),
-            CURR_NEIGHBOR: self.canvas.subsurface(pygame.Rect(*self.screen_coords[CURR_NEIGHBOR], self._SCREEN_SIZE[0] / 2, self._SCREEN_SIZE[1] / 2)),
+            CURR_NEIGHBOUR: self.canvas.subsurface(pygame.Rect(*self.screen_coords[CURR_NEIGHBOUR], self._SCREEN_SIZE[0] / 2, self._SCREEN_SIZE[1] / 2)),
             FROM_STATE: self.canvas.subsurface(pygame.Rect(*self.screen_coords[FROM_STATE], self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)),
             STATS: self.canvas.subsurface(pygame.Rect(*self.screen_coords[STATS], self._SCREEN_SIZE[0]/2, self._SCREEN_SIZE[1]/2)),
         }
@@ -100,7 +100,7 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         self.best_state_cost = inf
         self.states = {
             BEST_STATE: None,
-            CURR_NEIGHBOR: None,
+            CURR_NEIGHBOUR: None,
             FROM_STATE: None
         }
 
@@ -117,7 +117,7 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         self.states = {
             BEST_STATE: self.algorithm.best_state or from_state,
             FROM_STATE: from_state,
-            CURR_NEIGHBOR: new_state
+            CURR_NEIGHBOUR: new_state
         }
 
     def _update_statistics(self):
@@ -175,7 +175,7 @@ class VisualizationSubscriber(AlgorithmSubscriber):
             'time': f'{round(self.current_time - self.start_time, 2)}',
             'checked_states': self.explored_states_count,
             'current_state': get_cost_or_unknown(FROM_STATE),
-            'current neighbor': get_cost_or_unknown(CURR_NEIGHBOR),
+            'current neighbour': get_cost_or_unknown(CURR_NEIGHBOUR),
             'best_state': get_cost_or_unknown(BEST_STATE),
         }
 

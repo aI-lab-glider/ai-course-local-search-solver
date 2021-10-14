@@ -23,7 +23,7 @@ TIME_UNTILL_OPTIMUM_FOUND = 'time_untill_optimum_found'
 ACTIVE_TIME = 'active_time'
 BEST_STATES_UPDATE_COUNT = 'best_state_updates_count'
 LOCAL_OPTIMUM_ESCAPES_COUNT = 'local_optimum_escapes_count'
-ITERS_FROM_LAST_IMPROVEMENT = 'iters_from_last_impr'
+ITERS_FROM_LAST_STATE_CHANGE = 'iters_from_last_state_change'
 EXPLORED_STATES_COUNT = 'explored_states_count'
 
 
@@ -64,7 +64,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
             BEST_STATES_UPDATE_COUNT: 0,
             LOCAL_OPTIMUM_ESCAPES_COUNT: 0,
             BEST_STATE_HUMAN: None,
-            ITERS_FROM_LAST_IMPROVEMENT: 0,
+            ITERS_FROM_LAST_STATE_CHANGE: 0,
             EXPLORED_STATES_COUNT: 0
         }
 
@@ -95,7 +95,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
     def _update_info(self, model: Problem, state: State):
         self._update_states(model, state)
         self._update_stats({
-            ITERS_FROM_LAST_IMPROVEMENT: self.algorithm.steps_from_last_state_update,
+            ITERS_FROM_LAST_STATE_CHANGE: self.algorithm.steps_from_last_state_update,
             ACTIVE_TIME: round(time.monotonic() - self._start_time, 2)
         })
 
@@ -178,7 +178,7 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         )
 
     def _create_progress_bar(self):
-        completed = self._stats[ITERS_FROM_LAST_IMPROVEMENT] - 1
+        completed = self._stats[ITERS_FROM_LAST_STATE_CHANGE] - 1
         left = self.algorithm.config.local_optimum_moves_threshold - completed
         completed_bar = f'[cyan]{"#" * completed}[/cyan]'
         arrow = '[cyan3]>[/cyan3]'

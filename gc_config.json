@@ -1,14 +1,14 @@
 {
     "problem": {
         "name": "graph_coloring_problem",
-        "benchmark": "problem_1",
-        "move_generator": "kempe_chain",
+        "benchmark": "problem_2",
+        "move_generator": "change_color",
         "goal": "max_classes"
     },
     "algorithm": {
-        "name": "simulated_annealing",
-        "local_optimum_moves_threshold": 1,
-        "local_optimum_escapes_max": 1,
+        "name": "first_choice_hill_climbing",
+        "local_optimum_moves_threshold": 20,
+        "local_optimum_escapes_max": 1000,
         "initial_temperature": 10000,
         "cooling_step": 0.001,
         "min_temperature": 1e-8,
@@ -23,9 +23,9 @@
         "show_statistics": true
     },
     "visualization": {
-        "enabled": false,
-        "min_time_between_steps": 0,
-        "show_only_solution": false
+        "enabled": true,
+        "min_time_between_steps": 1,
+        "show_only_solution": true
     },
     "save_solution": true
 }
