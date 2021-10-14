@@ -1,0 +1,95 @@
+{
+    "state": {
+        "route": [
+            6,
+            5,
+            4,
+            3,
+            1,
+            2,
+            0,
+            6
+        ],
+        "points": [
+            [
+                13,
+                13
+            ],
+            [
+                57,
+                58
+            ],
+            [
+                62,
+                42
+            ],
+            [
+                42,
+                57
+            ],
+            [
+                16,
+                57
+            ],
+            [
+                8,
+                52
+            ],
+            [
+                7,
+                38
+            ]
+        ],
+        "name": "traveling_salesman_state"
+    },
+    "problem": {
+        "depot_idx": 6,
+        "points": [
+            [
+                13,
+                13
+            ],
+            [
+                57,
+                58
+            ],
+            [
+                62,
+                42
+            ],
+            [
+                42,
+                57
+            ],
+            [
+                16,
+                57
+            ],
+            [
+                8,
+                52
+            ],
+            [
+                7,
+                38
+            ]
+        ],
+        "name": "traveling_salesman_problem",
+        "goal_name": "distance",
+        "move_generator_name": "two_opt"
+    },
+    "statistics": {
+        "algorithm_name": "first_choice_hill_climbing",
+        "local_optimum_escapes_count": 1001,
+        "best_states_update_count": 2,
+        "explored_states_count": 0,
+        "time_untill_optimum_found": 0.02
+    },
+    "algorithm_config": {
+        "local_optimum_moves_threshold": 50,
+        "local_optimum_escapes_max": 1000,
+        "escape_random_restart_probability": 0.5,
+        "escape_perturbation_probability": 0.5,
+        "escape_perturbation_size": 50
+    }
+}
