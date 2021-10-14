@@ -34,8 +34,11 @@ def solve(config_file, **cli_options):
     }):
         path = create_path_to_save_solution(options)
         while path.exists():
-            should_overwrite = click.confirm(
-                f"There is already a solution saved to {path}. Do you want to overwrite it?", default=True)
+            should_save = click.confirm(
+                f"There is already a solution with to problem with this name, benchmark, move generator and goal. Do you want to save this solution?", default=True)
+            if not should_save:
+                return
+            should_overwrite = click.confirm("Do you want to overwrite it?")
             if not should_overwrite:
                 new_name = click.prompt(
                     f'New name to save in folder {path.parent} (without extension)', type=str)
