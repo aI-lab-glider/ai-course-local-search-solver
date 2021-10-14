@@ -47,7 +47,7 @@ def solve(config_file, **cli_options):
 
 
 def create_path_to_save_solution(config):
-    solution_dir = Path("expected_solutions")
+    solution_dir = Path("student_solutions")
     if not solution_dir.exists():
         os.mkdir(solution_dir)
     file_name = 'solution'
