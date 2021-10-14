@@ -29,4 +29,5 @@ class LocalSearchSolver(Solver):
         return Solution(
             state=solution_state,
             problem=model,
-            statistics=statistics)
+            statistics=statistics,
+            algorithm_config=algorithm.config)

@@ -5,9 +5,9 @@ from local_search.algorithms.hill_climbing.hill_climbing import HillClimbing
 from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
 from local_search.cli.utils.console import print_section_name
 from local_search.cli.utils.create_dataclass import create_dataclass
-from local_search.cli.utils.get_type_for_param import get_type_for_param
 from local_search.cli.utils.prompt import get_or_prompt_if_not_exists_or_invalid
 from local_search.helpers.camel_to_snake import camel_to_snake
+from local_search.helpers.get_type_for_param import get_type_for_param
 from local_search.problems.avatar_problem.problem import AvatarProblem
 from local_search.problems.base.problem import Problem
 
