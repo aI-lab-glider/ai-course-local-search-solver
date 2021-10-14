@@ -1,6 +1,8 @@
 from local_search.problems.base.state import State
 from dataclasses import dataclass
 from PIL import Image, ImageChops
+from io import BytesIO
+import base64
 
 
 @dataclass
@@ -15,5 +17,20 @@ class AvatarState(State):
             return False
         return ImageChops.difference(self.image, other.image).getbbox() is None
 
-    def show_image(self):
-        self.image.show()
+    @staticmethod
+    def to_b64(image: Image.Image):
+        im_file = BytesIO()
+        image.save(im_file, format="JPEG")
+        im_bytes = im_file.getvalue()
+        return base64.b64encode(im_bytes)
+
+    def asdict(self):
+        return {
+            'image': f"{self.to_b64(self.image)}".replace("b'", "")
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        cls.validate_data(data)
+        image = Image.open(BytesIO(base64.b64decode(data['image'])))
+        return cls(image)
