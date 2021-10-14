@@ -40,10 +40,13 @@ class LimitedAvatarState(State):
         return image
 
     def asdict(self):
+        base = super().asdict()
         return {
             'polygons': [[[(vertex.x, vertex.y) for vertex in polygon.vertices],
                           (polygon.color.R, polygon.color.G, polygon.color.B, polygon.color.A)]
-                         for polygon in self.polygons]
+                         for polygon in self.polygons],
+            'image_size': self.image_size,
+            **base
         }
 
     @classmethod

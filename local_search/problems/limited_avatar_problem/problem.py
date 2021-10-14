@@ -15,7 +15,7 @@ from PIL import Image
 from io import BytesIO
 import base64
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 
 @dataclass
@@ -45,9 +45,6 @@ class LimitedAvatarProblem(Problem):
         super().__init__(initial_solution,
                          move_generator,
                          goal=self.get_available_goals()[goal_name](reference_image))
-
-    def from_solution(cls, problem_name: str):
-        pass
 
     def random_state(self) -> LimitedAvatarState:
         """
@@ -79,10 +76,11 @@ class LimitedAvatarProblem(Problem):
         return base64.b64encode(im_bytes)
 
     def asdict(self):
+        base = super().asdict()
         return {
             'reference_image': f"{self.to_b64(self.reference_image)}".replace("b'", ""),
-            'move_generator_name': camel_to_snake(type(self.move_generator).__name__),
-            'goal_name': camel_to_snake(type(self.goal).__name__),
+            'config': asdict(self.config),
+            **base
         }
 
     @staticmethod
@@ -100,6 +98,7 @@ class LimitedAvatarProblem(Problem):
         cls.validate_data(data)
         data['reference_image'] = Image.open(
             BytesIO(base64.b64decode(data['reference_image'])))
+        data['config'] = LimitedAvatarProblemConfig(**data['config'])
         return cls(**data)
 
     @staticmethod

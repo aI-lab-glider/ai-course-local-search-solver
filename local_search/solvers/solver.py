@@ -1,11 +1,9 @@
 from abc import ABC, abstractmethod
 from local_search.algorithm_subscribers.algorithm_monitor import AlgorithmMonitor
-from local_search.algorithms.algorithm import Algorithm
 from local_search.algorithms.subscribable_algorithm import SubscribableAlgorithm
 from local_search.problems.base import Problem, State
-from dataclasses import dataclass
 from time import time
-
+import atexit
 from local_search.solvers.solver_config import SolverConfig
 
 DEFAULT_CONFIG = SolverConfig()
@@ -16,6 +14,15 @@ class Solver(ABC):
     def __init__(self, config: SolverConfig = None):
         self._config = config or DEFAULT_CONFIG
         self._time_limit = self._config.time_limit
+        self._is_terminated = False
+        atexit.register(self.on_exit)
+
+    def on_exit(self):
+        self._is_terminated = True
+
+    @property
+    def is_terminated(self):
+        return self.is_timeout() or self._is_terminated
 
     @property
     def algorithm_monitor(self):

@@ -24,5 +24,6 @@
         "enabled": true,
         "min_time_between_steps": 0.01,
         "show_only_solution": false
-    }
+    },
+    "save_solution": true
 }

@@ -25,8 +25,10 @@ class AvatarState(State):
         return base64.b64encode(im_bytes)
 
     def asdict(self):
+        base = super().asdict()
         return {
-            'image': f"{self.to_b64(self.image)}".replace("b'", "")
+            'image': f"{self.to_b64(self.image)}".replace("b'", ""),
+            **base
         }
 
     @classmethod

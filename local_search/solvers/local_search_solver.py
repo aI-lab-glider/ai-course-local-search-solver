@@ -16,12 +16,17 @@ class LocalSearchSolver(Solver):
         self.start_timer()
         solution_state = model.initial_state
         while not self.is_timeout():
-            next_state = algorithm.next_state(model, solution_state)
+            try:
+                next_state = algorithm.next_state(model, solution_state)
+            except (SystemExit, KeyboardInterrupt):
+                solution_state = algorithm.best_state
+                break
             if next_state:
                 solution_state = next_state
             else:
                 solution_state = algorithm.best_state
                 break
+
         self.stop_timer()
         statistics = statistics_subscription.subscriber.statistics
         statistics_subscription.close()
