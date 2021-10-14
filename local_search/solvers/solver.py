@@ -8,25 +8,6 @@ from time import time
 
 from local_search.solvers.solver_config import SolverConfig
 
-# TODO
-# 1. Solver can write problems solution to files
-# 2. Solver should write descriptive files.
-# 3. Solver should save statistics
-# 4.
-
-
-# TODO
-# Algorithm monitor should have config, and it should have option, that alows to store solutions.
-#
-
-
-# TODO
-# Solver will have algorithm monitor inside it. It will be able to turn it on/off.
-# Algorithm monitor will expose collected statistics.
-# It should be possible to turn on/off statistics that should be visible.
-# Solver will also be able to write down a solution file.
-
-
 DEFAULT_CONFIG = SolverConfig()
 
 

@@ -13,7 +13,6 @@ class LocalSearchSolver(Solver):
     def solve(self, model: Problem, algorithm: SubscribableAlgorithm) -> Solution:
         statistics_subscription = algorithm.subscribe(
             self.algorithm_monitor, niceness=MIN_NICENCESS)
-        # TODO delegate to algorithm monitor
         self.start_timer()
         solution_state = model.initial_state
         while not self.is_timeout():
