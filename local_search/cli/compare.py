@@ -21,7 +21,7 @@ def compare():
 
 
 @compare.command('solutions', help='Compares solutions')
-@click.option('-p', '--path', type=click.Path(exists=True, readable=True), help='Path to directory with solutions that should be compared')
+@click.argument('path', type=click.Path(exists=True, readable=True))
 def comapre_solutions(path):
     solutions_dir = Path(path)
     solutions = [Solution.from_json(solutions_dir/file)
@@ -31,9 +31,9 @@ def comapre_solutions(path):
 
 
 @compare.command('configurations', help='Runs different configurations on preconfigured solver and problem and compares returned solutions')
-@click.option('-c', '--config', type=click.Path(exists=True, readable=True), help='Path to directory with compare config')
-def compare_configurations(config):
-    with open(config, 'r') as config:
+@click.argument('config_path', type=click.Path(exists=True, readable=True))
+def compare_configurations(config_path):
+    with open(config_path, 'r') as config:
         config = json.load(config)
     console.log("Compares configurations with config: ", config)
     common_config = config["common"]
