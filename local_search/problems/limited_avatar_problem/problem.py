@@ -15,15 +15,25 @@ from PIL import Image
 from io import BytesIO
 import base64
 import random
+from dataclasses import dataclass
+
+
+@dataclass
+class LimitedAvatarProblemConfig:
+    n_polygons = 50
+    n_polygon_vertices = 3
+
+
+DEFAULT_CONFIG = LimitedAvatarProblemConfig()
 
 
 class LimitedAvatarProblem(Problem):
     def __init__(self,
                  reference_image: Image.Image,
                  move_generator_name: Union[str, None] = None,
+                 config: LimitedAvatarProblemConfig = None
                  ):
-        self.n_polygons = 50
-        self.n_polygon_vertices = 3
+        self.config = config or DEFAULT_CONFIG
         self.reference_image = reference_image
         self._image_size = reference_image.size
         move_generator_name = move_generator_name or list(
@@ -53,8 +63,8 @@ class LimitedAvatarProblem(Problem):
             return Vertex(x=random.randint(0 - offset, self._image_size[0] + offset),
                           y=random.randint(0 - offset, self._image_size[1] + offset))
 
-        polygons = [Polygon(vertices=[_generate_vertex() for _ in range(self.n_polygon_vertices)],
-                            color=_generate_color()) for _ in range(self.n_polygons)]
+        polygons = [Polygon(vertices=[_generate_vertex() for _ in range(self.config.n_polygon_vertices)],
+                            color=_generate_color()) for _ in range(self.config.n_polygons)]
         return LimitedAvatarState(polygons=polygons, image_size=self._image_size)
 
     def _find_initial_solution(self) -> LimitedAvatarState:
