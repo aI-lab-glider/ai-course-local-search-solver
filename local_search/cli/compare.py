@@ -24,10 +24,21 @@ def compare():
 @click.argument('path', type=click.Path(exists=True, readable=True))
 def comapre_solutions(path):
     solutions_dir = Path(path)
-    solutions = [Solution.from_json(solutions_dir/file)
-                 for file in os.listdir(solutions_dir)]
+    solutions = read_solutions_from_dir(solutions_dir)
     comparison = create_comparison_for_solutions(solutions)
     console.print(comparison)
+
+
+def read_solutions_from_dir(dir_path: Path) -> List[Solution]:
+    solutions = []
+    for file in os.listdir(dir_path):
+        file_path = dir_path/file
+        if file_path.is_dir():
+            dir_solutions = read_solutions_from_dir(file_path)
+            solutions.extend(dir_solutions)
+        elif file.endswith('.json'):
+            solutions.append(Solution.from_json(file_path))
+    return solutions
 
 
 @compare.command('configurations', help='Runs different configurations on preconfigured solver and problem and compares returned solutions')
