@@ -14,7 +14,7 @@ class ApproximateLimitedAvatar(Goal):
         """
         Calculates objective for passed state
         """
-        return ((self._ref - state.image) ** 2).sum()
+        return ((self._ref - np.asarray(state.image)) ** 2).sum()
 
     def human_readable_objective_for(self, state: LimitedAvatarState) -> str:
         """

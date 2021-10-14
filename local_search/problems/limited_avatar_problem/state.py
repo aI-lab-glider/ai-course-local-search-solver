@@ -5,7 +5,6 @@ from local_search.problems.limited_avatar_problem.models.color import Color
 from dataclasses import dataclass
 from PIL import Image, ImageDraw, ImageChops
 from typing import List, Tuple
-
 import numpy as np
 
 
@@ -33,12 +32,12 @@ class LimitedAvatarState(State):
                            fill=self._to_color_coordinates(polygon.color))
 
     @property
-    def image(self) -> Image:
+    def image(self) -> Image.Image:
         image = Image.new("RGB", self.image_size, "white")
         image_draw = ImageDraw.Draw(image, "RGBA")
         for polygon in self.polygons:
             self._draw_polygon(polygon, image_draw)
-        return np.asarray(image, dtype=int)
+        return image
 
     def asdict(self):
         return {
