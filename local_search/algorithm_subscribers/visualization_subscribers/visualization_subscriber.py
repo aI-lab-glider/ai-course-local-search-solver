@@ -151,7 +151,6 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         self._draw_information(model)
         self._draw_states(model)
         self._draw_button()
-        self._draw_border()
         pygame.display.flip()
 
     def _draw_states(self, model: Problem):
@@ -186,15 +185,6 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         font = pygame.font.SysFont('arial', font_size, bold)
         renderer = font.render(text, False, self._FONT_COLOR)
         screen.blit(renderer, position)
-
-    def _draw_border(self):
-        rect = pygame.Rect(0, 0, self.main_screen.get_width() -
-                           1, self.main_screen.get_height() - 1)
-        pygame.draw.rect(self.main_screen, BLACK, rect, 4)
-        pygame.draw.line(self.main_screen, BLACK, (self.main_screen.get_width() / 2, 0),
-                         (self.main_screen.get_width() / 2, self.main_screen.get_height()), 3)
-        pygame.draw.line(self.main_screen, BLACK, (0, self.main_screen.get_height() / 2),
-                         (self.main_screen.get_width(), self.main_screen.get_height() / 2), 3)
 
     def _draw_information(self, model: Problem):
         screen = self.state_screens[STATS]
@@ -231,7 +221,7 @@ class VisualizationSubscriber(AlgorithmSubscriber):
     def _draw_button(self):
         screen = self.state_screens[STATS]
         rect = pygame.Rect(screen.get_width() / 3, screen.get_height() /
-                           2, self._BUTTON_SIZE[0], self._BUTTON_SIZE[1])
+                           2, *self._BUTTON_SIZE)
         if self._is_freezed:
             pygame.draw.rect(screen, RED, rect)
         else:
