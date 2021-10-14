@@ -15,7 +15,8 @@ def create_dataclass(options, dataclass: Type):
             field_value = field.type(value)
         else:
             field_value = get_or_prompt_if_not_exists_or_invalid(options, field.name, {
-                'default': field.default
+                'default': field.default,
+                'type': field.type
             })
 
         dataclass_config[field.name] = field_value

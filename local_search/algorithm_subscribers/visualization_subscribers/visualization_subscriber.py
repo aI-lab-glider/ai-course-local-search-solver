@@ -12,7 +12,7 @@ from local_search.problems import Problem
 from local_search.problems.base.state import State
 
 BEST_STATE = 'best_state'
-CURR_NEIGHBOUR = 'curr_neinghbour'
+CURR_NEIGHBOUR = 'current_neinghbour'
 FROM_STATE = 'from_state'
 STATS = 'stats_info'
 

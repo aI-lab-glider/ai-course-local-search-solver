@@ -178,12 +178,12 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         )
 
     def _create_progress_bar(self):
-        completed = self._stats[ITERS_FROM_LAST_STATE_CHANGE] - 1
+        completed = max(self._stats[ITERS_FROM_LAST_STATE_CHANGE] - 1, 0)
         left = self.algorithm.config.local_optimum_moves_threshold - completed
         completed_bar = f'[cyan]{"#" * completed}[/cyan]'
         arrow = '[cyan3]>[/cyan3]'
         left_bar = "-" * left
-        return f'Steps without improvement: [{completed_bar}{arrow}{left_bar}]'
+        return f'Optimum detected: [{completed_bar}{arrow}{left_bar}]'
 
     def _create_state_column(self) -> Layout:
         layout = Layout()
