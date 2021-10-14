@@ -8,7 +8,7 @@ import numpy as np
 class ApproximateLimitedAvatar(Goal):
 
     def __init__(self, reference_image: Image.Image):
-        self._ref = np.asarray(reference_image)
+        self._ref = np.asarray(reference_image, dtype=int)
 
     def objective_for(self, state: LimitedAvatarState) -> int:
         """

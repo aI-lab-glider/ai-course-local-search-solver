@@ -20,7 +20,7 @@ class LimitedAvatarState(State):
     def __eq__(self, other: 'LimitedAvatarState'):
         if other is None:
             return False
-        return ImageChops.difference(self.image, other.image).getbbox() is None
+        return np.array_equal(self.image, other.image)
 
     def _to_coordinates(self, vertices: List[Vertex]) -> List[Tuple[int, int]]:
         return [(vertex.x, vertex.y) for vertex in vertices]
@@ -38,7 +38,7 @@ class LimitedAvatarState(State):
         image_draw = ImageDraw.Draw(image, "RGBA")
         for polygon in self.polygons:
             self._draw_polygon(polygon, image_draw)
-        return np.asarray(image)
+        return np.asarray(image, dtype=int)
 
     def asdict(self):
         return {
