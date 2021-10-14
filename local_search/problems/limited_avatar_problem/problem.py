@@ -20,8 +20,8 @@ from dataclasses import dataclass
 
 @dataclass
 class LimitedAvatarProblemConfig:
-    n_polygons = 50
-    n_polygon_vertices = 3
+    n_polygons: int = 50
+    n_polygon_vertices: int = 3
 
 
 DEFAULT_CONFIG = LimitedAvatarProblemConfig()
@@ -31,7 +31,8 @@ class LimitedAvatarProblem(Problem):
     def __init__(self,
                  reference_image: Image.Image,
                  move_generator_name: Union[str, None] = None,
-                 config: LimitedAvatarProblemConfig = None
+                 config: LimitedAvatarProblemConfig = None,
+                 goal_name: str = 'approximate_limited_avatar',
                  ):
         self.config = config or DEFAULT_CONFIG
         self.reference_image = reference_image
@@ -43,7 +44,7 @@ class LimitedAvatarProblem(Problem):
         initial_solution = self._find_initial_solution()
         super().__init__(initial_solution,
                          move_generator,
-                         goal=ApproximateLimitedAvatar(reference_image))
+                         goal=self.get_available_goals()[goal_name](reference_image))
 
     def from_solution(cls, problem_name: str):
         pass
@@ -90,19 +91,23 @@ class LimitedAvatarProblem(Problem):
 
     @staticmethod
     def get_available_goals():
-        return [camel_to_snake(ApproximateLimitedAvatar.__name__)]
+        return {
+            camel_to_snake(ApproximateLimitedAvatar.__name__): ApproximateLimitedAvatar
+        }
 
     @classmethod
     def from_dict(cls, data):
         cls.validate_data(data)
-        data['reference_image'] = Image.open(BytesIO(base64.b64decode(data['reference_image'])))
+        data['reference_image'] = Image.open(
+            BytesIO(base64.b64decode(data['reference_image'])))
         return cls(**data)
 
     @staticmethod
-    def from_benchmark(benchmark_name: str, move_generator_name: str, goal_name: str = 'approximate_limited_avatar', **kwargs):
+    def from_benchmark(benchmark_name: str, move_generator_name: str, goal_name: str = 'approximate_limited_avatar', config: LimitedAvatarProblemConfig = None):
         img = Image.open(Path(
             local_search.__file__).parent / "problems" / "limited_avatar_problem" / "benchmarks" / benchmark_name)
         return LimitedAvatarProblem(
             img,
-            move_generator_name
+            move_generator_name,
+            config
         )

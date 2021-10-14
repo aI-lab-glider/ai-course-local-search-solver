@@ -68,7 +68,7 @@ class Problem(ABC):
 
     @staticmethod
     @abstractmethod
-    def from_benchmark(benchmark_name: str, move_generator_name: str = None, goal_name: str = None) -> 'Problem':
+    def from_benchmark(benchmark_name: str, move_generator_name: str = None, goal_name: str = None, **kwargs) -> 'Problem':
         """
         Creates model from behcmark file
         """

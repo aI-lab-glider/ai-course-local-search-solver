@@ -3,7 +3,11 @@
         "name": "limited_avatar_problem",
         "benchmark": "monalisa.jpg",
         "move_generator": "mutate_polygon",
-        "goal": "approximate_limited_avatar"
+        "goal": "approximate_limited_avatar",
+        "config": {
+            "n_polygons": 50,
+            "n_polygon_vertices": 3
+        }
     },
     "algorithm": {
         "name": "first_choice_hill_climbing",
