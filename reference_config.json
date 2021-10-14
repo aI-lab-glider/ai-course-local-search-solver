@@ -18,7 +18,6 @@
         "escape_reheat_probability": 0.33
     },
     "solver_config": {
-        "max_iter": 10000,
         "time_limit": 60000,
         "show_statistics": true
     },
