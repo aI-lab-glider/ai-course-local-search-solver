@@ -151,7 +151,17 @@ class VisualizationSubscriber(AlgorithmSubscriber):
         self._draw_information(model)
         self._draw_states(model)
         self._draw_button()
+        self._draw_border()
         pygame.display.flip()
+
+    def _draw_border(self):
+        rect = pygame.Rect(0, 0, self.main_screen.get_width() -
+                           1, self.main_screen.get_height() - 1)
+        pygame.draw.rect(self.main_screen, BLACK, rect, 4)
+        pygame.draw.line(self.main_screen, BLACK, (self.main_screen.get_width() / 2, 0),
+                         (self.main_screen.get_width() / 2, self.main_screen.get_height()), 3)
+        pygame.draw.line(self.main_screen, BLACK, (0, self.main_screen.get_height() / 2),
+                         (self.main_screen.get_width(), self.main_screen.get_height() / 2), 3)
 
     def _draw_states(self, model: Problem):
         caption_font_size = 25
@@ -229,6 +239,7 @@ class VisualizationSubscriber(AlgorithmSubscriber):
 
         pygame.draw.rect(screen, self._FONT_COLOR, rect, 3)
         self.main_screen.blit(screen, self.screen_coords[STATS])
+        self._draw_border()
         pygame.display.flip()
 
     def _is_button_clicked(self, position):

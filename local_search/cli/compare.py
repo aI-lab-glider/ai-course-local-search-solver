@@ -78,7 +78,8 @@ def compare_configurations(config_path):
 
 
 def create_comparison_for_solutions(solutions: List[Solution]):
-    table = Table(title='Solutions comparison', box=box.ASCII)
+    colors = ['yellow', 'chartreuse1', 'blue', 'orange1', 'green', 'red', 'cyan','dark_orange']
+    table = Table(title='Solutions comparison', box=box.ASCII,header_style="magenta",title_style="red")
     columns = ['Algorithm name',
                'Problem name',
                'Move generator name',
@@ -87,8 +88,11 @@ def create_comparison_for_solutions(solutions: List[Solution]):
                'Time until optimum found',
                'Local optimum escapes count',
                'Explored states count']
+
+    i = 0
     for column in columns:
-        table.add_column(column, justify="right")
+        table.add_column(column, justify="right",style=f"bold {colors[i]}")
+        i += 1
 
     for solution in solutions:
         table.add_row(
