@@ -96,7 +96,8 @@ class AlgorithmMonitor(AlgorithmSubscriber):
         self._update_states(model, state)
         self._update_stats({
             ITERS_FROM_LAST_STATE_CHANGE: self.algorithm.steps_from_last_state_update,
-            ACTIVE_TIME: round(time.monotonic() - self._start_time, 2)
+            ACTIVE_TIME: round(time.monotonic() - self._start_time, 2),
+            EXPLORED_STATES_COUNT: self._stats[EXPLORED_STATES_COUNT] + 1
         })
 
     def _update_states(self, model: Problem, state: State):
