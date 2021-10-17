@@ -5,21 +5,22 @@ from local_search.problems.limited_avatar_problem.models.color import Color
 from typing import Generator, Tuple, Union
 import random
 import copy
+import numpy as np
 
 
 class MutatePolygon(LimitedAvatarMoveGenerator):
     def _generate_coords_diff(self) -> Tuple[int, int]:
-        return (random.randint(-self.im_size[0] // 2, self.im_size[0] // 2),
-                random.randint(-self.im_size[1] // 2, self.im_size[1] // 2))
+        return (int(np.random.normal(loc=0, scale=self.im_size[1]/6)),
+                int(np.random.normal(loc=0, scale=self.im_size[1]/6)))
 
     def _generate_vertex_idx(self, state: LimitedAvatarState) -> int:
         return random.randint(0, len(state.polygons[0].vertices) - 1)
 
     def _generate_color_diff(self) -> Color:
-        return Color(R=random.randint(-255, 255),
-                     G=random.randint(-255, 255),
-                     B=random.randint(-255, 255),
-                     A=random.randint(-255, 255))
+        return Color(R=int(np.random.normal(loc=0, scale=256/3)),
+                     G=int(np.random.normal(loc=0, scale=256/3)),
+                     B=int(np.random.normal(loc=0, scale=256/3)),
+                     A=int(np.random.normal(loc=0, scale=256/3)))
 
     def _generate_move(self, state: LimitedAvatarState):
         while True:
