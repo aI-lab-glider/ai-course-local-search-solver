@@ -9,7 +9,8 @@ setup(
         'click',
         'pygame',
         'Pillow',
-        "mpmath"
+        'mpmath',
+        'pytest'
     ],
     entry_points='''
         [console_scripts]

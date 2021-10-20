@@ -14,6 +14,8 @@ class MagicSquareState(State):
         return f"Magic number: {self.magic_number}" + "\n".join(rows)
 
     def __eq__(self, other):
+        if other is None:
+            return False
         return self.numbers == other.numbers and self.magic_number == other.magic_number
 
     def asdict(self):
@@ -27,6 +29,3 @@ class MagicSquareState(State):
         numbers = np.array(data['numbers'])
         magic_number = data['magic_number']
         return cls(numbers=numbers, magic_number=magic_number)
-
-
-

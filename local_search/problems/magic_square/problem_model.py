@@ -1,6 +1,7 @@
 from pathlib import Path
 import local_search
 from typing import Iterable
+from local_search.helpers.camel_to_snake import camel_to_snake
 from local_search.problems.base.problem import Problem
 from local_search.problems.magic_square.state import MagicSquareState
 from local_search.problems.magic_square.moves.move_generator import MagicSquareMoveGenerator
@@ -8,7 +9,7 @@ from local_search.problems.magic_square.goals.goal import MagicSquareGoal
 import numpy as np
 
 
-class MagicSquareProblem(Problem):
+class MagicSquare(Problem):
     def __init__(self, initial_solution: MagicSquareState, move_generator: MagicSquareMoveGenerator, goal: MagicSquareGoal):
         super().__init__(initial_solution, move_generator, goal)
 
@@ -18,11 +19,11 @@ class MagicSquareProblem(Problem):
 
     @staticmethod
     def get_available_move_generation_strategies() -> Iterable[str]:
-        return MagicSquareMoveGenerator.move_generators.keys()
+        return [camel_to_snake(MagicSquareMoveGenerator.__name__)]
 
     @staticmethod
     def get_available_goals() -> Iterable[str]:
-        return MagicSquareGoal.goals.keys()
+        return [camel_to_snake(MagicSquareGoal.__name__)]
 
     @staticmethod
     def from_benchmark(benchmark_name: str, move_generator_name: str = None, goal_name: str = None):
@@ -31,8 +32,9 @@ class MagicSquareProblem(Problem):
             numbers = [list(map(int, line.split(',')))
                        for line in benchmark_file.readlines()]
             numbers = np.array(numbers)
-            initial_state = MagicSquareState(numbers=numbers, magic_number=magic_number)
-            return MagicSquareProblem(
+            initial_state = MagicSquareState(
+                numbers=numbers, magic_number=magic_number)
+            return MagicSquare(
                 initial_solution=initial_state,
                 move_generator=MagicSquareMoveGenerator(),
                 goal=MagicSquareGoal()
@@ -40,11 +42,8 @@ class MagicSquareProblem(Problem):
 
     @classmethod
     def from_dict(cls, data):
-        """ ??? """
         return cls(**data)
 
     @classmethod
     def from_solution(cls, solution_name: str):
         return cls.from_benchmark(solution_name)
-
-

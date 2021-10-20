@@ -1,0 +1,1 @@
+from local_search.problems.magic_square.moves.move_generator import MoveGenerator
