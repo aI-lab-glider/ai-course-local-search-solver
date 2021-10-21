@@ -7,6 +7,7 @@ from local_search.problems.base.state import State
 
 
 class MoveGenerator(ABC):
+
     def random_moves(self, state: State) -> Generator[Move[State], None, None]:
         """
         Generates all available moves from state, but moves are performed in a random order.
@@ -19,7 +20,7 @@ class MoveGenerator(ABC):
         moves = list(self.available_moves(state))
         return (move for move in sample(moves, len(moves)))
 
-    @ abstractmethod
+    @abstractmethod
     def available_moves(self, state: State) -> Generator[Move[State], None, None]:
         """
         Generates available moves from state
