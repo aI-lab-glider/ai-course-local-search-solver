@@ -21,9 +21,14 @@ class GraphColoringGoal(Goal, ABC):
         GraphColoringGoal.goals[camel_to_snake(cls.__name__)] = cls
 
     def _num_colors(self, state: GraphColoringState) -> int:
+        # TODO:
+        # return number of colors in the coloring
         return len(set([v.color for v in state.coloring]))
 
     def _bad_edges(self, state: GraphColoringState) -> List[int]:
+        # TODO:
+        # return number of bad edges of every color class in the graph
+        # tip. self.edges is the list of 'Edge' in the graph
         bad_edges = [0 for _ in range(self.n_vertices)]
         for edge in self.edges:
             if state.coloring[edge.start].color == state.coloring[edge.end].color:
@@ -31,6 +36,8 @@ class GraphColoringGoal(Goal, ABC):
         return bad_edges
 
     def _color_classes(self, state: GraphColoringState) -> List[int]:
+        # TODO:
+        # return sizes of the color classes
         color_classes = [0 for _ in range(self.n_vertices)]
         for vertex in state.coloring:
             color_classes[vertex.color] += 1
