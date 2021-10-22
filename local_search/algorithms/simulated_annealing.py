@@ -38,7 +38,7 @@ class SimulatedAnnealing(SubscribableAlgorithm):
     """
 
     def __init__(self, config: SimulatedAnnealingConfig = None):
-        self.config = config or DEFAULT_CONFIG
+        self.config: SimulatedAnnealingConfig = config or DEFAULT_CONFIG
         self.temperature = self.config.initial_temperature
         self._local_optimum_escapes = 0
         self._escape_strategies = list(SAEscapeStrategy)
@@ -47,7 +47,7 @@ class SimulatedAnnealing(SubscribableAlgorithm):
         self._escape_probabilities[SAEscapeStrategy.Perturbation.value] = self.config.escape_perturbation_probability
         self._escape_probabilities[SAEscapeStrategy.Reheat.value] = self.config.escape_reheat_probability
         self.cooling_time = 0
-        super().__init__(config=config)
+        super().__init__(config=self.config)
 
     def _find_next_state(self, model: Problem, state: State) -> Union[State, None]:
         # TODO:
@@ -88,7 +88,8 @@ class SimulatedAnnealing(SubscribableAlgorithm):
         #   and k is stored as self.cooling_time
         # - update self.cooling_time
         # - the temperature can't go below self.config.min_temperature
-        self.temperature = max(self.temperature * (self.config.cooling_step ** self.cooling_time), self.config.min_temperature)
+        self.temperature = max(self.temperature * (self.config.cooling_step **
+                               self.cooling_time), self.config.min_temperature)
         self.cooling_time += 1
 
     def escape_local_optimum(self, model: Problem, state: State, best_state: State) -> Union[State, None]:

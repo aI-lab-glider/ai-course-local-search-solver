@@ -1,6 +1,6 @@
 import pytest
 
-from local_search.algorithms.simulated_annealing import SimulatedAnnealing, DEFAULT_CONFIG
+from local_search.algorithms.simulated_annealing import SimulatedAnnealing
 from test_utils import create_object_copy_with_student_method
 from tests.mock import MockState
 
@@ -9,7 +9,7 @@ PROBLEM_SIZE = 100
 
 @pytest.fixture
 def student_solver(student_loader, method_name: str) -> SimulatedAnnealing:
-    teacher_solver = SimulatedAnnealing(DEFAULT_CONFIG)
+    teacher_solver = SimulatedAnnealing()
     return create_object_copy_with_student_method(teacher_solver,
                                                   student_loader,
                                                   "local_search/algorithms/simulated_annealing.py",
@@ -35,13 +35,16 @@ def test_reheat_should_restore_temp_and_reset_schedule(student_solver):
     assert student_solver.cooling_time == 0, "reheating should reset the 'cooling_time'"
 
 
-def test_update_temperature():
+@pytest.mark.parametrize('method_name', [SimulatedAnnealing._update_temperature.__name__])
+def test_update_temperature(student_solver):
     assert False
 
 
-def test_calculate_transition_probability():
+@pytest.mark.parametrize('method_name', [SimulatedAnnealing._calculate_transition_probability.__name__])
+def test_calculate_transition_probability(student_solver):
     assert False
 
 
-def test_find_next_state():
+@pytest.mark.parametrize('method_name', [SimulatedAnnealing._find_next_state.__name__])
+def test_find_next_state(student_solver):
     assert False
