@@ -1,4 +1,4 @@
-from __future__  import annotations
+from __future__ import annotations
 import random
 from abc import ABC
 from dataclasses import dataclass
@@ -33,7 +33,7 @@ class MockState(State):
         return MockState(a, sum - a)
 
 
-class MockGoal(Goal,ABC):
+class MockGoal(Goal, ABC):
 
     def objective_for(self, state: MockState) -> int:
         return state.a ** 2 + state.b ** 2
@@ -93,10 +93,11 @@ class MockProblem(Problem):
         return ["MockGoalMin", "MockGoalMax"]
 
     @staticmethod
-    def from_benchmark(benchmark_name: str, move_generator_name: str = None, goal_name: str = None,
-                       **kwargs) -> MockProblem:
-        return MockProblem(100)
+    def from_benchmark(**kwargs) -> MockProblem:
+        raise NotImplementedError(
+            f"{MockProblem.__name__} cannot be created from benchmark")
 
     @classmethod
-    def from_dict(cls: Type[MockProblem], data) -> MockProblem:
-        return MockProblem(100)
+    def from_dict(cls: Type[MockProblem], **kwargs) -> MockProblem:
+        raise NotImplementedError(
+            f"{MockProblem.__name__} cannot be created from dict")

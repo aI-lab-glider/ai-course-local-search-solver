@@ -1,7 +1,8 @@
-from typing import List
+from random import Random
+from typing import List, Tuple, Type, Union
+from local_search.helpers.camel_to_snake import camel_to_snake
 
 import pytest
-
 from local_search.algorithms.hill_climbing.best_choice_hill_climbing import BestChoiceHillClimbing
 from local_search.algorithms.hill_climbing.random_choice_hill_climbing import RandomChoiceHillClimbing
 from local_search.algorithms.hill_climbing.worst_choice_hill_climbing import WorstChoiceHillClimbing
@@ -12,14 +13,21 @@ from tests.mock import MockProblem, MockGoal, MockGoalMax, MockGoalMin, MockStat
 PROBLEM_SIZE = 100
 
 
-def test_best_choice_hill_climbing_should_find_the_best_neighbor(student_loader: RelativePathLoader, mock_goals):
-    student_solver_module = student_loader.load("local_search/algorithms/hill_climbing/best_choice_hill_climbing.py")
-    student_solver: BestChoiceHillClimbing = student_solver_module.BestChoiceHillClimbing(DEFAULT_CONFIG)
-    teacher_solver = BestChoiceHillClimbing()
+@pytest.fixture
+def solvers(student_loader: RelativePathLoader, solver_type: Union[Type[BestChoiceHillClimbing], Type[RandomChoiceHillClimbing], Type[WorstChoiceHillClimbing]]):
+    student_solver_module = student_loader.load(
+        f"local_search/algorithms/hill_climbing/{camel_to_snake(solver_type.__name__)}.py"
+    )
+    return getattr(student_solver_module, solver_type.__name__)(DEFAULT_CONFIG), solver_type(DEFAULT_CONFIG)
 
+
+@pytest.mark.parametrize("solver_type", [BestChoiceHillClimbing])
+def test_best_choice_hill_climbing_should_find_the_best_neighbor(solvers: Tuple[BestChoiceHillClimbing, BestChoiceHillClimbing], mock_goals):
+    student_solver, teacher_solver = solvers
     for goal in mock_goals:
         state = MockState.suboptimal_state(PROBLEM_SIZE)
-        got_state, problem = get_climbing_results_for_a_mock_problem(student_solver, goal, state)
+        got_state, problem = get_climbing_results_for_a_mock_problem(
+            student_solver, goal, state)
         assert problem.improvement(got_state,
                                    state) > 0, "algorithm returns a state that's not better than the previous " \
                                                f"one (goal type: {goal.type()})"
@@ -30,14 +38,14 @@ def test_best_choice_hill_climbing_should_find_the_best_neighbor(student_loader:
                         f"(goal type: {goal.type()})"
 
 
-def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(student_loader: RelativePathLoader, mock_goals):
-    student_solver_module = student_loader.load("local_search/algorithms/hill_climbing/worst_choice_hill_climbing.py")
-    student_solver: WorstChoiceHillClimbing = student_solver_module.WorstChoiceHillClimbing(DEFAULT_CONFIG)
-    teacher_solver = WorstChoiceHillClimbing()
+@pytest.mark.parametrize("solver_type", [WorstChoiceHillClimbing])
+def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(solvers: Tuple[WorstChoiceHillClimbing, WorstChoiceHillClimbing], mock_goals):
+    student_solver, teacher_solver = solvers
 
     for goal in mock_goals:
         state = MockState.suboptimal_state(PROBLEM_SIZE)
-        got_state, problem = get_climbing_results_for_a_mock_problem(student_solver, goal, state)
+        got_state, problem = get_climbing_results_for_a_mock_problem(
+            student_solver, goal, state)
         assert problem.improvement(got_state,
                                    state) > 0, "algorithm returns a state that's not better than the previous " \
                                                f"one (goal type: {goal.type()})"
@@ -48,18 +56,20 @@ def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(stu
                         f"(goal type: {goal.type()})"
 
 
-def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(student_loader: RelativePathLoader, mock_goals, random):
-    student_solver_module = student_loader.load("local_search/algorithms/hill_climbing/random_choice_hill_climbing.py")
-    student_solver: RandomChoiceHillClimbing = student_solver_module.RandomChoiceHillClimbing(DEFAULT_CONFIG)
+@pytest.mark.parametrize("solver_type", [RandomChoiceHillClimbing])
+def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(solvers: Tuple[RandomChoiceHillClimbing, RandomChoiceHillClimbing], mock_goals, random):
+    student_solver, _ = solvers
     for goal in mock_goals:
         state = MockState.suboptimal_state(PROBLEM_SIZE)
 
-        got_state, problem = get_climbing_results_for_a_mock_problem(student_solver, goal, state)
+        got_state, problem = get_climbing_results_for_a_mock_problem(
+            student_solver, goal, state)
         assert problem.improvement(got_state, state) >= 0, f"algorithm returns a state that's worse than " \
-                                                                      f"the previous " \
-                                                                       "one (goal type: {goal.type()})"
+            f"the previous " \
+            "one (goal type: {goal.type()})"
 
-        got_values = set([problem.objective_for(student_solver._climb_the_hill(problem, state)) for _ in range(100)])
+        got_values = set([problem.objective_for(
+            student_solver._climb_the_hill(problem, state)) for _ in range(100)])
         assert len(
             got_values) > 1, f"algorithm is deterministic, always returns the same state, while it should be random " \
                              f"(goal type: {goal.type()})) "

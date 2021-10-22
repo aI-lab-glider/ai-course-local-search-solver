@@ -1,8 +1,8 @@
 import pytest
 
 from local_search.algorithms.simulated_annealing import SimulatedAnnealing, DEFAULT_CONFIG
-from test_utils import RelativePathLoader, create_object_copy_with_student_method
-from tests.mock import MockProblem, MockGoal, MockGoalMax, MockGoalMin, MockState
+from test_utils import create_object_copy_with_student_method
+from tests.mock import MockState
 
 PROBLEM_SIZE = 100
 
@@ -16,7 +16,7 @@ def student_solver(student_loader, method_name: str) -> SimulatedAnnealing:
                                                   method_name)
 
 
-@pytest.mark.parametrize('method_name', ["_reheat"])
+@pytest.mark.parametrize('method_name', [SimulatedAnnealing._reheat.__name__])
 def test_reheat_should_restore_temp_and_reset_schedule(student_solver):
     student_solver.temperature = 0
     student_solver.steps_from_last_state_update = 100
@@ -25,7 +25,8 @@ def test_reheat_should_restore_temp_and_reset_schedule(student_solver):
     new_state = student_solver._reheat(state)
     assert state == new_state, "reheating modifies the state, it shouldn't!"
     print(student_solver.config)
-    expected_temp = student_solver.config.escape_reheat_ratio * student_solver.config.initial_temperature
+    expected_temp = student_solver.config.escape_reheat_ratio * \
+        student_solver.config.initial_temperature
     assert student_solver.temperature == expected_temp, f"reheating should change temperature according to " \
                                                         f"self.config, got {student_solver.temperature}, " \
                                                         f"expected {expected_temp}"
