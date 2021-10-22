@@ -73,7 +73,6 @@ class MockMove(Move):
 
 
 class MockProblem(Problem):
-    sum: int
 
     def __init__(self, sum: int, goal: MockGoal):
         self.sum = sum

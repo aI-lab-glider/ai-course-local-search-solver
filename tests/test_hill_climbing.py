@@ -57,7 +57,7 @@ def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(sol
 
 
 @pytest.mark.parametrize("solver_type", [RandomChoiceHillClimbing])
-def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(solvers: Tuple[RandomChoiceHillClimbing, RandomChoiceHillClimbing], mock_goals, random):
+def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(solvers: Tuple[RandomChoiceHillClimbing, RandomChoiceHillClimbing], mock_goals, set_random_seed):
     student_solver, _ = solvers
     for goal in mock_goals:
         state = MockState.suboptimal_state(PROBLEM_SIZE)
