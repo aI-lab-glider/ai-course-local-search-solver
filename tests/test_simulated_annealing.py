@@ -19,7 +19,8 @@ def student_solver(student_loader, method_name: str) -> SimulatedAnnealing:
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._reheat.__name__])
-def test_reheat_should_restore_temp_and_reset_schedule(student_solver):
+def test_reheat_should_restore_temp_and_reset_schedule(student_solver, record_property):
+    record_property("points", 2)
     student_solver.temperature = 0
     student_solver.steps_from_last_state_update = 100
     student_solver.cooling_time = 100
@@ -49,7 +50,7 @@ def test_update_temperature_not_goes_below_min_temperature(student_solver: Simul
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._update_temperature.__name__])
-def test_update_temperature_uses_correct_descrease_function(student_solver: SimulatedAnnealing):
+def test_update_temperature_uses_correct_decrease_function(student_solver: SimulatedAnnealing):
     teacher_solver = SimulatedAnnealing()
     student_solver.config = teacher_solver.config
     initial_temperature = student_solver.temperature = teacher_solver.temperature
@@ -66,7 +67,8 @@ def test_update_temperature_uses_correct_descrease_function(student_solver: Simu
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._update_temperature.__name__])
-def test_update_temperature_updates_cooling_time(student_solver: SimulatedAnnealing):
+def test_update_temperature_updates_cooling_time(student_solver: SimulatedAnnealing, record_property):
+    record_property("points", 2)
     INITIAL_COOLING_TIME = 1
     student_solver.cooling_time = INITIAL_COOLING_TIME
     student_solver._update_temperature()
@@ -78,7 +80,7 @@ def test_update_temperature_updates_cooling_time(student_solver: SimulatedAnneal
 @pytest.mark.parametrize('mocked_improvement', [
     10 ** i for i in range(4)
 ])
-def test_calculate_transition_probability(student_solver: SimulatedAnnealing, mocked_improvement):
+def test_calculate_transition_probability(student_solver: SimulatedAnnealing, mocked_improvement, record_property):
     class MockProblem:
         def improvement(*args):
             return mocked_improvement
@@ -94,7 +96,8 @@ def test_calculate_transition_probability(student_solver: SimulatedAnnealing, mo
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._find_next_state.__name__])
-def test_find_next_state_gets_random_neighbour(student_solver: SimulatedAnnealing, set_random_seed):
+def test_find_next_state_gets_random_neighbour(student_solver: SimulatedAnnealing, set_random_seed, record_property):
+    record_property("points", 2)
     model = MockProblem(PROBLEM_SIZE, MockGoalMax())
     initial_state = MockState.suboptimal_state(PROBLEM_SIZE)
     with patch.object(student_solver, SimulatedAnnealing._get_random_neighbours.__name__):
@@ -106,7 +109,8 @@ def test_find_next_state_gets_random_neighbour(student_solver: SimulatedAnnealin
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._find_next_state.__name__])
-def test_find_next_state_returns_next_state_if_state_is_better(student_solver: SimulatedAnnealing, set_random_seed):
+def test_find_next_state_returns_next_state_if_state_is_better(student_solver: SimulatedAnnealing, set_random_seed, record_property):
+    record_property("points", 2)
     model = MockProblem(PROBLEM_SIZE, MockGoalMax())
     state = MockState.suboptimal_state(PROBLEM_SIZE)
     optimal_state = MockState.optimal_state(model.goal.type(), model.sum)
@@ -118,7 +122,8 @@ def test_find_next_state_returns_next_state_if_state_is_better(student_solver: S
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._find_next_state.__name__])
-def test_find_next_state_calculates_transition_probability_if_state_is_not_better(student_solver: SimulatedAnnealing, set_random_seed):
+def test_find_next_state_calculates_transition_probability_if_state_is_not_better(student_solver: SimulatedAnnealing, set_random_seed, record_property):
+    record_property("points", 2)
     model = MockProblem(PROBLEM_SIZE, MockGoalMax())
     state = MockState.optimal_state(model.goal.type(), PROBLEM_SIZE)
     next_state = MockState.suboptimal_state(PROBLEM_SIZE)
@@ -133,7 +138,8 @@ def test_find_next_state_calculates_transition_probability_if_state_is_not_bette
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._find_next_state.__name__])
-def test_find_next_state_updates_temperatures(student_solver):
+def test_find_next_state_updates_temperatures(student_solver, record_property):
+    record_property("points", 2)
     model = MockProblem(PROBLEM_SIZE, MockGoalMax())
     state = MockState.suboptimal_state(PROBLEM_SIZE)
     with patch.object(student_solver, SimulatedAnnealing._update_temperature.__name__):
