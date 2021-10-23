@@ -1,14 +1,14 @@
-from __future__  import annotations
+from __future__ import annotations
+
 import random
 from abc import ABC
 from dataclasses import dataclass
 from typing import Iterable, Type, Generator
 
 from local_search.problems import State, Problem
-from local_search.problems.base import TProblem, Move
+from local_search.problems.base import Move
 from local_search.problems.base.goal import Goal, GoalType
 from local_search.problems.base.move_generator import MoveGenerator
-from local_search.problems.base.moves import TState
 
 
 @dataclass
@@ -33,7 +33,7 @@ class MockState(State):
         return MockState(a, sum - a)
 
 
-class MockGoal(Goal,ABC):
+class MockGoal(Goal, ABC):
 
     def objective_for(self, state: MockState) -> int:
         return state.a ** 2 + state.b ** 2
@@ -73,7 +73,6 @@ class MockMove(Move):
 
 
 class MockProblem(Problem):
-    sum: int
 
     def __init__(self, sum: int, goal: MockGoal):
         self.sum = sum
@@ -93,10 +92,11 @@ class MockProblem(Problem):
         return ["MockGoalMin", "MockGoalMax"]
 
     @staticmethod
-    def from_benchmark(benchmark_name: str, move_generator_name: str = None, goal_name: str = None,
-                       **kwargs) -> MockProblem:
-        return MockProblem(100)
+    def from_benchmark(**kwargs) -> MockProblem:
+        raise NotImplementedError(
+            f"{MockProblem.__name__} cannot be created from benchmark")
 
     @classmethod
-    def from_dict(cls: Type[MockProblem], data) -> MockProblem:
-        return MockProblem(100)
+    def from_dict(cls: Type[MockProblem], **kwargs) -> MockProblem:
+        raise NotImplementedError(
+            f"{MockProblem.__name__} cannot be created from dict")

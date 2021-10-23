@@ -5,6 +5,6 @@ import pytest
 
 
 @pytest.fixture
-def random():
+def set_random_seed():
     rand.seed(0)
     numpy.random.seed(0)

@@ -7,7 +7,8 @@ import sys
 from contextlib import contextmanager
 from os.path import isfile
 from functools import partial, wraps
-from typing import TypeVar
+from types import ModuleType
+from typing import Generic, TypeVar, Union
 import pytest
 
 ALLOWED_EXCEPTIONS = [
@@ -15,7 +16,7 @@ ALLOWED_EXCEPTIONS = [
     "TypeError", "ZeroDivisionError", "IndentationError", "NotImplementedError"
 ]
 
-BOBOT_FILES = ["test_utils.py", "grading.py", "test_integer_programming.py"]
+BOBOT_FILES = ["test_utils.py", "grading.py"]
 
 hide_exceptions = True
 
@@ -60,7 +61,8 @@ def intercept_exceptions():
             file_name = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             file_line_no = exc_tb.tb_lineno
             error_location_msg = f" in {file_name}:{file_line_no}" if file_name not in BOBOT_FILES else ""
-            error = BobotError(f"Tested code raises {print_exception_type(e)}{error_location_msg}")
+            error = BobotError(
+                f"Tested code raises {print_exception_type(e)}{error_location_msg}")
             error.original = e
             raise error from None
     else:
@@ -107,7 +109,8 @@ class SafeModule:
 
             return function
         else:
-            raise AttributeError("accessing other Python structures than classes and functions is not allowed")
+            raise AttributeError(
+                "accessing other Python structures than classes and functions is not allowed")
 
 
 class RelativePathLoader:
@@ -116,7 +119,7 @@ class RelativePathLoader:
     def __init__(self, basedir_str: str) -> None:
         self.basedir = pathlib.Path(basedir_str)
 
-    def load(self, relative_path_str: str):
+    def load(self, relative_path_str: Union[str, pathlib.Path]) -> object:
         relative_path = pathlib.Path(relative_path_str)
         name = ".".join(relative_path.with_suffix("").parts)
         full_path = self.basedir.joinpath(relative_path)
@@ -129,10 +132,13 @@ class RelativePathLoader:
 
         return module
 
+
 T = TypeVar('T')
+
+
 def create_object_copy_with_student_method(original: T,
                                            student_loader: RelativePathLoader,
-                                           student_code_path: pathlib.Path,
+                                           student_code_path: Union[pathlib.Path, str],
                                            method_name: str) -> T:
     """A function that transplants a method from the class implemented by student
     to a receiver (normally it would a correct class implemented by the teacher)  
@@ -152,6 +158,7 @@ def create_object_copy_with_student_method(original: T,
     safe_method = partial(safe_method, receiver)
     object.__setattr__(receiver, method_name, safe_method)
     return receiver
+
 
 @contextmanager
 def override_static_method(receiver: T,
