@@ -22,7 +22,8 @@ def solvers(student_loader: RelativePathLoader, solver_type: Union[Type[BestChoi
 
 
 @pytest.mark.parametrize("solver_type", [BestChoiceHillClimbing])
-def test_best_choice_hill_climbing_should_find_the_best_neighbor(solvers: Tuple[BestChoiceHillClimbing, BestChoiceHillClimbing], mock_goals):
+def test_best_choice_hill_climbing_should_find_the_best_neighbor(solvers: Tuple[BestChoiceHillClimbing, BestChoiceHillClimbing], mock_goals, record_property):
+    record_property("points", 4)
     student_solver, teacher_solver = solvers
     for goal in mock_goals:
         state = MockState.suboptimal_state(PROBLEM_SIZE)
@@ -39,7 +40,8 @@ def test_best_choice_hill_climbing_should_find_the_best_neighbor(solvers: Tuple[
 
 
 @pytest.mark.parametrize("solver_type", [WorstChoiceHillClimbing])
-def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(solvers: Tuple[WorstChoiceHillClimbing, WorstChoiceHillClimbing], mock_goals):
+def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(solvers: Tuple[WorstChoiceHillClimbing, WorstChoiceHillClimbing], mock_goals, record_property):
+    record_property("points", 4)
     student_solver, teacher_solver = solvers
 
     for goal in mock_goals:
@@ -52,12 +54,13 @@ def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(sol
 
         exp_state = teacher_solver._climb_the_hill(problem, state)
         assert problem.objective_for(got_state) == problem.objective_for(
-            exp_state), "algorithm returns an improving state, but it's not the wors " \
+            exp_state), "algorithm returns an improving state, but it's not the worst " \
                         f"(goal type: {goal.type()})"
 
 
 @pytest.mark.parametrize("solver_type", [RandomChoiceHillClimbing])
-def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(solvers: Tuple[RandomChoiceHillClimbing, RandomChoiceHillClimbing], mock_goals, set_random_seed):
+def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(solvers: Tuple[RandomChoiceHillClimbing, RandomChoiceHillClimbing], mock_goals, set_random_seed, record_property):
+    record_property("points", 4)
     student_solver, _ = solvers
     for goal in mock_goals:
         state = MockState.suboptimal_state(PROBLEM_SIZE)
