@@ -1,12 +1,12 @@
-from random import Random
 from typing import List, Tuple, Type, Union
-from local_search.helpers.camel_to_snake import camel_to_snake
 
 import pytest
+
 from local_search.algorithms.hill_climbing.best_choice_hill_climbing import BestChoiceHillClimbing
+from local_search.algorithms.hill_climbing.hill_climbing import HillClimbing, DEFAULT_CONFIG
 from local_search.algorithms.hill_climbing.random_choice_hill_climbing import RandomChoiceHillClimbing
 from local_search.algorithms.hill_climbing.worst_choice_hill_climbing import WorstChoiceHillClimbing
-from local_search.algorithms.hill_climbing.hill_climbing import HillClimbing, DEFAULT_CONFIG
+from local_search.helpers.camel_to_snake import camel_to_snake
 from test_utils import RelativePathLoader
 from tests.mock import MockProblem, MockGoal, MockGoalMax, MockGoalMin, MockState
 
@@ -14,7 +14,8 @@ PROBLEM_SIZE = 100
 
 
 @pytest.fixture
-def solvers(student_loader: RelativePathLoader, solver_type: Union[Type[BestChoiceHillClimbing], Type[RandomChoiceHillClimbing], Type[WorstChoiceHillClimbing]]):
+def solvers(student_loader: RelativePathLoader, solver_type: Union[
+    Type[BestChoiceHillClimbing], Type[RandomChoiceHillClimbing], Type[WorstChoiceHillClimbing]]):
     student_solver_module = student_loader.load(
         f"local_search/algorithms/hill_climbing/{camel_to_snake(solver_type.__name__)}.py"
     )
@@ -22,7 +23,8 @@ def solvers(student_loader: RelativePathLoader, solver_type: Union[Type[BestChoi
 
 
 @pytest.mark.parametrize("solver_type", [BestChoiceHillClimbing])
-def test_best_choice_hill_climbing_should_find_the_best_neighbor(solvers: Tuple[BestChoiceHillClimbing, BestChoiceHillClimbing], mock_goals, record_property):
+def test_best_choice_hill_climbing_should_find_the_best_neighbor(
+        solvers: Tuple[BestChoiceHillClimbing, BestChoiceHillClimbing], mock_goals, record_property):
     record_property("points", 4)
     student_solver, teacher_solver = solvers
     for goal in mock_goals:
@@ -40,7 +42,8 @@ def test_best_choice_hill_climbing_should_find_the_best_neighbor(solvers: Tuple[
 
 
 @pytest.mark.parametrize("solver_type", [WorstChoiceHillClimbing])
-def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(solvers: Tuple[WorstChoiceHillClimbing, WorstChoiceHillClimbing], mock_goals, record_property):
+def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(
+        solvers: Tuple[WorstChoiceHillClimbing, WorstChoiceHillClimbing], mock_goals, record_property):
     record_property("points", 4)
     student_solver, teacher_solver = solvers
 
@@ -59,7 +62,9 @@ def test_worst_choice_hill_climbing_should_find_the_worst_improving_neighbor(sol
 
 
 @pytest.mark.parametrize("solver_type", [RandomChoiceHillClimbing])
-def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(solvers: Tuple[RandomChoiceHillClimbing, RandomChoiceHillClimbing], mock_goals, set_random_seed, record_property):
+def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(
+        solvers: Tuple[RandomChoiceHillClimbing, RandomChoiceHillClimbing], mock_goals, set_random_seed,
+        record_property):
     record_property("points", 4)
     student_solver, _ = solvers
     for goal in mock_goals:
@@ -68,8 +73,8 @@ def test_random_choice_hill_climbing_should_find_the_random_improving_neighbor(s
         got_state, problem = get_climbing_results_for_a_mock_problem(
             student_solver, goal, state)
         assert problem.improvement(got_state, state) >= 0, f"algorithm returns a state that's worse than " \
-            f"the previous " \
-            "one (goal type: {goal.type()})"
+                                                           f"the previous " \
+                                                           "one (goal type: {goal.type()})"
 
         got_values = set([problem.objective_for(
             student_solver._climb_the_hill(problem, state)) for _ in range(100)])

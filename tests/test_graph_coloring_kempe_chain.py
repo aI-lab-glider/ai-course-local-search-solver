@@ -16,7 +16,7 @@ def start_index():
 
 @pytest.fixture()
 def graph() -> Dict[int, Set[int]]:
-    return {0: {4,5,8}, 1: {4,6}, 2: {4,5}, 3: {6}, 4: {0, 1, 2}, 5: {0,2}, 6: {1, 3}, 7: {8}, 8: {0,7}}
+    return {0: {4, 5, 8}, 1: {4, 6}, 2: {4, 5}, 3: {6}, 4: {0, 1, 2}, 5: {0, 2}, 6: {1, 3}, 7: {8}, 8: {0, 7}}
 
 
 @pytest.fixture()
@@ -47,16 +47,16 @@ def edges(graph: Dict[int, Set[int]]) -> List[Edge]:
     return result
 
 
-@pytest.mark.parametrize('new_color', [1,2])
+@pytest.mark.parametrize('new_color', [1, 2])
 def test_kempe_chain_should_have_result_with_no_conflicts(student_move, new_coloring_state, edges):
     student_move._kempe_chain(new_coloring_state.coloring)
     teacher_goal = MinColors(edges, len(student_move.graph))
     bad_edges = teacher_goal._bad_edges(new_coloring_state)
     n_bad_edges = sum(bad_edges)
     assert n_bad_edges == 0, f"there are still {n_bad_edges} conflicts after kempe chain\n" \
-                                                    f"\t- bad edges: {bad_edges}\n" \
-                                                    f"\t- state: {new_coloring_state}\n" \
-                                                    f"\t- graph: {student_move.graph}\n"
+                             f"\t- bad edges: {bad_edges}\n" \
+                             f"\t- state: {new_coloring_state}\n" \
+                             f"\t- graph: {student_move.graph}\n"
 
 
 @pytest.mark.parametrize('new_color', [1, 2])
@@ -65,8 +65,8 @@ def test_kempe_chain_should_solve_direct_conflicts(student_move, new_coloring_st
     for n in student_move.graph[0]:
         assert new_coloring_state.coloring[n].color != new_coloring_state.coloring[0].color, \
             f"kempe chain fails to correctly fix direct coloring conflict\n" \
-                                                    f"\t- state: {new_coloring_state}\n" \
-                                                    f"\t- graph: {student_move.graph}\n"
+            f"\t- state: {new_coloring_state}\n" \
+            f"\t- graph: {student_move.graph}\n"
 
 
 @pytest.mark.parametrize('new_color', [1])
@@ -87,6 +87,3 @@ def test_kempe_chain_should_handle_cycles(student_move, new_coloring_state, reco
     assert new_coloring_state.coloring[2].color == 1, f"kempe chain doesn't handle correctly cycles in the graph\n" \
                                                       f"\t- state: {new_coloring_state}\n" \
                                                       f"\t- graph: {student_move.graph}\n"
-
-
-

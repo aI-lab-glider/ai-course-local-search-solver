@@ -1,14 +1,14 @@
 from __future__ import annotations
+
 import random
 from abc import ABC
 from dataclasses import dataclass
 from typing import Iterable, Type, Generator
 
 from local_search.problems import State, Problem
-from local_search.problems.base import TProblem, Move
+from local_search.problems.base import Move
 from local_search.problems.base.goal import Goal, GoalType
 from local_search.problems.base.move_generator import MoveGenerator
-from local_search.problems.base.moves import TState
 
 
 @dataclass

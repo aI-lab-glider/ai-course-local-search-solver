@@ -1,10 +1,11 @@
 import random
+from unittest.mock import patch
+
 import pytest
 
 from local_search.algorithms.simulated_annealing import SimulatedAnnealing
 from test_utils import create_object_copy_with_student_method
-from tests.mock import MockGoal, MockGoalMax, MockProblem, MockState
-from unittest.mock import patch
+from tests.mock import MockGoalMax, MockProblem, MockState
 
 PROBLEM_SIZE = 100
 
@@ -29,7 +30,7 @@ def test_reheat_should_restore_temp_and_reset_schedule(student_solver, record_pr
     assert state == new_state, "reheating modifies the state, it shouldn't!"
     print(student_solver.config)
     expected_temp = student_solver.config.escape_reheat_ratio * \
-        student_solver.config.initial_temperature
+                    student_solver.config.initial_temperature
     assert student_solver.temperature == expected_temp, f"reheating should change temperature according to " \
                                                         f"self.config, got {student_solver.temperature}, " \
                                                         f"expected {expected_temp}"
@@ -45,7 +46,7 @@ def test_update_temperature_not_goes_below_min_temperature(student_solver: Simul
     student_solver.cooling_time = random.randint(1, 5)
     student_solver.config.cooling_step = random.random()
     student_solver._update_temperature()
-    assert student_solver.temperature == student_solver.config.min_temperature, 'update temperature should not go below min'\
+    assert student_solver.temperature == student_solver.config.min_temperature, 'update temperature should not go below min' \
                                                                                 'temperature during update'
 
 
@@ -57,13 +58,13 @@ def test_update_temperature_uses_correct_decrease_function(student_solver: Simul
     initial_cooling_time = student_solver.cooling_time = teacher_solver.cooling_time
     teacher_solver._update_temperature()
     student_solver._update_temperature()
-    assert student_solver.temperature == teacher_solver.temperature, 'update temperature, does not uses correct formula to update temperature:'\
-                                                                     'for params:'\
-        f'temperature: {initial_temperature}'\
-        f'cooling_time: {initial_cooling_time}'\
-        f'cooling_step: {teacher_solver.config.cooling_step}'\
-        f'expected new temperature to be: {teacher_solver.temperature}'\
-        f'but received: {student_solver.temperature}'
+    assert student_solver.temperature == teacher_solver.temperature, 'update temperature, does not uses correct formula to update temperature:' \
+                                                                     'for params:' \
+                                                                     f'temperature: {initial_temperature}' \
+                                                                     f'cooling_time: {initial_cooling_time}' \
+                                                                     f'cooling_step: {teacher_solver.config.cooling_step}' \
+                                                                     f'expected new temperature to be: {teacher_solver.temperature}' \
+                                                                     f'but received: {student_solver.temperature}'
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._update_temperature.__name__])
@@ -72,8 +73,8 @@ def test_update_temperature_updates_cooling_time(student_solver: SimulatedAnneal
     INITIAL_COOLING_TIME = 1
     student_solver.cooling_time = INITIAL_COOLING_TIME
     student_solver._update_temperature()
-    assert student_solver.cooling_time == INITIAL_COOLING_TIME + 1, 'expected update temperature to  update cooling time by 1,'\
-        f'not by {student_solver.cooling_time - INITIAL_COOLING_TIME}'
+    assert student_solver.cooling_time == INITIAL_COOLING_TIME + 1, 'expected update temperature to  update cooling time by 1,' \
+                                                                    f'not by {student_solver.cooling_time - INITIAL_COOLING_TIME}'
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._calculate_transition_probability.__name__])
@@ -84,6 +85,7 @@ def test_calculate_transition_probability(student_solver: SimulatedAnnealing, mo
     class MockProblem:
         def improvement(*args):
             return mocked_improvement
+
     problem = MockProblem()
     teacher_solver = SimulatedAnnealing()
     initial_temp = teacher_solver.temperature = student_solver.temperature = 1
@@ -91,7 +93,7 @@ def test_calculate_transition_probability(student_solver: SimulatedAnnealing, mo
         problem, None, None)
     actual_probability = student_solver._calculate_transition_probability(
         problem, None, None)
-    assert expected_probability == actual_probability, f'expected to calculate {expected_probability}'\
+    assert expected_probability == actual_probability, f'expected to calculate {expected_probability}' \
                                                        f'for delta model improvement {mocked_improvement} amd temperature {initial_temp}'
 
 
@@ -109,7 +111,8 @@ def test_find_next_state_gets_random_neighbour(student_solver: SimulatedAnnealin
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._find_next_state.__name__])
-def test_find_next_state_returns_next_state_if_state_is_better(student_solver: SimulatedAnnealing, set_random_seed, record_property):
+def test_find_next_state_returns_next_state_if_state_is_better(student_solver: SimulatedAnnealing, set_random_seed,
+                                                               record_property):
     record_property("points", 2)
     model = MockProblem(PROBLEM_SIZE, MockGoalMax())
     state = MockState.suboptimal_state(PROBLEM_SIZE)
@@ -122,12 +125,13 @@ def test_find_next_state_returns_next_state_if_state_is_better(student_solver: S
 
 
 @pytest.mark.parametrize('method_name', [SimulatedAnnealing._find_next_state.__name__])
-def test_find_next_state_calculates_transition_probability_if_state_is_not_better(student_solver: SimulatedAnnealing, set_random_seed, record_property):
+def test_find_next_state_calculates_transition_probability_if_state_is_not_better(student_solver: SimulatedAnnealing,
+                                                                                  set_random_seed, record_property):
     record_property("points", 2)
     model = MockProblem(PROBLEM_SIZE, MockGoalMax())
     state = MockState.optimal_state(model.goal.type(), PROBLEM_SIZE)
     next_state = MockState.suboptimal_state(PROBLEM_SIZE)
-    with patch.object(student_solver, SimulatedAnnealing._calculate_transition_probability.__name__),\
+    with patch.object(student_solver, SimulatedAnnealing._calculate_transition_probability.__name__), \
             patch.object(student_solver, SimulatedAnnealing._get_random_neighbours.__name__):
         student_solver._get_random_neighbours.return_value = (
             s for s in [next_state])
