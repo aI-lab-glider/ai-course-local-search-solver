@@ -1,68 +1,72 @@
-from local_search.problems.base.goal import GoalType
+from typing import List
+
+import pytest
+
+from local_search.problems.graph_coloring_problem.goals import MinColors
 from local_search.problems.graph_coloring_problem.goals.goal import GraphColoringGoal
 from local_search.problems.graph_coloring_problem.models.edge import Edge
 from local_search.problems.graph_coloring_problem.models.vertex import Vertex
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
-import pytest
-import random
-
-N_VERTICES = 10
+from test_utils import RelativePathLoader
 
 
-class MockGoal(GraphColoringGoal):
-    def objective_for(self, state) -> int:
-        return 1
-
-    def human_readable_objective_for(self, state) -> str:
-        return str(self.objective_for(state))
-
-    def type(self) -> GoalType:
-        return GoalType.MIN
-
-    @staticmethod
-    def from_n_vertices(n_vertices) -> 'MockGoal':
-        l = list(range(n_vertices))
-        edges = [Edge(start, end) for start, end in zip(l, l[1:] + [l[0]])]
-        return MockGoal(edges, n_vertices)
+@pytest.fixture()
+def graph():
+    return {0: {4, 5, 8}, 1: {4, 6}, 2: {4, 5}, 3: {6}, 4: {0, 1, 2}, 5: {0, 2}, 6: {1, 3}, 7: {8}, 8: {0, 7}}
 
 
-@pytest.mark.parametrize('num_colors', [1, 2, 4, 10])
-def test_num_colors(num_colors):
+@pytest.fixture()
+def n_vertices(graph):
+    return len(graph)
+
+
+@pytest.fixture()
+def edges(graph) -> List[Edge]:
+    result = []
+    for start, ends in graph.items():
+        result += [Edge(start, end) for end in ends]
+    return result
+
+
+@pytest.fixture()
+def teacher_goal(edges: List[Edge], n_vertices: int) -> GraphColoringGoal:
+    return MinColors(edges, n_vertices)
+
+
+@pytest.fixture()
+def student_goal(edges: List[Edge], n_vertices: int, student_loader: RelativePathLoader) -> GraphColoringGoal:
+    students_module = student_loader.load("local_search/problems/graph_coloring_problem/goals/min_colors.py")
+    return students_module.MinColors(edges, n_vertices)
+
+
+@pytest.fixture()
+def graph_coloring_state(n_vertices: int, num_colors: int):
     colors = list(range(num_colors))
-    state = GraphColoringState([
-        Vertex(i, colors[i % num_colors]) for i in range(N_VERTICES)
+    return GraphColoringState([
+        Vertex(i, colors[i % num_colors]) for i in range(n_vertices)
     ])
-    goal = MockGoal.from_n_vertices(N_VERTICES)
-    calculated_colors = goal._num_colors(state)
-    assert num_colors == calculated_colors, 'expected goal to return '\
-                                            f'{num_colors} for state {state},'\
-                                            f'but received {calculated_colors}'
 
 
-def test_bad_edges():
-    color = 1
-    state = GraphColoringState([Vertex(i, color) for i in range(N_VERTICES)])
-    expected_bad_edges = [0 for _ in range(N_VERTICES)]
-    expected_bad_edges[color] = N_VERTICES
-    goal = MockGoal.from_n_vertices(N_VERTICES)
-    actual_bad_edges = goal._bad_edges(state)
-    assert expected_bad_edges == actual_bad_edges, f'expected to get {expected_bad_edges} '\
-                                                   f'for state {state}, but received: {actual_bad_edges}'
+@pytest.mark.parametrize('num_colors', [1, 2, 4, 9])
+def test_num_colors(graph_coloring_state, student_goal, teacher_goal):
+    student_colors = student_goal._num_colors(graph_coloring_state)
+    teacher_colors = teacher_goal._num_colors(graph_coloring_state)
+    assert teacher_colors == student_colors, f'expected {teacher_colors} colors, got {student_colors}\n' \
+                                             f'\t- state {graph_coloring_state},'
 
 
-@pytest.mark.parametrize('num_colors', [1, 2, 4, 10])
-def test_color_classes(num_colors):
-    colors = list(range(num_colors))
-    coloring = [Vertex(i, colors[i % num_colors])
-                for i in range(N_VERTICES)]
-    state = GraphColoringState(coloring)
-    goal = MockGoal.from_n_vertices(N_VERTICES)
+@pytest.mark.parametrize('num_colors', [1, 2, 4, 9])
+def test_bad_edges(graph_coloring_state, student_goal, teacher_goal):
+    student_bad_edges = student_goal._bad_edges(graph_coloring_state)
+    teacher_bad_edges = teacher_goal._bad_edges(graph_coloring_state)
+    assert teacher_bad_edges == student_bad_edges, f'expected {teacher_bad_edges} bad edges, got {student_bad_edges}\n' \
+                                                   f'\t- state {graph_coloring_state},'
 
-    expected_color_classes = [0 for _ in range(N_VERTICES)]
-    for vertex in state.coloring:
-        expected_color_classes[vertex.color] += 1
 
-    actual_color_classes = goal._color_classes(state)
+@pytest.mark.parametrize('num_colors', [1, 2, 4, 9])
+def test_color_classes(graph_coloring_state, student_goal, teacher_goal):
+    student_color_classes = student_goal._color_classes(graph_coloring_state)
+    teacher_color_classes = teacher_goal._color_classes(graph_coloring_state)
 
-    assert actual_color_classes == expected_color_classes, f'expected actual color classes, to be {expected_color_classes}'\
-                                                           f'for state {state}, but received {actual_color_classes}'
+    assert student_color_classes == teacher_color_classes, f'expected {teacher_color_classes} color classes, got {student_color_classes}\n' \
+                                                           f'\t- state {graph_coloring_state},'
