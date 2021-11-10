@@ -1,6 +1,0 @@
-{
-    "problem_model": "magic_square_problem",
-    "benchmark_file": "ms_1",
-    "algorithm": "hill_climbing",
-    "visualization": false
-}

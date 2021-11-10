@@ -1,0 +1,30 @@
+{
+    "problem": {
+        "name": "graph_coloring_problem",
+        "benchmark": "problem_2",
+        "move_generator": "change_color",
+        "goal": "max_classes"
+    },
+    "algorithm": {
+        "name": "first_choice_hill_climbing",
+        "local_optimum_moves_threshold": 20,
+        "local_optimum_escapes_max": 1000,
+        "initial_temperature": 10000,
+        "cooling_step": 0.99,
+        "min_temperature": 1e-8,
+        "escape_random_restart_probability": 0.33,
+        "escape_perturbation_probability": 0.33,
+        "escape_perturbation_size": 10,
+        "escape_reheat_probability": 0.33
+    },
+    "solver_config": {
+        "time_limit": 60000,
+        "show_statistics": true
+    },
+    "visualization": {
+        "enabled": true,
+        "min_time_between_steps": 1,
+        "show_only_solution": true
+    },
+    "save_solution": true
+}

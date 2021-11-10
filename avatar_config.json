@@ -1,0 +1,28 @@
+{
+    "problem": {
+        "name": "avatar_problem",
+        "benchmark": "monalisa.jpg",
+        "move_generator": "add_triangle",
+        "goal": "approximate_avatar"
+    },
+    "algorithm": {
+        "name": "first_choice_hill_climbing",
+        "max_steps_without_improvement": 100,
+        "optimization_strategy": "min",
+        "local_optimum_moves_threshold": 10,
+        "local_optimum_escapes_max": 10,
+        "escape_random_restart_probability": 0.5,
+        "escape_perturbation_probability": 0.5,
+        "escape_perturbation_size": 50
+    },
+    "solver_config": {
+        "time_limit": 60000,
+        "show_statistics": true
+    },
+    "visualization": {
+        "enabled": true,
+        "min_time_between_steps": 0.01,
+        "show_only_solution": false
+    },
+    "save_solution": true
+}
