@@ -141,3 +141,4 @@ cython_debug/
 local-search/
 .idea/
 test-venv/
+student_solutions/

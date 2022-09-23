@@ -1,15 +1,18 @@
 from setuptools import setup
 
+
 setup(
     name='Local search',
     version='1.0.0',
+    py_modules=['local_search'],
     install_requires=[
         'numpy',
         'rich',
         'click',
         'pygame',
         'Pillow',
-        "mpmath"
+        'mpmath',
+        'pytest'
     ],
     entry_points='''
         [console_scripts]

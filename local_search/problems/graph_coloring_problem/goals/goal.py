@@ -6,6 +6,8 @@ from local_search.problems.base.problem import Goal
 from local_search.problems.graph_coloring_problem.models.edge import Edge
 from local_search.problems.graph_coloring_problem.state import GraphColoringState
 
+# Do we want to have TODOs on this class. It not teaches students nothing about algorithms, only makes them familiar with the problem?
+
 
 class GraphColoringGoal(Goal, ABC):
     """
