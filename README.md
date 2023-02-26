@@ -1,4 +1,4 @@
-# Lab 02 - local search solvers
+# Lab 04 - local search solvers
 
 Local search solvers are algorithms used for optimization problems where it is impractical to explore the entire search space 🔍. Instead, they focus on finding a good solution by making small incremental changes to an initial solution 💡. They are commonly used in transportation and logistics 🚛, manufacturing and production 🏭, telecommunications and networking 📡. Current research in this area include the use of hybrid algorithms, metaheuristics, constraint satisfaction, parallelization, and machine learning applications for neighborhood estimation to improve the efficiency and effectiveness of local search solvers 🤖.
 
