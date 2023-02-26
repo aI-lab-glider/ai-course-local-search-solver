@@ -1,17 +1,68 @@
-# Genetic algorithms
+# Lab 02 - local search solvers
 
-## Run 
+Local search solvers are algorithms used for optimization problems where it is impractical to explore the entire search space 🔍. Instead, they focus on finding a good solution by making small incremental changes to an initial solution 💡. They are commonly used in transportation and logistics 🚛, manufacturing and production 🏭, telecommunications and networking 📡. Current research in this area include the use of hybrid algorithms, metaheuristics, constraint satisfaction, parallelization, and machine learning applications for neighborhood estimation to improve the efficiency and effectiveness of local search solvers 🤖.
+
+# TODO: 
+
+Search for `TODO` text in the repository with CTRL+F and replace it with you code written according to it.
+
+
+## How To Submit Solutions
+
+* [ ] Clone repository: git clone:
+    ```bash
+    git clone <repository url>
+    ```
+* [ ] Complete TODOS the exercises
+* [ ] Commit your changes
+    ```bash
+    git add <path to the changed files>
+    git commit -m <commit message>
+    ```
+* [ ] Push changes to your repository main branch
+    ```bash
+    git push -u origin master
+    ```
+
+The rest will be taken care of automatically. You can check the `GRADE.md` file for your grade / test results. Be aware that it may take some time (up to one hour) till this file
+
+## How To Run
 
 ### Linux
 ```bash
 pip install -e .
 local_search_solver solve -c [PATH_TO_CONFIG]
 ```
-### Windows
-```bash
-pip install -e .
-python run.py solve -c [PATH_TO_CONFIG]
+
+## Config
+
+Every entity (solver/algorithm/problem) gets its corespondig config class constainning all necessary parametrs, e.g.:
+- algorithm_config.py
+- solver_config.py
+
+The default values can be overridden by configuration file, please look into *_config.json files for reference.
+
+### config file structure:
+
+```jsonc
+{
+  "problem": {
+     ...
+   },
+   "algorithm": {
+     ...
+   },
+   "solver_config": {
+     ...
+   },
+   "visualization": {
+     ...
+   }
+  "save_solution": ...
+}
+
 ```
+
 
 ## CLI 
 
